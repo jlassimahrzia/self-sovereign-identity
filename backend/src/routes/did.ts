@@ -115,7 +115,7 @@ router.get('/api/Jwt', async (req : any , res : any) =>{
     res.json({jwt ,decode})
 })
 
-router.post('/api/addDDOtoIPFS', async (req : any , res : any) => {
+router.post('/api/createIdentity', async (req : any , res : any) => {
     let _keypair: KeyPair
     let _ddo: DidDocument
     let _cid: String
