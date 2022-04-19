@@ -78,7 +78,6 @@ const resolve = async (ipfsHash: String)  : Promise<any> => {
     for await (const itr of asyncitr) {
 
         let data = Buffer.from(itr).toString()
-        console.log(JSON.parse(data.toString()))
         return JSON.parse(data.toString());
     } 
 }
