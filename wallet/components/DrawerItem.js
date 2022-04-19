@@ -5,6 +5,8 @@ import { Block, Text, theme } from "galio-framework";
 import Icon from "./Icon";
 import argonTheme from "../constants/Theme";
 
+import { Octicons , AntDesign } from '@expo/vector-icons'; 
+
 class DrawerItem extends React.Component {
   renderIcon = () => {
     const { title, focused } = this.props;
@@ -12,56 +14,34 @@ class DrawerItem extends React.Component {
     switch (title) {
       case "Home":
         return (
-          <Icon
-            name="shop"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.PRIMARY}
-          />
-        );
-      case "Elements":
-        return (
-          <Icon
-            name="map-big"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.ERROR}
-          />
-        );
-      case "Articles":
-        return (
-          <Icon
-            name="spaceship"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.PRIMARY}
-          />
+          <AntDesign name="home" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY}/>
         );
       case "Profile":
         return (
-          <Icon
-            name="chart-pie-35"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.WARNING}
-          />
+          <AntDesign name="user" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
-      case "Account":
+      case "QR-Code":
         return (
-          <Icon
-            name="calendar-date"
-            family="ArgonExtra"
-            size={14}
-            color={focused ? "white" : argonTheme.COLORS.INFO}
-          />
+          <AntDesign name="scan1" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
-      case "Getting Started":
-        return (<Icon
-          name="spaceship"
-          family="ArgonExtra"
-          size={14}
-          color={focused ? "white" : "rgba(0,0,0,0.5)"}
-        />);
+      case "Credentials":
+        return (
+          <AntDesign name="creditcard" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
+      case "Organisations":
+        return (
+          <Octicons name="link" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
+      case "Settings":
+        return (
+          <AntDesign name="setting" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
       case "Log out":
         return <Icon />;
       default:

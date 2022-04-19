@@ -13,7 +13,7 @@ function CustomDrawerContent({
   state,
   ...rest
 }) {
-  const screens = ["Home", "Profile", "Account", "Elements", "Articles"];
+  const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Profile","Settings"];
   return (
     <Block
       style={styles.container}
@@ -34,7 +34,7 @@ function CustomDrawerContent({
               />
             );
           })}
-          <Block
+          {/* <Block
             flex
             style={{ marginTop: 24, marginVertical: 8, paddingHorizontal: 8 }}
           >
@@ -49,7 +49,7 @@ function CustomDrawerContent({
               DOCUMENTATION
             </Text>
           </Block>
-          <DrawerCustomItem title="Getting Started" navigation={navigation} />
+          <DrawerCustomItem title="Getting Started" navigation={navigation} /> */}
         </ScrollView>
       </Block>
     </Block>

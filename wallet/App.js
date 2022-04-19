@@ -11,7 +11,7 @@ import { enableScreens } from "react-native-screens";
 enableScreens();
 
 import Screens from "./navigation/Screens";
-import { Images, articles, argonTheme } from "./constants";
+import { Images, argonTheme } from "./constants";
 
 // cache app images
 const assetImages = [
@@ -23,9 +23,6 @@ const assetImages = [
   Images.iOSLogo,
   Images.androidLogo
 ];
-
-// cache product images
-articles.map(article => assetImages.push(article.image));
 
 function cacheImages(images) {
   return images.map(image => {

@@ -1,20 +1,20 @@
 import { Animated, Dimensions, Easing } from "react-native";
 // header for screens
 import { Header, Icon } from "../components";
-import { argonTheme, tabs } from "../constants";
+import { argonTheme } from "../constants";
 
-import Articles from "../screens/Articles";
 import { Block } from "galio-framework";
 // drawer
 import CustomDrawerContent from "./Menu";
-import Elements from "../screens/Elements";
+
 // screens
 import Home from "../screens/Home";
 import Onboarding from "../screens/Onboarding";
-import Pro from "../screens/Pro";
+import Credentials from "../screens/Credentials";
+import Organisations from "../screens/Organisations";
 import Profile from "../screens/Profile";
-import React from "react";
-import Register from "../screens/Register";
+import Settings from "../screens/Settings";
+import QrCode from "../screens/QrCode";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -25,52 +25,7 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-function ElementsStack(props) {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        mode: "card",
-        headerShown: false,
-      }}
-    >
-      {/** Style object
-       for the card in stack. 
-       You can provide a custom background color to use instead of the default background here. */}
-      {/** Header
-        Custom header to use instead of the default header.  
-      */}
-      <Stack.Screen
-        name="Elements"
-        component={Elements}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header title="Elements" navigation={navigation} scene={scene} />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Pro"
-        component={Pro}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title=""
-              back
-              white
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          headerTransparent: true,
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function ArticlesStack(props) {
+function QrCodeStack(props) {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -79,30 +34,43 @@ function ArticlesStack(props) {
       }}
     >
       <Stack.Screen
-        name="Articles"
-        component={Articles}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header title="Articles" navigation={navigation} scene={scene} />
-          ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Pro"
-        component={Pro}
+        name="QrCode"
+        component={QrCode}
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              title=""
-              back
-              white
-              transparent
+              title="QrCode"
               navigation={navigation}
               scene={scene}
             />
           ),
-          headerTransparent: true,
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function OrganisationsStack(props) {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
+      <Stack.Screen
+        name="Organisations"
+        component={Organisations}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Organisations"
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
     </Stack.Navigator>
@@ -112,7 +80,6 @@ function ArticlesStack(props) {
 function ProfileStack(props) {
   return (
     <Stack.Navigator
-      initialRouteName="Profile"
       screenOptions={{
         mode: "card",
         headerShown: "screen",
@@ -124,32 +91,64 @@ function ProfileStack(props) {
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              transparent
-              white
               title="Profile"
               navigation={navigation}
               scene={scene}
             />
           ),
-          cardStyle: { backgroundColor: "#FFFFFF" },
-          headerTransparent: true,
+          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
+    </Stack.Navigator>
+  );
+}
+
+function SettingsStack(props) {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
       <Stack.Screen
-        name="Pro"
-        component={Pro}
+        name="Settings"
+        component={Settings}
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              title=""
-              back
-              white
-              transparent
+              title="Settings"
               navigation={navigation}
               scene={scene}
             />
           ),
-          headerTransparent: true,
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function CredentialsStack(props) {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
+      <Stack.Screen
+        name="Credentials"
+        component={Credentials}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Credentials"
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
     </Stack.Navigator>
@@ -171,30 +170,11 @@ function HomeStack(props) {
           header: ({ navigation, scene }) => (
             <Header
               title="Home"
-              search
-              options
               navigation={navigation}
               scene={scene}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
-        }}
-      />
-      <Stack.Screen
-        name="Pro"
-        component={Pro}
-        options={{
-          header: ({ navigation, scene }) => (
-            <Header
-              title=""
-              back
-              white
-              transparent
-              navigation={navigation}
-              scene={scene}
-            />
-          ),
-          headerTransparent: true,
         }}
       />
     </Stack.Navigator>
@@ -253,10 +233,11 @@ function AppStack(props) {
       initialRouteName="Home"
     >
       <Drawer.Screen name="Home" component={HomeStack} />
+      <Drawer.Screen name="QR-Code" component={QrCodeStack} />
+      <Drawer.Screen name="Credentials" component={CredentialsStack} />
+      <Drawer.Screen name="Organisations" component={OrganisationsStack} />
       <Drawer.Screen name="Profile" component={ProfileStack} />
-      <Drawer.Screen name="Account" component={Register} />
-      <Drawer.Screen name="Elements" component={ElementsStack} />
-      <Drawer.Screen name="Articles" component={ArticlesStack} />
+      <Drawer.Screen name="Settings" component={SettingsStack} />
     </Drawer.Navigator>
   );
 }

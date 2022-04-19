@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   ImageBackground,
   Image,
@@ -34,19 +34,19 @@ class Onboarding extends React.Component {
               <Block style={styles.title}>
                 <Block>
                   <Text color="white" size={60}>
-                    Design
+                    Get Started
                   </Text>
                 </Block>
                 <Block>
-                  <Text color="white" size={60}>
-                    System
+                  <Text color="white" size={30}>
+                    By Creating a new identity
                   </Text>
                 </Block>
-                <Block style={styles.subTitle}>
+                {/* <Block style={styles.subTitle}>
                   <Text color="white" size={16}>
-                    Fully coded React Native components.
+                   
                   </Text>
-                </Block>
+                </Block> */}
               </Block>
               <Block center>
                 <Button

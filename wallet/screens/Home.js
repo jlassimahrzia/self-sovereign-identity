@@ -1,47 +1,25 @@
-import React from 'react';
-import { StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { Block, theme } from 'galio-framework';
-
-import { Card } from '../components';
-import articles from '../constants/articles';
+import { Dimensions } from 'react-native';
+import { Block, Text, theme } from "galio-framework";
 const { width } = Dimensions.get('screen');
 
-class Home extends React.Component {
-  renderArticles = () => {
-    return (
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.articles}>
-        <Block flex>
-          <Card item={articles[0]} horizontal  />
-          <Block flex row>
-            <Card item={articles[1]} style={{ marginRight: theme.SIZES.BASE }} />
-            <Card item={articles[2]} />
-          </Block>
-          <Card item={articles[3]} horizontal />
-          <Card item={articles[4]} full />
-        </Block>
-      </ScrollView>
-    )
-  }
-
-  render() {
-    return (
-      <Block flex center style={styles.home}>
-        {this.renderArticles()}
+function Home() {
+  return(
+      <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
+        <Text center size={34} style={{ paddingTop: theme.SIZES.BASE,paddingBottom: theme.SIZES.BASE / 2}}>
+          WELCOME
+        </Text>
+        <Text
+          center
+          size={16}
+          color={theme.COLORS.MUTED}
+          style={{ paddingTop: theme.SIZES.BASE }}
+        >
+          Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre 
+          provisoire pour calibrer une mise en page,le texte définitif venant remplacer le faux-texte 
+          dès qu'il est prêt ou que la mise en page est achevée. 
+        </Text>
       </Block>
-    );
-  }
+  )
 }
-
-const styles = StyleSheet.create({
-  home: {
-    width: width,    
-  },
-  articles: {
-    width: width - theme.SIZES.BASE * 2,
-    paddingVertical: theme.SIZES.BASE,
-  },
-});
 
 export default Home;

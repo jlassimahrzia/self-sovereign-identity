@@ -61,11 +61,11 @@ class Header extends React.Component {
     }
 
     switch (title) {
-      case 'Home':
+      /*case 'Home':
         return ([
           <BellButton key='chat-home' navigation={navigation} isWhite={white} />,
           <BasketButton key='basket-home' navigation={navigation} isWhite={white} />
-        ]);
+        ]); */
       case 'Deals':
         return ([
           <BellButton key='chat-categories' navigation={navigation} />,
@@ -185,7 +185,7 @@ class Header extends React.Component {
           title={title}
           style={navbarStyles}
           transparent={transparent}
-          right={this.renderRight()}
+          //right={this.renderRight()}
           rightStyle={{ alignItems: 'center' }}
           left={
             <Icon 
