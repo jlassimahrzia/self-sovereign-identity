@@ -1,26 +1,44 @@
+import React, { useState, useEffect } from 'react';
+import { Text, View, StyleSheet, Button } from 'react-native';
+import { BarCodeScanner } from 'expo-barcode-scanner';
 
+export default function QrCode() {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
 
-import { Block, Text, theme } from "galio-framework";
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  };
 
-function QrCode() {
-    return(
-        <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
-            <Text center size={34} style={{ paddingTop: theme.SIZES.BASE,paddingBottom: theme.SIZES.BASE / 2}}>
-                QrCode
-            </Text>
-            <Text
-                center
-                size={16}
-                color={theme.COLORS.MUTED}
-                style={{ paddingTop: theme.SIZES.BASE }}
-            >
-            Le lorem ipsum est, en imprimerie, une suite de mots sans signification utilisée à titre 
-            provisoire pour calibrer une mise en page,le texte définitif venant remplacer le faux-texte 
-            dès qu'il est prêt ou que la mise en page est achevée. 
-            </Text>
-        </Block>
-    )
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  return (
+    <View style={styles.container}>
+      <BarCodeScanner
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
+    </View>
+  );
 }
 
-export default QrCode;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+});

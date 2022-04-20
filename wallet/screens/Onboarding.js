@@ -42,11 +42,11 @@ class Onboarding extends React.Component {
                     By Creating a new identity
                   </Text>
                 </Block>
-                {/* <Block style={styles.subTitle}>
+                <Block style={styles.subTitle}>
                   <Text color="white" size={16}>
-                   
+                    Tunisian Self-Sovereign Identity Network (TSSIN)
                   </Text>
-                </Block> */}
+                </Block>
               </Block>
               <Block center>
                 <Button
