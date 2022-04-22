@@ -1,6 +1,8 @@
+/** Setup Express web server **/
+
 var express = require('express');
 var app = express();
-var config = require('../config.js');
+var config = require('./config/config.js');
 const router = express.Router()
 let cors = require("cors");
 

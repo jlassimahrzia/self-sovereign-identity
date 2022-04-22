@@ -1,4 +1,4 @@
-import React from 'react'
+import {React, useEffect, useState} from 'react'
 import {
   ImageBackground,
   Image,
@@ -7,15 +7,46 @@ import {
   Dimensions
 } from "react-native";
 import { Block, Button, Text, theme } from "galio-framework";
-
 const { height, width } = Dimensions.get("screen");
-
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
 
-class Onboarding extends React.Component {
-  render() {
-    const { navigation } = this.props;
+import SqliteService from "../services/SqliteService"
+import DidService from '../services/DidService';
+
+function Onboarding({ navigation }) {
+
+    const db = SqliteService.openDatabase()
+
+    const [id, setId] = useState(null)
+
+    useEffect(() => {
+      SqliteService.createIdentityTable(db)
+    }, []);
+
+    const addIdentity = (db, keyPair) =>{
+      db.transaction(
+        (tx) => {
+          tx.executeSql("insert into identity (address, privateKey,publicKey) values (?,?,?)", 
+          [keyPair.address,keyPair.privateKey,keyPair.publicKey],
+          (tx, resultSet) => { setId(resultSet.insertId)},
+          (tx, error) => console.log(error)
+          );
+        }
+      );
+    }
+
+    const createIdentity = async () => {
+      //SqliteService.deleteTable(db)
+      const keyPair = await DidService.createKeyPair()
+      addIdentity(db, keyPair);
+      if(id){
+        const res = await DidService.sendDidRequest(keyPair.address, keyPair.publicKey)
+        if(res){
+          navigation.navigate("App")
+        }
+      }
+    }
 
     return (
       <Block flex style={styles.container}>
@@ -52,7 +83,7 @@ class Onboarding extends React.Component {
                 <Button
                   style={styles.button}
                   color={argonTheme.COLORS.SECONDARY}
-                  onPress={() => navigation.navigate("App")}
+                  onPress={createIdentity}
                   textStyle={{ color: argonTheme.COLORS.BLACK }}
                 >
                   Get Started
@@ -62,7 +93,7 @@ class Onboarding extends React.Component {
         </Block>
       </Block>
     );
-  }
+
 }
 
 const styles = StyleSheet.create({

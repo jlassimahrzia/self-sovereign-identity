@@ -2,76 +2,102 @@ import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
 import { Wallet } from '@ethersproject/wallet'
 
-var config = require('../../config.js');
+var config = require('../config/config.js');
+
 var express = require('express');
 var app = express();
 const router = express.Router()
-const didJWT = require('did-jwt')
-const ipfsClient = require('ipfs-http-client')
 
+// JWT
+const didJWT = require('did-jwt')
+
+// IPFS
+const ipfsClient = require('ipfs-http-client')
 const ipfs = ipfsClient.create('http://127.0.0.1:5001')
 
+// Contract
 const Web3 = require('web3')
-// Provider : Ganache Web3 provider
 const web3 = new Web3('http://127.0.0.1:7545') 
 let contract = new web3.eth.Contract(config.ABI_REGISTRY_CONTRACT, config.RGISTRY_CONTRACT_ADDRESS)
 
+// MySQL
+const db = require("../config/db.config.js");
 
+// Types
 export type KeyPair = {
     address: string
     privateKey: string
     publicKey: string
-    identifier: string
 }
 
 export interface DidDocument {
-    '@context': string | string[];
-    '@type': string, // Citizen / Organization
-    id: string;
-    publicKey : string;
-    updated?: string;
-    created?: string;
+    '@context': string | string[]
+    '@type': string // Citizen / Organization
+    id: string
+    publicKey : string
+    updated?: string
+    created?: string
 }
+
   
 /**
  *  1- createKeyPair
  */
 
-const createKeyPair= (): KeyPair => {
+const createKeyPair = (): KeyPair => {
     const wallet = Wallet.createRandom()
     const privateKey = wallet.privateKey
     const address = computeAddress(privateKey)
     const publicKey = computePublicKey(privateKey, true)
-    const identifier = `did:exemple:${publicKey}`
-    return { address, privateKey, publicKey, identifier }
+    return { address, privateKey, publicKey }
+}
+
+/**
+ *  2- Request DID from did issuer
+ */
+
+const sendDidRequest = (data : any ) : any => {
+    let address = data.address
+    let publickey = data.publickey
+    let query = "INSERT INTO didrequest (address, publickey) VALUES (?, ?);"
+    
+    return new Promise((resolve, reject) => {
+        db.query( query, [ address, publickey ] , (err : any, res : any) => {
+            if (err) {
+              console.log("error: ", err);
+              reject(err);
+            }
+            resolve(res.insertId);
+        });
+    });
 }
 
 /**
  * 2- Create an Identity Document containing the Public Key
  */
 
-const createDDO = (_KeyPair: KeyPair): DidDocument =>  {
+/* const createDDO = (_KeyPair: KeyPair): DidDocument =>  {
     return { '@context': 'https://w3id.org/did/v1',
              '@type': 'Citizen', 
              id: _KeyPair.identifier, 
              publicKey: _KeyPair.publicKey,
              created: (new Date(Date.now())).toISOString()} //YYYY-MM-DDTHH:mm:ss.sssZ
 };
-
+ */
 /**
  * 3- Publish Identity Document to IPFS
 */
 
-const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
+/* const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
     const cid = await ipfs.add(JSON.stringify(_ddo))
     return cid
-}
+} */
 
 /**
  * Get ddo
  */
 
-const resolve = async (ipfsHash: String)  : Promise<any> => {
+/* const resolve = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = ipfs.cat(ipfsHash)
 
@@ -80,12 +106,12 @@ const resolve = async (ipfsHash: String)  : Promise<any> => {
         let data = Buffer.from(itr).toString()
         return JSON.parse(data.toString());
     } 
-}
+} */
 /**
  *  Create a did-JWT
  */
 
-const createDidJWT = async(): Promise<any> => {
+/* const createDidJWT = async(): Promise<any> => {
     let keypair = createKeyPair()
     
     const signer = didJWT.ES256KSigner(didJWT.hexToBytes(keypair.privateKey), true)
@@ -102,13 +128,29 @@ const createDidJWT = async(): Promise<any> => {
 
     return didJWT.createJWT(payload, options)
     
-}
+} */
 
-router.get('/api/keypair', (req : any , res : any) => {
-    res.json(createKeyPair())
+/**
+ *  Routes
+ */
+
+router.get('/api/createKeyPair', (req : any , res : any) => {
+    let _keypair: KeyPair
+    _keypair = createKeyPair()
+    res.json({_keypair})
 })
 
-router.get('/api/Jwt', async (req : any , res : any) =>{
+router.post('/api/didRequest', async (req : any , res : any) => {
+    let _request = {
+        address : req.body.address,
+        publickey: req.body.publickey
+    }
+    const id = await sendDidRequest(_request)
+    console.log(id)
+    res.json({id})
+})
+
+/* router.get('/api/Jwt', async (req : any , res : any) =>{
     let jwt = await createDidJWT()
     let decode = didJWT.decodeJWT(jwt)
     res.json({jwt ,decode})
@@ -127,20 +169,20 @@ router.post('/api/createIdentity', async (req : any , res : any) => {
     _cid = await pushDDO_ipfs(_ddo)
     
     res.json({_keypair,_cid})
-})
+}) */
 
 // 4- Ethereum tx registring ipfs hash 
-router.post('/api/mappingDidToHash', async (req : any , res : any) => {
+ router.post('/api/mappingDidToHash', async (req : any , res : any) => {
     let _cid = req.body.cid
     let _did = req.body.did
     let accounts = await web3.eth.getAccounts()
     const result = await contract.methods.setDidToHash(_did,_cid).send({from: accounts[0],
         gas:3000000});
     res.json({result}) 
-})
+}) 
 
 // 5- Resolve DID 
-router.post('/api/resolve', async (req : any , res : any) => {
+/* router.post('/api/resolve', async (req : any , res : any) => {
     let did = req.body.did
     console.log(did)
     const ipfshash = await contract.methods.getDidToHash(did).call();
@@ -148,5 +190,5 @@ router.post('/api/resolve', async (req : any , res : any) => {
     let ddo = await resolve(ipfshash)
     
     res.json({did,ipfshash,ddo}) 
-})
+}) */
 module.exports = router;

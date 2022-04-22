@@ -6,7 +6,7 @@ function Home() {
   return(
       <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
         <Text center size={34} style={{ paddingTop: theme.SIZES.BASE,paddingBottom: theme.SIZES.BASE / 2}}>
-          WELCOME
+          WELCOME !
         </Text>
         <Text
           center
