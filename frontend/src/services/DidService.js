@@ -1,21 +1,32 @@
 import axios from 'axios'
-import toast from 'react-hot-toast';
 
 class DidService {
 
-    async createIdentity(){
-        let keyPair = {}
-        let cid = ""
-        await axios.post("http://localhost:8000/api/createIdentity")
+    async getdidRequestList(){
+        let tab = []
+        await axios.get("http://localhost:8000/api/didRequestList")
             .then(res => {
-                keyPair = res.data._keypair
-                cid = res.data._cid;
+                tab = res.data.list
             })
             .catch(error => {
                 console.log(error)
-                toast.error("Something went wrong")
             });
-        return {keyPair,cid};
+        return tab;
+    } 
+
+    async createIdentity(publickey){
+        let identifier
+        let cid 
+        await axios.post("http://localhost:8000/api/createIdentity", {publickey})
+            .then(res => {
+                identifier = res.data.identifier
+                cid = res.data.cid
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        console.log("identifier",identifier)
+        return {identifier,cid};
     }
 
     async mappingDidToHash(cid, did){
@@ -27,7 +38,6 @@ class DidService {
         })
         .catch(error => {
             console.log(error)
-            toast.error("Something went wrong")
         });
         return done
     }
@@ -41,7 +51,6 @@ class DidService {
         })
         .catch(error => {
             console.log(error)
-            toast.error("Something went wrong")
         });
         return ddo
     }

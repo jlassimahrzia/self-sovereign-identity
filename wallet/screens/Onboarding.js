@@ -46,6 +46,8 @@ function Onboarding({ navigation }) {
           navigation.navigate("App")
         }
       }
+      SqliteService.getIdentity(db)
+      navigation.navigate("App")
     }
 
     return (

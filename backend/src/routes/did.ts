@@ -73,31 +73,56 @@ const sendDidRequest = (data : any ) : any => {
 }
 
 /**
- * 2- Create an Identity Document containing the Public Key
+ *  3- Get Did list requests
  */
 
-/* const createDDO = (_KeyPair: KeyPair): DidDocument =>  {
+const getDidRequestList = () : any => {
+    let query = "SELECT * FROM didrequest WHERE state=false"
+    return new Promise((resolve, reject) => {
+        db.query( query , (err : any, res : any) => {
+            if (err) {
+              console.log("error: ", err);
+              reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+/**
+ *  4- Generate DID
+ */
+
+const generateDID = (publicKey: string) : string => {
+    return `did:exemple:${publicKey}`
+}
+
+/**
+ * 5- Create an Identity Document containing the Public Key
+ */
+
+const createDDO = (identifier: string, publicKey: string ): DidDocument =>  {
     return { '@context': 'https://w3id.org/did/v1',
              '@type': 'Citizen', 
-             id: _KeyPair.identifier, 
-             publicKey: _KeyPair.publicKey,
+             id: identifier, 
+             publicKey: publicKey,
              created: (new Date(Date.now())).toISOString()} //YYYY-MM-DDTHH:mm:ss.sssZ
 };
- */
+
 /**
- * 3- Publish Identity Document to IPFS
+ * 6- Publish Identity Document to IPFS
 */
 
-/* const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
+const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
     const cid = await ipfs.add(JSON.stringify(_ddo))
     return cid
-} */
+} 
 
 /**
- * Get ddo
+ * Resolve ddo
  */
 
-/* const resolve = async (ipfsHash: String)  : Promise<any> => {
+const resolve = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = ipfs.cat(ipfsHash)
 
@@ -106,7 +131,7 @@ const sendDidRequest = (data : any ) : any => {
         let data = Buffer.from(itr).toString()
         return JSON.parse(data.toString());
     } 
-} */
+} 
 /**
  *  Create a did-JWT
  */
@@ -150,29 +175,25 @@ router.post('/api/didRequest', async (req : any , res : any) => {
     res.json({id})
 })
 
-/* router.get('/api/Jwt', async (req : any , res : any) =>{
-    let jwt = await createDidJWT()
-    let decode = didJWT.decodeJWT(jwt)
-    res.json({jwt ,decode})
+router.get('/api/didRequestList', async (req : any , res : any) => {
+    const list = await getDidRequestList()
+    res.json({list})
 })
 
 router.post('/api/createIdentity', async (req : any , res : any) => {
-    let _keypair: KeyPair
-    let _ddo: DidDocument
-    let _cid: String
+    let publickey = req.body.publickey
 
-    // 1- create key pair 
-    _keypair = createKeyPair()
+    // 1- generateDID
+    const identifier = generateDID(publickey)
     // 2- Generate did doc
-    _ddo = createDDO(_keypair)
+    const ddo = createDDO(identifier,publickey)
     // 3- add did doc to ipfs and get the cid
-    _cid = await pushDDO_ipfs(_ddo)
-    
-    res.json({_keypair,_cid})
-}) */
+    const cid = await pushDDO_ipfs(ddo)
+    res.json({identifier,cid})
+})
 
-// 4- Ethereum tx registring ipfs hash 
- router.post('/api/mappingDidToHash', async (req : any , res : any) => {
+// Ethereum tx registring ipfs hash 
+router.post('/api/mappingDidToHash', async (req : any , res : any) => {
     let _cid = req.body.cid
     let _did = req.body.did
     let accounts = await web3.eth.getAccounts()
@@ -181,8 +202,8 @@ router.post('/api/createIdentity', async (req : any , res : any) => {
     res.json({result}) 
 }) 
 
-// 5- Resolve DID 
-/* router.post('/api/resolve', async (req : any , res : any) => {
+// Resolve DID 
+router.post('/api/resolve', async (req : any , res : any) => {
     let did = req.body.did
     console.log(did)
     const ipfshash = await contract.methods.getDidToHash(did).call();
@@ -190,5 +211,13 @@ router.post('/api/createIdentity', async (req : any , res : any) => {
     let ddo = await resolve(ipfshash)
     
     res.json({did,ipfshash,ddo}) 
-}) */
+}) 
+
+/* router.get('/api/Jwt', async (req : any , res : any) =>{
+    let jwt = await createDidJWT()
+    let decode = didJWT.decodeJWT(jwt)
+    res.json({jwt ,decode})
+})
+*/
+
 module.exports = router;
