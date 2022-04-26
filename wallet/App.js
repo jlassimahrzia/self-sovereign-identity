@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useRef} from "react";
 import { Image } from "react-native";
 import AppLoading from "expo-app-loading";
 import { useFonts } from '@use-expo/font';
@@ -12,6 +12,8 @@ enableScreens();
 
 import Screens from "./navigation/Screens";
 import { Images, argonTheme } from "./constants";
+
+import Toast from 'react-native-toast-message';
 
 // cache app images
 const assetImages = [
@@ -35,6 +37,7 @@ function cacheImages(images) {
 }
 
 export default props => {
+  const ref = useRef(null);
   const [isLoadingComplete, setLoading] = useState(false);
   let [fontsLoaded] = useFonts({
     'ArgonExtra': require('./assets/font/argon.ttf'),
@@ -64,6 +67,7 @@ export default props => {
     );
   } else if(fontsLoaded) {
     return (
+      <>
       <NavigationContainer>
         <GalioProvider theme={argonTheme}>
           <Block flex>
@@ -71,6 +75,8 @@ export default props => {
           </Block>
         </GalioProvider>
       </NavigationContainer>
+      <Toast ref={(ref) => Toast.setRef(ref)} />
+      </>
     );
   } else {
     return null

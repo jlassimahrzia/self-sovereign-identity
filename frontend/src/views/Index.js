@@ -79,7 +79,10 @@ const Index = () => {
                   <Table className="align-items-center table-flush" responsive>
                       <thead className="thead-light">
                       <tr>
-                          <th scope="col"># </th>  
+                          <th scope="col"># </th> 
+                          <th scope="col">Firstname </th> 
+                          <th scope="col">Lastname </th> 
+                          <th scope="col">Email </th>
                           <th scope="col">Address </th>
                           <th scope="col">Public Key</th>
                           <th scope="col">Create Identity</th>
@@ -89,6 +92,15 @@ const Index = () => {
                       { didRequestsList.map((item,index) => (
                           <tr key={index} >
                             <td>{index+1}</td>
+                            <td>
+                              {item.firstname}
+                            </td>
+                            <td>
+                              {item.lastname}
+                            </td>
+                            <td>
+                              {item.email}
+                            </td>
                             <td>
                               {item.address}
                             </td>

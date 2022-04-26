@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Argon FREE React Native",
-    "slug": "argon-free-react-native",
+    "name": "identityTN",
+    "slug": "identityTN",
     "privacy": "public",
     "platforms": [
       "ios",
@@ -24,6 +24,14 @@
     "ios": {
       "supportsTablet": true
     },
-    "description": "Argon React Native, based on Argon Design System. Coded by Creative Tim"
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends."
+        }
+      ]
+    ],
+    "description": "Tunisian Self-Sovereign Identity Network (TSSIN)"
   }
 }

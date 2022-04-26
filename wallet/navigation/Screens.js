@@ -1,4 +1,5 @@
 import { Animated, Dimensions, Easing } from "react-native";
+import {useEffect, useState} from 'react'
 // header for screens
 import { Header, Icon } from "../components";
 import { argonTheme } from "../constants";
@@ -15,9 +16,12 @@ import Organisations from "../screens/Organisations";
 import Profile from "../screens/Profile";
 import Settings from "../screens/Settings";
 import QrCode from "../screens/QrCode";
+import Register from "../screens/Register";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
+
+import SqliteService from "../services/SqliteService"
 
 const { width } = Dimensions.get("screen");
 
@@ -96,7 +100,6 @@ function ProfileStack(props) {
               scene={scene}
             />
           ),
-          cardStyle: { backgroundColor: "#F8F9FE" },
         }}
       />
     </Stack.Navigator>
@@ -182,6 +185,35 @@ function HomeStack(props) {
 }
 
 export default function OnboardingStack(props) {
+  const db = SqliteService.openDatabase()
+  const [identity, setIdentity] = useState(null)
+  const [profile, setProfile] = useState(null)
+
+  const getIdentity = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from identity`,
+        [],(transaction, resultSet) => { 
+          if(resultSet.rows.length != 0)
+          setIdentity(resultSet.rows._array[0])},
+        (transaction, error) => console.log(error)
+      );
+    });
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from profile`,
+        [],(transaction, resultSet) => { 
+          if(resultSet.rows.length != 0)
+          setProfile(resultSet.rows._array[0])},
+        (transaction, error) => console.log(error)
+      );
+    });
+  }
+
+  useEffect(() => {
+    getIdentity()
+  }, []);
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -189,19 +221,40 @@ export default function OnboardingStack(props) {
         headerShown: false,
       }}
     >
-      <Stack.Screen
+      { identity == null? <Stack.Screen
         name="Onboarding"
         component={Onboarding}
         option={{
           headerTransparent: true,
         }}
-      />
+      /> : null}
+      { profile == null? <Stack.Screen name="Register" component={Register} /> : null}
       <Stack.Screen name="App" component={AppStack} />
     </Stack.Navigator>
   );
 }
 
 function AppStack(props) {
+  const db = SqliteService.openDatabase()
+  const [did, setDid] = useState(null)
+
+  const getIdentity = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from identity`,
+        [],(transaction, resultSet) =>{ 
+          if(resultSet.rows.length != 0)
+            setDid(resultSet.rows._array[0].did)},
+        (transaction, error) => console.log(error)
+      );
+    });
+  }
+
+  useEffect(() => {
+    getIdentity()
+    console.log("fom appstack", did)
+  }, []);
+
   return (
     <Drawer.Navigator
       style={{ flex: 1 }}
@@ -234,9 +287,9 @@ function AppStack(props) {
     >
       <Drawer.Screen name="Home" component={HomeStack} />
       <Drawer.Screen name="QR-Code" component={QrCodeStack} />
-      <Drawer.Screen name="Credentials" component={CredentialsStack} />
-      <Drawer.Screen name="Organisations" component={OrganisationsStack} />
       <Drawer.Screen name="Profile" component={ProfileStack} />
+      { did ? <Drawer.Screen name="Credentials" component={CredentialsStack} /> : null }
+      { did ? <Drawer.Screen name="Organisations" component={OrganisationsStack} /> : null }
       <Drawer.Screen name="Settings" component={SettingsStack} />
     </Drawer.Navigator>
   );

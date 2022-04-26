@@ -6,22 +6,32 @@ import {
   StatusBar,
   Dimensions
 } from "react-native";
-import { Block, Button, Text, theme } from "galio-framework";
+import { Block, Button, Text, theme} from "galio-framework";
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
 
 import SqliteService from "../services/SqliteService"
 import DidService from '../services/DidService';
+import Toast from 'react-native-toast-message';
 
 function Onboarding({ navigation }) {
 
     const db = SqliteService.openDatabase()
 
     const [id, setId] = useState(null)
+    const [load, setLoading] = useState(false)
+
+    const showToast = () => {
+      Toast.show({
+        type: 'error',
+        text1: 'Hello',
+        text2: 'This is some something 👋'
+      });
+    }
 
     useEffect(() => {
-      SqliteService.createIdentityTable(db)
+     
     }, []);
 
     const addIdentity = (db, keyPair) =>{
@@ -37,20 +47,36 @@ function Onboarding({ navigation }) {
     }
 
     const createIdentity = async () => {
-      //SqliteService.deleteTable(db)
+      setLoading(true)
       const keyPair = await DidService.createKeyPair()
-      addIdentity(db, keyPair);
-      if(id){
-        const res = await DidService.sendDidRequest(keyPair.address, keyPair.publicKey)
-        if(res){
-          navigation.navigate("App")
-        }
+      console.log(keyPair)
+      if(keyPair){
+        await addIdentity(db, keyPair);
+        //if(id){
+          navigation.navigate("Register")
+        /*}
+        else {
+          Toast.show({
+            type: 'error',
+            text1: 'Error',
+            text2: 'Failed to create identity'
+          });
+          setLoading(false)
+        }*/
+      }
+      else {
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to generate keys'
+        });
+        setLoading(false)
       }
       SqliteService.getIdentity(db)
-      navigation.navigate("App")
     }
 
     return (
+      <>
       <Block flex style={styles.container}>
         <StatusBar hidden />
         <Block flex center>
@@ -63,6 +89,7 @@ function Onboarding({ navigation }) {
           <Image source={Images.LogoOnboarding} style={styles.logo} />
         </Block>
         <Block flex space="between" style={styles.padded}>
+       
             <Block flex space="around" style={{ zIndex: 2 }}>
               <Block style={styles.title}>
                 <Block>
@@ -82,11 +109,14 @@ function Onboarding({ navigation }) {
                 </Block>
               </Block>
               <Block center>
+               
                 <Button
                   style={styles.button}
                   color={argonTheme.COLORS.SECONDARY}
                   onPress={createIdentity}
                   textStyle={{ color: argonTheme.COLORS.BLACK }}
+                  loading={load}
+                  loadingSize="large"
                 >
                   Get Started
                 </Button>
@@ -94,6 +124,7 @@ function Onboarding({ navigation }) {
           </Block>
         </Block>
       </Block>
+      </>
     );
 
 }

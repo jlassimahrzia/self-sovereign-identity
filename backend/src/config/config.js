@@ -1,4 +1,4 @@
-const registryContract = require("../../../truffle/build/contracts/Registry.json");
+const registryContract = require("../../../contracts/build/contracts/Registry.json");
 
 module.exports = {
     PORT: 8000,

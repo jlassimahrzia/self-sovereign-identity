@@ -57,12 +57,11 @@ const createKeyPair = (): KeyPair => {
  */
 
 const sendDidRequest = (data : any ) : any => {
-    let address = data.address
-    let publickey = data.publickey
-    let query = "INSERT INTO didrequest (address, publickey) VALUES (?, ?);"
+
+    let query = "INSERT INTO didrequest (firstname, lastname, email, address, publickey) VALUES (?, ?, ?, ?, ?);"
     
     return new Promise((resolve, reject) => {
-        db.query( query, [ address, publickey ] , (err : any, res : any) => {
+        db.query( query, [ data.firstname, data.lastname, data.email, data.address, data.publickey ] , (err : any, res : any) => {
             if (err) {
               console.log("error: ", err);
               reject(err);
@@ -167,6 +166,9 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
 
 router.post('/api/didRequest', async (req : any , res : any) => {
     let _request = {
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
         address : req.body.address,
         publickey: req.body.publickey
     }

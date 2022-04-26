@@ -3,7 +3,8 @@ import { Image, ScrollView, StyleSheet } from "react-native";
 
 import { DrawerItem as DrawerCustomItem } from "../components";
 import Images from "../constants/Images";
-import React from "react";
+import {React, useState, useEffect} from "react";
+import SqliteService from "../services/SqliteService"
 
 function CustomDrawerContent({
   drawerPosition,
@@ -13,7 +14,36 @@ function CustomDrawerContent({
   state,
   ...rest
 }) {
+  
+  const db = SqliteService.openDatabase()
+  const [did, setDid] = useState(null)
+  const [routes, setRoutes] = useState([])
+
+  const getIdentity = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from identity`,
+        [],(transaction, resultSet) => { 
+          if(resultSet.rows.length != 0){
+            setDid(resultSet.rows._array[0].did)}},
+        (transaction, error) => console.log(error)
+      );
+    });
+  }
   const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Profile","Settings"];
+  const screens2 = ["Home", "QR-Code", "Profile","Settings"];
+  useEffect(() => {
+    getIdentity()
+    console.log("fom appstack", did)
+    if(did == null){
+      setRoutes([...screens])
+    }
+    else {
+      setRoutes([...screens2])
+    }
+  }, []);
+
+  
   return (
     <Block
       style={styles.container}
@@ -23,8 +53,8 @@ function CustomDrawerContent({
         <Image styles={styles.logo} source={Images.Logo} />
       </Block>
       <Block flex style={{ paddingLeft: 8, paddingRight: 14 }}>
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-          {screens.map((item, index) => {
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+          {routes.map((item, index) => {
             return (
               <DrawerCustomItem
                 title={item}
