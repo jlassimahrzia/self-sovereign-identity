@@ -1,4 +1,4 @@
-import { useState} from 'react'
+import { useState, useEffect} from 'react'
 import {
   StyleSheet,
   ImageBackground,
@@ -50,6 +50,24 @@ function Register({ navigation }) {
     }
   };
 
+  const getIdentity = async () => {
+    db.transaction(tx => {
+      tx.executeSql('SELECT * FROM identity', [], 
+        (txObj, { rows: { _array } }) => {
+          if(_array.length != 0){
+            setAddress(_array[0].address)
+            setPublicKey(_array[0].publicKey)}
+            console.log("inside tx",address,publicKey)
+        },
+        (txObj, error) => console.log('Error ', error)
+      ) 
+    })
+  }
+
+  useEffect(() => {
+    getIdentity()
+  }, [setPublicKey,setAddress]);
+
   const RegisterSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Required'),
     firstname: Yup.string().min(2, 'Too Short!').required('Required'),
@@ -61,28 +79,14 @@ function Register({ navigation }) {
     initialValues: { firstname: '', lastname: '', email: '' },
     onSubmit: async (values) =>{
       setLoading(true)
-      db.transaction(
-        (tx) => {
-          tx.executeSql("insert into profile (firstname, lastname, email, photo) values (?,?,?,?)", 
-          [values.firstname, values.lastname, values.email, image],
-          (tx, resultSet) => { setId(resultSet.insertId)},
-          (tx, error) => console.log(error)
-          );
-        }
-      );
-      //if(id){
-        db.transaction((tx) => {
-          tx.executeSql(
-            `select * from identity`,
-            [],(transaction, resultSet) => {
-              if(resultSet.rows.length != 0){
-              setAddress(resultSet.rows._array[0].address)
-              setPublicKey(resultSet.rows._array[0].publicKey)}
-            },
-            (transaction, error) => console.log(error)
-          );
-        });
-      //}
+
+      db.transaction(tx => {
+        tx.executeSql('INSERT INTO profile (firstname, lastname, email, photo) values (?,?,?,?)', 
+        [values.firstname, values.lastname, values.email, image],
+          (txObj, resultSet) => setId(resultSet.insertId),
+          (txObj, error) => console.log('Error', error))
+      })
+
       console.log(address,publicKey)
       if(address && publicKey){
         const res = await DidService.sendDidRequest(values.firstname, values.lastname,  values.email ,address , publicKey)  

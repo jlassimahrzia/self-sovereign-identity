@@ -29,15 +29,15 @@ function Home() {
     });
   }
   const deletex = () => {
-    //SqliteService.deleteTable(db)
-    SqliteService.getIdentity(db)
+    SqliteService.deleteTable(db)
+    //SqliteService.getIdentity(db)
   }
   return(
       <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
         <Text center size={34} style={{ paddingTop: theme.SIZES.BASE,paddingBottom: theme.SIZES.BASE / 2}}>
           WELCOME
         </Text>
-      {/*  <Button onPress={deletex}>Delete </Button> */}
+        <Button onPress={deletex}>Delete </Button>
         {did  == null ? <Text 
           center
           size={16}

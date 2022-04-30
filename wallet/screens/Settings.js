@@ -8,6 +8,7 @@ function Settings() {
   const [did, setDid] = useState(null)
   const [address, setAddress] = useState(null)
   const [data, setData] = useState([])
+  
   const getIdentity = async () => {
     await db.transaction((tx) => {
       tx.executeSql(
@@ -22,12 +23,14 @@ function Settings() {
       );
     });
   }
+
   useEffect(() => {
     getIdentity()
     setData([{ title: "DID", content: did},
     { title: "Address", content: address }])
     console.log("did",did,"address",address)
-  }, []);
+  }, [setDid,setAddress]);
+
     return(
         <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
             <Text center size={34} style={{ paddingTop: theme.SIZES.BASE,paddingBottom: theme.SIZES.BASE / 2}}>

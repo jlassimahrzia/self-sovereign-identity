@@ -49,7 +49,7 @@ function Onboarding({ navigation }) {
     const createIdentity = async () => {
       setLoading(true)
       const keyPair = await DidService.createKeyPair()
-      console.log(keyPair)
+      console.log("keyPair",keyPair)
       if(keyPair){
         await addIdentity(db, keyPair);
         //if(id){
