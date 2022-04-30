@@ -2,7 +2,7 @@ import axios from 'axios'
 
 class DidService {
 
-    async getdidRequestList(){
+    async getdidRequestList() {
         let tab = []
         await axios.get("http://localhost:8000/api/didRequestList")
             .then(res => {
@@ -12,12 +12,12 @@ class DidService {
                 console.log(error)
             });
         return tab;
-    } 
+    }
 
-    async createIdentity(publickey){
+    async createIdentity(publickey, email, id) {
         let identifier
-        let cid 
-        await axios.post("http://localhost:8000/api/createIdentity", {publickey})
+        let cid
+        await axios.post("http://localhost:8000/api/createIdentity", { publickey, email, id })
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid
@@ -25,33 +25,48 @@ class DidService {
             .catch(error => {
                 console.log(error)
             });
-        console.log("identifier",identifier)
-        return {identifier,cid};
+        console.log("identifier", identifier)
+        return { identifier, cid };
     }
 
-    async mappingDidToHash(cid, did){
+    async createIdentityFailed(email, id) {
         let done = false
-        await axios.post("http://localhost:8000/api/mappingDidToHash", {cid, did})
-        .then(res => {
-            done = true
-            console.log(res)
-        })
-        .catch(error => {
-            console.log(error)
-        });
+        await axios.post("http://localhost:8000/api/createIdentityFailed", { email, id })
+            .then(res => {
+                done = true
+                console.log(res)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+
+        return { done };
+    }
+
+
+    async mappingDidToHash(cid, did) {
+        let done = false
+        await axios.post("http://localhost:8000/api/mappingDidToHash", { cid, did })
+            .then(res => {
+                done = true
+                console.log(res)
+            })
+            .catch(error => {
+                console.log(error)
+            });
         return done
     }
 
     async resolve(did) {
         let ddo = {}
-        await axios.post("http://localhost:8000/api/resolve", {did})
-        .then(res => {
-            ddo = res.data.ddo
-            console.log(res)
-        })
-        .catch(error => {
-            console.log(error)
-        });
+        await axios.post("http://localhost:8000/api/resolve", { did })
+            .then(res => {
+                ddo = res.data.ddo
+                console.log(res)
+            })
+            .catch(error => {
+                console.log(error)
+            });
         return ddo
     }
 }

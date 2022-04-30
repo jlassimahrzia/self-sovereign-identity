@@ -28,9 +28,8 @@ export default function QrCode() {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true)
     alert(`${data}`)
-    let did = JSON.parse(data)
-    console.log(did.identifier)
-    setDID(db,did.identifier)
+    console.log(data)
+    setDID(db,data)
     SqliteService.getIdentity(db)
   };
 

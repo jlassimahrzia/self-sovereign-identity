@@ -22,15 +22,19 @@ import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import "assets/plugins/nucleo/css/nucleo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "assets/scss/argon-dashboard-react.scss";
-
+import "antd/dist/antd.css";
 import AdminLayout from "layouts/Admin.js";
 import AuthLayout from "layouts/Auth.js";
+import VC from "views/VC";
+import Login from "views/examples/Login"
 
 ReactDOM.render(
   <BrowserRouter>
     <Switch>
       <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
+      <Route path="/vc" render={(props) => <VC {...props} />} />
+      <Route path="/login" render={(props) => <Login {...props} />} />
       <Redirect from="/" to="/admin/index" />
     </Switch>
   </BrowserRouter>,

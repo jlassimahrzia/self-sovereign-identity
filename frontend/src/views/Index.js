@@ -1,24 +1,27 @@
-import { Fragment , useState , useEffect , useRef} from 'react'
+import { Fragment, useState, useEffect, useRef } from 'react'
 import {
-  Table,Container,Modal,
-  Row,Col,
+  Table, Container,
+  Row, Col,
   Button,
-  Card, CardHeader, Badge, ButtonGroup
+  Card, CardHeader, Badge, ButtonGroup, Input
 } from "reactstrap";
 import PageHeader from "components/Headers/PageHeader.js";
 import DidService from 'services/DidService';
 import QRCode from "qrcode.react";
-
+import { Select } from 'antd';
+const { Option } = Select;
 const Index = () => {
   const qrRef = useRef();
   const [url, setUrl] = useState("");
 
   const [didRequestsList, setdidRequestsList] = useState([]);
   const [didRequest, setDidRequest] = useState(null);
-  const [didModal, setDidModal] = useState(false);
+  const [status, setStatus] = useState(0);
+  const [button1, setButton1] = useState("");
+  const [button2, setButton2] = useState("");
 
   const retrieveDidRequestsList = async () => {
-    const data = await DidService.getdidRequestList();
+    let data = await DidService.getdidRequestList();
     setdidRequestsList([...data])
   }
 
@@ -26,126 +29,116 @@ const Index = () => {
     retrieveDidRequestsList();
   }, [])
 
-  const createIdentity = async (publickey) => {
-    const data = await DidService.createIdentity(publickey)
-    console.log("data",data)
-    if(data){
+  const createIdentity1 = async (publickey, email, id) => {
+    const data = await DidService.createIdentity(publickey, email, id)
+    console.log("data", data)
+    if (data) {
       const done = await DidService.mappingDidToHash(data.cid.path, data.identifier)
-      if(done)
-        setUrl({identifier: data.identifier})
+      if (done)
+        setUrl({ identifier: data.identifier })
       const ddo = await DidService.resolve(data.identifier)
-      console.log("ddo",ddo)
+      console.log("ddo", ddo)
     }
   }
 
-  const OpenDidModal = (item) => {
+  const createIdentity2 = (item) => {
     console.log(item.publickey)
     setDidRequest(item)
-    setDidModal(true)
-    createIdentity(item.publickey)
+    createIdentity1(item.publickey, item.email, item.id)
+    document.getElementById(item.id).disabled = true;
+    document.getElementById(item.id + "a").disabled = true;
   };
 
-  const CloseDidModal = () => {
-    setDidModal(false)
+  const createIdentityFailed = async (email, id) => {
+    const done = await DidService.createIdentityFailed(email, id)
+    if (done) {
+      console.log('success')
+    }
+  }
+  const SendFailed = (item) => {
+    createIdentityFailed(item.email, item.id)
+    document.getElementById(item.id).disabled = true;
+    document.getElementById(item.id + "a").disabled = true;
   }
 
-  const qrCode = (
-    <QRCode
-      id="qrCodeElToRender"
-      size={500}
-      value={JSON.stringify(url)}
-      bgColor="white"
-      fgColor="#141926"
-      level="H"
-    />
-  );
 
   return (
     <>
-        <PageHeader />
-        <Container className="mt--7" fluid>  
+      <PageHeader/>
+      <Container className="mt--7" fluid>
         <Row>
-            <div className="col">    
-                <Card className="shadow">
-                {/* Header */}
-                  <CardHeader className="border-0">
-                      <Row className="align-items-center">
-                          <Col xs="8">
-                              <h3 className="mb-0">DID Request</h3>
-                          </Col>
-                      </Row>               
-                  </CardHeader>
-                  {/* List */}
-                  <Table className="align-items-center table-flush" responsive>
-                      <thead className="thead-light">
-                      <tr>
-                          <th scope="col"># </th> 
-                          <th scope="col">Firstname </th> 
-                          <th scope="col">Lastname </th> 
-                          <th scope="col">Email </th>
-                          <th scope="col">Address </th>
-                          <th scope="col">Public Key</th>
-                          <th scope="col">Create Identity</th>
-                      </tr>
-                      </thead>
-                      <tbody>
-                      { didRequestsList.map((item,index) => (
-                          <tr key={index} >
-                            <td>{index+1}</td>
-                            <td>
-                              {item.firstname}
-                            </td>
-                            <td>
-                              {item.lastname}
-                            </td>
-                            <td>
-                              {item.email}
-                            </td>
-                            <td>
-                              {item.address}
-                            </td>
-                            <td>
-                              {item.publickey}
-                            </td>
-                            <td>
-                              <Button color="info"
-                                onClick={ () => OpenDidModal(item)}>create Identity</Button>
-                            </td> 
-                          </tr> 
-                        ))}
-                      </tbody>
-                  </Table>
-                </Card>
-            </div> 
-            <Modal className="modal-dialog-centered" size='lg' isOpen={didModal} toggle={CloseDidModal} >
-              <div className="modal-header">
-                <h4 className="modal-title" id="modal-title-default">
-                  Scan QR code
-                </h4>
-                <button
-                  aria-label="Close"
-                  className="close"
-                  data-dismiss="modal"
-                  type="button"
-                  onClick={CloseDidModal}
-                >
-                  <span aria-hidden={true}>×</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                {url ?
-                  <div className="qr-code" ref={qrRef}>
-                    {qrCode}
-                  </div> : null}
-              </div>
-              <div className="modal-footer" ref={qrRef}>
-                <Button className="ml-auto" color="link" data-dismiss="modal" type="button" onClick={CloseDidModal}  >
-                  Close
-                </Button>
-              </div>
-            </Modal> 
+          <div className="col">
+            <Card className="shadow">
+              {/* Header */}
+              <CardHeader className="border-0">
+                <Row className="align-items-center">
+                  <Col xs="8">
+                    <h3 className="mb-0">DID Request</h3>
+                  </Col>
+                  <Col xs="4">
+                    <Input
+                      type="select"
+                      id="exampleSelect"
+                      name="select"
+                      onChange={(e) => setStatus(e.target.value)}
+                    >
+                      <option value="0">Pending</option>
+                      <option value="1">Issued</option>
+                      <option value="2">Declined</option>
+                    </Input>
+                  </Col>
+                </Row>
+              </CardHeader>
+              {/* List */}
+              <Table className="align-items-center table-flush" responsive>
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">Public Key</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Lastname</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Actions</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {didRequestsList.map((item, index) => {
+                    return item.state === parseInt(status) ?
+                      <tr key={index}>
+                        <td>{index + 1}</td>
+                        <td>
+                          {item.address}
+                        </td>
+                        <td>
+                          {item.publickey}
+                        </td>
+                        <td>
+                          {item.firstname}
+                        </td>
+                        <td>
+                          {item.lastname}
+                        </td>
+                        <td>
+                          {item.email}
+                        </td>
+                        <td>
+                          <Button color="info" id={item.id} disabled={item.state !== 0 ? "disabled" : ""}
+                            onClick={() => createIdentity2(item)}>Create Identity</Button>
+                          <Button id={item.id + "a"} disabled={item.state !== 0 ? "disabled" : ""} onClick={() => SendFailed(item)}>Decline Request</Button>
+                        </td>
+                        <td>
+                          {item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"}
+                        </td>
+                      </tr> : ""
+                  })}
+                </tbody>
+              </Table>
+            </Card>
+          </div>
         </Row>
-        </Container>
+      </Container>
     </>
   );
 };

@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(require('./routes/did'));
 app.use(require('./routes/vc.schema'));
+app.use(require('./routes/vc'));
 
 app.get('/', (req : any , res : any ) => {
     console.log("Hello World")
@@ -20,9 +21,3 @@ app.get('/', (req : any , res : any ) => {
 app.listen(config.PORT, () => 
     console.log('Listening on port ' + config.PORT)
 );
-
-app.get('/test', (req: any, res: any) => {
-    let x= 0;
-    x++;
-    res.json({x})
-})
