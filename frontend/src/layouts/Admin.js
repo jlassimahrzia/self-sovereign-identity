@@ -58,7 +58,6 @@ const Admin = (props) => {
         props.location.pathname.indexOf(routes[i].layout + routes[i].path) !==
         -1
       ) {
-        console.log(props)
         return routes[i].name;
       }
     }

@@ -21,7 +21,7 @@ contract Registry {
         bytes memory emptyTest = bytes(didToHash[_did]);
         if (emptyTest.length != 0) {
             // allow you to return a value & Refund the remaining gas to the caller
-            revert("DID registration failed.");
+            revert("DID already exist");
         }
         didCounter ++;
         didToHash[_did] = _newHash;

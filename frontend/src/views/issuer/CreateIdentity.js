@@ -3,7 +3,7 @@ import {
   Table, Container,
   Row, Col,
   Button,
-  Card, CardHeader, Input, Badge
+  Card, CardHeader, Input
 } from "reactstrap";
 import PageHeader from "components/Headers/PageHeader.js";
 import DidService from 'services/DidService';

@@ -35,7 +35,7 @@ import {
 } from "reactstrap";
 
 const AdminNavbar = (props) => {
-  console.log(props)
+  
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">

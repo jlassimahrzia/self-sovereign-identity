@@ -1,4 +1,3 @@
-import { format } from "path";
 
 var express = require('express');
 var app = express();
@@ -12,7 +11,6 @@ export interface Attribute {
     name: string,
     type: string,
     description: string,
-    required: boolean,
     format?: string
 }
 
@@ -33,51 +31,51 @@ const data = {
     }
 }
 
-let createCredentialSchema = (title: string, description:string, attributes: Array<Attribute>) => {
+let createCredentialSchema = (title: string, description:string, attributes: object, required: Array<string>) => {
 
     let baseschema = require("../config/vc.baseSchema.json")
     let vc_baseschema = JSON.parse(JSON.stringify(baseschema)); 
     vc_baseschema.title = title
     vc_baseschema.description = description
-    attributes.forEach(element => {
-        if(element.required){
-            vc_baseschema.properties.credentialSubject.required.push(element.name)
-        }
-        if(element.format){
+    vc_baseschema.properties.credentialSubject.required = [...required]
+
+    for (const [key, value] of Object.entries(attributes)) {
+        if(value.format){
             vc_baseschema.properties.credentialSubject.properties = {
                 ...vc_baseschema.properties.credentialSubject.properties,
-                [element.name]: {
-                    "description": `${element.description}`,
-                    "type": `${element.type}`,
-                    "format": `${element.format}`
+                [key]: {
+                    "description": `${value.description}`,
+                    "type": `${value.type}`,
+                    "format": `${value.format}`
                 }
             } 
         }
         else{
             vc_baseschema.properties.credentialSubject.properties = {
                 ...vc_baseschema.properties.credentialSubject.properties,
-                [element.name]: {
-                    "description": `${element.description}`,
-                    "type": `${element.type}`
+                [key]: {
+                    "description": `${value.description}`,
+                    "type": `${value.type}`
                 }
             }  
         }
-    }); 
-    const validate = ajv.compile(vc_baseschema)
+    }
+    /* const validate = ajv.compile(vc_baseschema)
     const valid = validate(data)
     if (!valid) console.log(validate.errors)
     else {
         console.log("Done");
-    }
+    } */
+    console.log(vc_baseschema)
     return vc_baseschema;
 }
 
 router.post('/api/createCredentialSchema', async (req : any , res : any) => {
-    let attributes = req.body.attributes
-    let title = req.body.title
-    let description = req.body.description
-
-    let newSchema = createCredentialSchema(title, description, attributes)
+    let attributes = req.body.data.properties
+    let title = req.body.data.title
+    let description = req.body.data.description
+    let required = req.body.data.required
+    let newSchema = createCredentialSchema(title, description, attributes,required)
     
     res.json({newSchema})
 })
