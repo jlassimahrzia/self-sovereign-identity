@@ -18,6 +18,7 @@
 import Icons from "views/examples/Icons";
 import Index from "views/Index.js";
 import CreateIdentity from "views/issuer/CreateIdentity.js";
+import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 
 var routes = [
@@ -25,22 +26,29 @@ var routes = [
   {
     path: "/index",
     name: "Home",
-    icon: "ni ni-single-02 text-warning",
+    icon: "ni ni-tag text-primary",
     component: Index,
     layout: "/issuer",
   },
   {
     path: "/createIdentity",
     name: "Create identity",
-    icon: "ni ni-single-02 text-warning",
+    icon: "ni ni-single-02 text-primary",
     component: CreateIdentity,
     layout: "/issuer",
   },
   {
     path: "/vcSchema",
     name: "Verifiable Credential Schema",
-    icon: "ni ni-single-02 text-warning",
+    icon: "ni ni-credit-card text-primary",
     component: VcSchema,
+    layout: "/issuer",
+  },
+  {
+    path: "/vc",
+    name: "Verifiable Credential",
+    icon: "ni ni-check-bold text-primary",
+    component: VC,
     layout: "/issuer",
   }
   

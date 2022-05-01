@@ -45,6 +45,7 @@
   ],
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.15.3",
+    "@ginkgo-bioworks/react-json-schema-form-builder": "^2.8.0",
     "antd": "^4.20.0",
     "axios": "^0.26.1",
     "bootstrap": "4.6.0",

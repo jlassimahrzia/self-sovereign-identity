@@ -9,7 +9,10 @@ import {
   InputGroupAddon,
   InputGroupText,
   InputGroup,
+  Container,
+  Row, Card
 } from "reactstrap";
+import PageHeader from 'components/Headers/PageHeader';
 
 function VC() {
     const [name, setName] = useState("")
@@ -54,8 +57,12 @@ function VC() {
         
     }
     return (
-        <div>
-       
+    <>
+    <PageHeader/>
+    <Container className="mt--7" fluid>
+      <Row>
+        <div className="col">
+        <Card className="shadow">
         <Form role="form">
         <FormGroup className="mb-3">
           <InputGroup className="input-group-alternative">
@@ -116,11 +123,12 @@ function VC() {
             Create Verifiable Credentials
           </Button>
         </div>
-      </Form>
-
-         
-
+        </Form>
+        </Card>
       </div>
+      </Row>
+    </Container>
+    </>
     )
 }
 

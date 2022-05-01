@@ -25,7 +25,6 @@ import "assets/scss/argon-dashboard-react.scss";
 import "antd/dist/antd.css";
 import AdminLayout from "layouts/Admin.js";
 import AuthLayout from "layouts/Auth.js";
-import VC from "views/VC";
 import Login from "views/examples/Login.js"
 
 ReactDOM.render(
@@ -34,7 +33,6 @@ ReactDOM.render(
       <Route path="/issuer" render={(props) => <AdminLayout {...props} />} />
 
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
-      <Route path="/vc" render={(props) => <VC {...props} />} />
       <Route path="/login" render={(props) => <Login {...props} />} />
       <Redirect from="/" to="/issuer/index" />
     </Switch>
