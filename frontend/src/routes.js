@@ -15,22 +15,35 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
+import Icons from "views/examples/Icons";
 import Index from "views/Index.js";
-import Profile from "views/examples/Profile.js";
-import Maps from "views/examples/Maps.js";
-import Register from "views/examples/Register.js";
-import Login from "views/examples/Login.js";
-import Tables from "views/examples/Tables.js";
-import Icons from "views/examples/Icons.js";
+import CreateIdentity from "views/issuer/CreateIdentity.js";
+import VcSchema from "views/issuer/VcSchema.js";
 
 var routes = [
+  /* , */
   {
     path: "/index",
-    name: "Create identity",
+    name: "Home",
     icon: "ni ni-single-02 text-warning",
     component: Index,
-    layout: "/admin",
+    layout: "/issuer",
+  },
+  {
+    path: "/createIdentity",
+    name: "Create identity",
+    icon: "ni ni-single-02 text-warning",
+    component: CreateIdentity,
+    layout: "/issuer",
+  },
+  {
+    path: "/vcSchema",
+    name: "Verifiable Credential Schema",
+    icon: "ni ni-single-02 text-warning",
+    component: VcSchema,
+    layout: "/issuer",
   }
+  
   /* {
     path: "/icons",
     name: "Icons",

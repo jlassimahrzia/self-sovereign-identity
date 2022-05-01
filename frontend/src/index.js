@@ -26,16 +26,17 @@ import "antd/dist/antd.css";
 import AdminLayout from "layouts/Admin.js";
 import AuthLayout from "layouts/Auth.js";
 import VC from "views/VC";
-import Login from "views/examples/Login"
+import Login from "views/examples/Login.js"
 
 ReactDOM.render(
   <BrowserRouter>
     <Switch>
-      <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
+      <Route path="/issuer" render={(props) => <AdminLayout {...props} />} />
+
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
       <Route path="/vc" render={(props) => <VC {...props} />} />
       <Route path="/login" render={(props) => <Login {...props} />} />
-      <Redirect from="/" to="/admin/index" />
+      <Redirect from="/" to="/issuer/index" />
     </Switch>
   </BrowserRouter>,
   document.getElementById("root")
