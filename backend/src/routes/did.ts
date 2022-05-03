@@ -1,7 +1,6 @@
 import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
 import { Wallet } from '@ethersproject/wallet'
-import { url } from 'inspector';
 var nodemailer = require("nodemailer");
 var QRCode = require('qrcode')
 
