@@ -26,28 +26,28 @@ var routes = [
   {
     path: "/index",
     name: "Home",
-    icon: "ni ni-tag text-primary",
+    icon: "ni ni-tag text-black",
     component: Index,
     layout: "/issuer",
   },
   {
     path: "/createIdentity",
     name: "Create identity",
-    icon: "ni ni-single-02 text-primary",
+    icon: "ni ni-single-02 text-black",
     component: CreateIdentity,
     layout: "/issuer",
   },
   {
     path: "/vcSchema",
     name: "Verifiable Credential Schema",
-    icon: "ni ni-credit-card text-primary",
+    icon: "ni ni-credit-card text-black",
     component: VcSchema,
     layout: "/issuer",
   },
   {
     path: "/vc",
     name: "Verifiable Credential",
-    icon: "ni ni-check-bold text-primary",
+    icon: "ni ni-check-bold text-black",
     component: VC,
     layout: "/issuer",
   }

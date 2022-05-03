@@ -11,7 +11,6 @@ var express = require('express');
 var app = express();
 const router = express.Router()
 
-
 // JWT
 const didJWT = require('did-jwt')
 
@@ -132,7 +131,7 @@ const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
 const resolve = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = ipfs.cat(ipfsHash)
-
+    console.log(asyncitr)
     for await (const itr of asyncitr) {
 
         let data = Buffer.from(itr).toString()
@@ -256,7 +255,7 @@ router.post('/api/resolve', async (req : any , res : any) => {
     let did = req.body.did
     console.log(did)
     const ipfshash = await contract.methods.getDidToHash(did).call();
-    console.log(ipfshash)
+    console.log("hash",ipfshash)
     let ddo = await resolve(ipfshash)
     
     res.json({did,ipfshash,ddo}) 

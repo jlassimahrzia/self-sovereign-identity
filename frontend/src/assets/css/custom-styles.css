@@ -1,0 +1,119 @@
+.formHead-0-2-2 {
+    border: unset !important;
+    background-color: transparent !important;
+}
+
+
+div.form-footer.formFooter-0-2-4 {
+    padding: 0 0 24px 0 !important;
+}
+
+[data-test="form-name-label"] {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+    font-weight: 500 !important;
+}
+
+[data-test="form-description-label"] {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+    font-weight: 500 !important;
+}
+
+.formBuilder-0-2-1 .fa-plus-square {
+    color: #3a3a3a !important;
+    font-size: 25px !important;
+    font-weight: 500 !important;
+}
+
+.formHead-0-2-2 {
+    width: 100% !important;
+}
+
+.formHead-0-2-2 div {
+    width: 45% !important;
+}
+
+.addDetails-0-2-5 .popover .popover-inner {
+    border: unset !important
+}
+
+.addDetails-0-2-5 .popover .popover-inner .popover-header {
+    border-bottom: unset !important;
+}
+
+div>div.action-buttons {
+    padding: 10px !important
+}
+
+.formBuilder-0-2-1 .card-container,  .formBuilder-0-2-1 .section-container{
+    width: 86% !important
+}
+
+.formBuilder-0-2-1 .card-container,
+.formBuilder-0-2-1 .card-container .d-flex,
+.cardEntries-0-2-7 input,
+.cardEntries-0-2-7 .card-select,
+div.collapse-element.card-container.collapseElement-0-2-9>div.collapse.show>div>div.cardEntries-0-2-7>div:nth-child(2)>div:nth-child(2)>div>div {
+    border: 1px solid #b7b7b791 !important;
+    
+}
+
+.cardEntries-0-2-7 {
+    border: unset !important
+}
+
+.formBuilder-0-2-1 .card-container h4 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+    color: #3a3a3a !important;
+    font-weight: 500 !important;
+}
+
+.formBuilder-0-2-1 .card-container h4 .label {
+    font-weight: 400 !important;
+    font-size: 18px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+}
+
+
+.formBuilder-0-2-1 .section-container h4 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+    color: #3a3a3a !important;
+    font-weight: 500 !important;
+}
+
+.formBuilder-0-2-1 .section-container h4 .label {
+    font-weight: 400 !important;
+    font-size: 18px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !important;
+}
+
+.formBuilder-0-2-1 .section-container,
+.formBuilder-0-2-1 .section-container .d-flex,
+.cardEntries-0-2-7 input,
+.cardEntries-0-2-7 .card-select,
+div.collapse-element.section-container.collapseElement-0-2-9>div.collapse.show>div>div.cardEntries-0-2-7>div:nth-child(2)>div:nth-child(2)>div>div {
+    border: 1px solid #b7b7b791 !important;
+    
+}
+
+.formBuilder-0-2-1 .section-container,  .formBuilder-0-2-1 .section-container{
+    width: 86% !important
+}
+
+.sectionContainer-0-2-13 .section-head , .sectionContainer-0-2-13 .section-interactions{
+    border : unset !important;
+}
+
+
+div.d-flex > h4 > span.arrows > span > svg {
+    color: #a0a0a0 !important;
+    border: 1px solid #a0a0a0 !important;
+}
+
+
+[data-icon="caret-right"] {
+    color: #555555 !important
+}
+
+.navbar-vertical.navbar-expand-md .navbar-nav .nav-link.active:before {
+    border-left: 2px solid #d7363c !important;
+}

@@ -25,15 +25,16 @@ contract SchemasRegistry {
         if (emptyTest.length == 0) {
             revert("DID does not exist");
         }
+
         string memory path;
         Schema[] memory tab = didToSchemas[_did];
         for (uint i=0; i< tab.length; i++) {
          if(keccak256(abi.encodePacked((tab[i].name))) == keccak256(abi.encodePacked((_name)))){
             path = tab[i].path;
          }
-         else{
+        }
+        if(keccak256(abi.encodePacked((path))) == keccak256(abi.encodePacked(('')))){
             revert("Schema does not exist");
-         }
         }
         return path ;
     }
