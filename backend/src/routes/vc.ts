@@ -178,51 +178,49 @@ for (var i = 0; i < 10; i++) {
 }
   
 router.post('/api/createVC', (req: any, res: any) => {
+
     let id = req.body.id
     let did = req.body.did
-    let name = req.body.name
-    let type = req.body.type
-    let year = req.body.year 
+    let familyName = req.body.familyName
+    let firstName = req.body.firstName
+    let dateOfBirth = req.body.dateOfBirth 
     
-let vcPayload: JwtCredentialPayload = {
-    sub: did,
-    nbf: 1562950282,
-    vc: {
-        id: 'credential/'+result,
-        issuanceDate: (new Date(Date.now())).toISOString(),
-     
-    '@context': ['https://www.w3.org/2018/credentials/v1'],
-    type: ['VerifiableCredential'],
-    credentialSubject: {
-      degree: {
-        Type:{ 
-            value: type ,
-            
-            
-        },
-        Name:{ 
-            value: name,
-         
-        },
-        Year:{ 
-           value:year,
+    let vcPayload: JwtCredentialPayload = {
+        sub: did,
+        nbf: 1562950282,
+        vc: {
+            id: 'credential/'+result,
+            issuanceDate: (new Date(Date.now())).toISOString(),
+        
+            '@context': ['https://www.w3.org/2018/credentials/v1'],
+            type: ['VerifiableCredential'],
+            credentialSubject: {
+                degree: {
+                    familyName:{ 
+                        value: familyName ,  
+                    },
+                    firstName:{ 
+                        value: firstName,
+                    },
+                    dateOfBirth:{ 
+                    value: dateOfBirth,
+                    }
+                }
+            }, 
         }
-      }
-    }, 
-  }
-}
-Object.keys(req.body).forEach(function (key){
-    CreateJWT(key,req.body[key],vcPayload)
- }) 
+    }
+
+    Object.keys(req.body).forEach(function (key){
+        CreateJWT(key,req.body[key],vcPayload)
+    }) 
     
     const vc0 = async (): Promise<string> => {
+        const vcJwt = await createVerifiableCredentialJwt(vcPayload, issuer)
+        return vcJwt  
+    }
 
-     const vcJwt = await createVerifiableCredentialJwt(vcPayload, issuer)
-        return vcJwt
-        
-         }
-         let vcJwt=""
-         vc0().then(function(result) { 
+        let vcJwt=""
+        vc0().then(function(result) { 
            
             vcJwt = result
             console.log(result)
@@ -233,13 +231,11 @@ Object.keys(req.body).forEach(function (key){
 
          })
         const value = JSON.stringify(vcPayload)
-             QRCode.toDataURL(value, { type: 'terminal' }, function (err: any, url: any) {
+
+    QRCode.toDataURL(value, { type: 'terminal' }, function (err: any, url: any) {
         if (err) return console.log("error occured")
         emailSenderFunction('jlassimahrzia111@gmail.com', url);
     })
-         
-   
-
 
 })
 
@@ -251,8 +247,8 @@ async function CreateJWT( index: String,  value: String,vcPayload:any) {
     
 
     if(index!=="did"){
-        if(index==="type"){
-            const x={Type: vcPayload.vc.credentialSubject.degree.Type}
+        if(index==="familyName"){
+            const x={familyName: vcPayload.vc.credentialSubject.degree.familyName}
             const token = jwt.sign(
                  x ,
                  'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
@@ -261,11 +257,11 @@ async function CreateJWT( index: String,  value: String,vcPayload:any) {
                 }
               )
         
-            vcPayload.vc.credentialSubject.degree.Type= { ...vcPayload.vc.credentialSubject.degree.Type,proof: token };
+            vcPayload.vc.credentialSubject.degree.familyName= { ...vcPayload.vc.credentialSubject.degree.familyName,proof: token };
 
            
-           }else if(index==="name"){
-            const x={Name: vcPayload.vc.credentialSubject.degree.Name}
+           }else if(index==="firstName"){
+            const x={firstName: vcPayload.vc.credentialSubject.degree.firstName}
             const token = jwt.sign(
                  x ,
                  'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
@@ -273,9 +269,9 @@ async function CreateJWT( index: String,  value: String,vcPayload:any) {
                   expiresIn: "1h",
                 }
               )
-              vcPayload.vc.credentialSubject.degree.Name= { ...vcPayload.vc.credentialSubject.degree.Name,proof: token };
+              vcPayload.vc.credentialSubject.degree.firstName= { ...vcPayload.vc.credentialSubject.degree.firstName,proof: token };
             }else{
-            const x={Year: vcPayload.vc.credentialSubject.degree.Year}
+            const x={dateOfBirth: vcPayload.vc.credentialSubject.degree.dateOfBirth}
             const token = jwt.sign(
                  x ,
                  'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
@@ -283,7 +279,7 @@ async function CreateJWT( index: String,  value: String,vcPayload:any) {
                   expiresIn: "1h",
                 }
               )
-              vcPayload.vc.credentialSubject.degree.Year= { ...vcPayload.vc.credentialSubject.degree.Year,proof: token };
+              vcPayload.vc.credentialSubject.degree.dateOfBirth= { ...vcPayload.vc.credentialSubject.degree.dateOfBirth,proof: token };
 
         //   }
         

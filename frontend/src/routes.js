@@ -15,11 +15,11 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import Icons from "views/examples/Icons";
 import Index from "views/Index.js";
 import CreateIdentity from "views/issuer/CreateIdentity.js";
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
+import CreateCredential from "views/issuer/CreateCredential";
 
 var routes = [
   /* , */
@@ -45,8 +45,15 @@ var routes = [
     layout: "/issuer",
   },
   {
+    path: "/ceateVc",
+    name: "Create Verifiable Credential",
+    icon: "ni ni-fat-add text-black",
+    component: CreateCredential,
+    layout: "/issuer",
+  },
+  {
     path: "/vc",
-    name: "Verifiable Credential",
+    name: "Verifiable Credential Request",
     icon: "ni ni-check-bold text-black",
     component: VC,
     layout: "/issuer",

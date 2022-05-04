@@ -55,8 +55,8 @@ return (
                   setUiSchema(newUiSchema)
                 }}
               />
-              <div className="text-center">
-                {schema != '' ? <Button style={{background:"#d7363c",color:"white"}} type="button"
+              <div className="text-center">{
+              schema !== '' ? <Button style={{background:"#d7363c",color:"white"}} type="button"
                   onClick={OpenConfirmModal} 
                 >
                   Submit
@@ -65,8 +65,8 @@ return (
                     disabled
                   >
                     Submit
-                  </Button>}
-              </div>
+                  </Button>
+              }</div>
             </CardBody>
           </Card>
         </div>

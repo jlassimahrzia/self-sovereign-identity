@@ -6,10 +6,10 @@ import {
     Input,
     InputGroupAddon,
     InputGroupText,
-    InputGroup,
+    InputGroup, Label
   } from "reactstrap";
 import {useState, useEffect} from 'react'
-import Sidebar from "components/Sidebar/Sidebar.js";
+//import Sidebar from "components/Sidebar/Sidebar.js";
 import {
     Table, Container, Modal,
     Row, Col,
@@ -19,13 +19,15 @@ import {
   import PageHeader from "components/Headers/PageHeader.js"; 
   import VCService from 'services/VCService';
 
-function Issuer() {
-    const [name, setName] = useState("")
+function VC() {
+    
     const [did, setDid] = useState("")
     const [id, setId] = useState("")
 
-    const [type, setType] = useState("")
-    const [year, setYear] = useState("")
+    const [firstName, setFirstname] = useState("")
+    const [familyName, setFamilyname] = useState("")
+    const [dateOfBirth, setDateOfBirth] = useState("")
+
     const [status, setStatus] = useState(0);
 
 
@@ -41,17 +43,21 @@ function Issuer() {
         retrieveVcRequestsList();
       }, [])
 
+      useEffect(() => {
+      }, [vcRequestsList])
     const handleVC = async () => {
         try {
-            const data = await VCService.createVC(id,did,type, name, year)
+            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth)
             
             console.log(data)
+            CloseDidModal()
+            retrieveVcRequestsList()
            
           } catch (err) {
             console.log("error");
-          }
-        
+          }   
     }
+
       const OpenDidModal = (item) => {
         console.log(item.did) 
         console.log(item.id)
@@ -59,12 +65,11 @@ function Issuer() {
         setId(item.id)
         setDidModal(true)
        
-    
       };
-        const CloseDidModal = () => {
+
+  const CloseDidModal = () => {
     setDidModal(false)
   }
-
 
   const createVCFailed= async (id) => {
     const done = await VCService.createVCFailed(id)
@@ -72,20 +77,15 @@ function Issuer() {
       console.log('success')
     }
   }
+
   const SendFailed = (item) => {
     createVCFailed(item.id)
-   
-
   }
 
   return (
     <div>
     <PageHeader />
-
-
-
     <Container className="mt--7" fluid>
-
       <Row>
         <div className="col">
           <Card className="shadow">
@@ -93,8 +93,7 @@ function Issuer() {
             <CardHeader className="border-0">
               <Row className="align-items-center">
                 <Col xs="8">
-                  <h3 className="mb-0">Verifiable Credentials Request</h3>
-                  
+                  <h3 className="mb-0">Verifiable Credentials Request</h3>               
                 </Col>
                 <Col xs="4">
                     <Input
@@ -108,11 +107,6 @@ function Issuer() {
                       <option value="2">Declined</option>
                     </Input>
                   </Col>
-               
-
-                  
-     
-
               </Row>
             </CardHeader>
             {/* List */}
@@ -122,37 +116,26 @@ function Issuer() {
                   <th scope="col"># </th>
                   <th scope="col">DID </th>
                   <th scope="col">State </th> 
+                  <th scope="col">Credential Type </th> 
                   <th scope="col">Actions </th>
-             
                 </tr>
               </thead>
-              <tbody>
-           
-              {vcRequestsList.map((item, index) => {
-                  
-                  return    item.state === parseInt(status) ? 
+              <tbody>{
+                vcRequestsList.map((item, index) => {
+                  return  item.state === parseInt(status) ? 
                   <tr key={index} >
                     <td>{index + 1}</td>
+                    <td>{item.did}</td>
+                    <td>{item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"}</td>
+                    <td>PersonalIDCredential</td>
                     <td>
-                      {item.did}
-                    </td>
-                    <td>
-                    {item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"}
-      
-                    </td>
-                        
-                    <td>
-                    <Button color="info" onClick={() => OpenDidModal(item)}
+                    <Button style={{background:"#d7363c",color:"white"}} onClick={() => OpenDidModal(item)}
                     disabled={item.state !== 0 ? true : false}>Create VC</Button>
                     <Button onClick={() => SendFailed(item)} id={item.id + "a"} 
-                    disabled={item.state !== 0 ? true : false} >Decline Request</Button>
-                  </td>
-                          </tr>: ""
-                  
-
-             
-                        })}
-              </tbody>
+                    disabled={item.state !== 0 ? true : false}>Decline Request</Button>
+                    </td>
+                  </tr>: ""})
+                }</tbody>
             </Table>
           </Card>
         </div>
@@ -173,69 +156,90 @@ function Issuer() {
               </button>
             </div>
             <div className="modal-body">
-           <div> <Form role="form">
-           <FormGroup className="mb-3">
-           <InputGroup className="input-group-alternative">
-             <InputGroupAddon addonType="prepend">
-               <InputGroupText>
-                 DID
-               </InputGroupText>
-             </InputGroupAddon>
-             <Input
-              className="input"
-              value={did}
-              readOnly
+              <div> 
+                <Form role="form">
+                <FormGroup>
+                  <Label>
+                    familyName
+                  </Label>
+                  <Input
+                     onChange={(e) => setFamilyname(e.target.value)}
+                  />
+                </FormGroup>
+                
+                <FormGroup>
+                  <Label>
+                    firstName
+                  </Label>
+                  <Input
+                     onChange={(e) => setFirstname(e.target.value)}
+                  />
+                </FormGroup>
+                <FormGroup>
+                  <Label>
+                      dateOfBirth
+                  </Label>
+                  <Input
+                     onChange={(e) => setDateOfBirth(e.target.value)}
+                  />
+                </FormGroup>
+            {/* <FormGroup className="mb-3">
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  DID
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input
+                className="input"
+                value={did}
+                readOnly
+                />
+            </InputGroup>
+          </FormGroup> */}
+  
+         {/*  <FormGroup>
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                familyName
+              </InputGroupAddon>
+              <Input
+                className="input"
+                onChange={(e) => setFamilyname(e.target.value)}
               />
-           </InputGroup>
-         </FormGroup>
- 
-         <FormGroup>
-           <InputGroup className="input-group-alternative">
-             <InputGroupAddon addonType="prepend">
-               Type
-             </InputGroupAddon>
-             <Input
+            </InputGroup>
+          </FormGroup>
+  
+          <FormGroup>
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                firstName
+              </InputGroupAddon>
+              <Input
+                className="input"
+                onChange={(e) => setFirstname(e.target.value)}
+              />
+            </InputGroup>
+          </FormGroup>
+  
+          <FormGroup>
+          <InputGroup className="input-group-alternative">
+            <InputGroupAddon addonType="prepend">
+                dateOfBirth
+            </InputGroupAddon>
+            <Input
               className="input"
- 
-             onChange={(e) => setType(e.target.value)}
-             />
-           </InputGroup>
-         </FormGroup>
- 
-         <FormGroup>
-           <InputGroup className="input-group-alternative">
-             <InputGroupAddon addonType="prepend">
-               Name
-             </InputGroupAddon>
-             <Input
-              className="input"
- 
-             onChange={(e) => setName(e.target.value)}
-             />
-           </InputGroup>
-         </FormGroup>
- 
-         <FormGroup>
-         <InputGroup className="input-group-alternative">
-           <InputGroupAddon addonType="prepend">
-             Year
-           </InputGroupAddon>
-           <Input
-            className="input"
-     
-           onChange={(e) => setYear(e.target.value)}
-           />
-         </InputGroup>
-       </FormGroup>
-   
-           <div className="text-center">
-             <Button className="my-4" color="info" type="button" onClick={handleVC} >
-               Confirm
-             </Button>
-           </div>
-         </Form></div>
+              onChange={(e) => setDateOfBirth(e.target.value)}
+            />
+          </InputGroup>
+        </FormGroup> */}
+    
+            <Button className="my-4" color="primary" type="button" onClick={handleVC} >
+                Submit
+              </Button>
+                </Form>
+              </div>
             </div>
-         
           </Modal> 
 
       </Row>
@@ -244,4 +248,4 @@ function Issuer() {
   )
 }
 
-export default Issuer
+export default VC

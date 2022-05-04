@@ -123,7 +123,6 @@ router.post('/api/resolveSchema', async (req : any , res : any) => {
     let did = req.body.did
     let name = req.body.name
     const ipfshash = await contract.methods.getSchemasPath(did, name).call();
-    console.log(ipfshash)
     let vcSchema = await resolveSchema(ipfshash)
     vcSchema = JSON.parse(vcSchema)
     res.json({vcSchema}) 
@@ -132,7 +131,7 @@ router.post('/api/resolveSchema', async (req : any , res : any) => {
 router.post('/api/schemas', async (req : any , res : any) => {
     let did = req.body.did
     const schemas = await contract.methods.getDidToSchema(did).call();
-    res.json({schemas}) 
+    res.json(schemas) 
 }) 
 
 module.exports = router;
