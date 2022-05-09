@@ -88,11 +88,7 @@ let createCredentialSchema = (title: string, description:string, attributes: obj
 const resolveSchema = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = await ipfs.cat(ipfsHash)
-    /* console.log(asyncitr)
-    for await (const itr of asyncitr) {
-        let data = Buffer.from(itr).toString()
-        return data.toString()
-    }  */
+    
     let mainContent="";
     for await(const itr of asyncitr){
         mainContent+=itr.toString();
