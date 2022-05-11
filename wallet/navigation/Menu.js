@@ -35,13 +35,15 @@ function CustomDrawerContent({
   useEffect(() => {
     getIdentity()
     console.log("fom appstack", did)
-    if(did == null){
+    if(did !== null){
       setRoutes([...screens])
     }
     else {
-      setRoutes([...screens2])
+      //setRoutes([...screens2])
+      setRoutes([...screens])
     }
   }, []);
+
 
   
   return (

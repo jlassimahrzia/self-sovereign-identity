@@ -30,10 +30,6 @@ function Onboarding({ navigation }) {
       });
     }
 
-    useEffect(() => {
-     
-    }, []);
-
     const addIdentity = (db, keyPair) =>{
       db.transaction(
         (tx) => {
@@ -51,18 +47,9 @@ function Onboarding({ navigation }) {
       const keyPair = await DidService.createKeyPair()
       console.log("keyPair",keyPair)
       if(keyPair){
-        await addIdentity(db, keyPair);
-        //if(id){
-          navigation.navigate("Register")
-        /*}
-        else {
-          Toast.show({
-            type: 'error',
-            text1: 'Error',
-            text2: 'Failed to create identity'
-          });
-          setLoading(false)
-        }*/
+        console.log("entred")
+        await addIdentity(db, keyPair)
+        navigation.navigate('Register', { screen: 'Register' });
       }
       else {
         Toast.show({

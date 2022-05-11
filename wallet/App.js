@@ -41,6 +41,7 @@ export default props => {
   const [isLoadingComplete, setLoading] = useState(false);
   let [fontsLoaded] = useFonts({
     'ArgonExtra': require('./assets/font/argon.ttf'),
+    'open-sans-regular': require('./assets/font/OpenSans-Regular.ttf'),
   });
 
   function _loadResourcesAsync() {
@@ -75,7 +76,7 @@ export default props => {
           </Block>
         </GalioProvider>
       </NavigationContainer>
-      <Toast ref={(ref) => Toast.setRef(ref)} />
+      <Toast refs={(ref) => Toast.setRef(ref)} />
       </>
     );
   } else {

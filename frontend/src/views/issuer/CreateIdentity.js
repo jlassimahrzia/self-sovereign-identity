@@ -78,8 +78,7 @@ const CreateIdentity = () => {
                       type="select"
                       id="exampleSelect"
                       name="select"
-                      onChange={(e) => setStatus(e.target.value)}
-                    >
+                      onChange={(e) => setStatus(e.target.value)}>
                       <option value="0">Pending</option>
                       <option value="1">Issued</option>
                       <option value="2">Declined</option>
@@ -101,8 +100,7 @@ const CreateIdentity = () => {
                     <th scope="col">Actions</th>
                   </tr>
                 </thead>
-                <tbody>{
-                  didRequestsList.map((item, index) => {
+                <tbody>{didRequestsList.map((item, index) => {
                     return item.state === parseInt(status) ?
                       <tr key={index}>
                         <td>{index + 1}</td>
@@ -118,8 +116,7 @@ const CreateIdentity = () => {
                           <Button id={item.id + "a"} disabled={item.state !== 0 ? true : false} onClick={() => SendFailed(item)}>Decline Request</Button>
                         </td>
                       </tr> : ""
-                  })
-                }</tbody>
+                })}</tbody>
               </Table>
             </Card>
           </div>

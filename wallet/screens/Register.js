@@ -57,7 +57,6 @@ function Register({ navigation }) {
           if(_array.length != 0){
             setAddress(_array[0].address)
             setPublicKey(_array[0].publicKey)}
-            console.log("inside tx",address,publicKey)
         },
         (txObj, error) => console.log('Error ', error)
       ) 
@@ -76,7 +75,7 @@ function Register({ navigation }) {
 
   const { handleChange, handleSubmit, handleBlur, values, errors, touched } = useFormik({
     validationSchema: RegisterSchema,
-    initialValues: { firstname: '', lastname: '', email: '' },
+    initialValues: { firstname: " ", lastname: " ", email: " " },
     onSubmit: async (values) =>{
       setLoading(true)
 
@@ -87,7 +86,7 @@ function Register({ navigation }) {
           (txObj, error) => console.log('Error', error))
       })
 
-      console.log(address,publicKey)
+      console.log("address && public key ", address, publicKey)
       if(address && publicKey){
         const res = await DidService.sendDidRequest(values.firstname, values.lastname,  values.email ,address , publicKey)  
         if(res){

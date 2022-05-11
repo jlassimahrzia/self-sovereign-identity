@@ -36,7 +36,6 @@ function Profile() {
 
   useEffect(() => {
     getProfile()
-    console.log(profile)
   }, []);
 
     return (

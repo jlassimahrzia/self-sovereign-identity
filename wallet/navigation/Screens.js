@@ -186,8 +186,8 @@ function HomeStack(props) {
 
 export default function OnboardingStack(props) {
   const db = SqliteService.openDatabase()
-  const [identity, setIdentity] = useState(null)
-  const [profile, setProfile] = useState(null)
+  const [identity, setIdentity] = useState("")
+  const [profile, setProfile] = useState("")
 
   const getIdentity = () => {
     db.transaction((tx) => {
@@ -212,6 +212,8 @@ export default function OnboardingStack(props) {
 
   useEffect(() => {
     getIdentity()
+    console.log("identiy",identity);
+    console.log("profile",profile);
   }, []);
 
   return (
@@ -221,17 +223,18 @@ export default function OnboardingStack(props) {
         headerShown: false,
       }}
     >
-      { identity == null? <Stack.Screen
+      { identity === "" ? <Stack.Screen
         name="Onboarding"
         component={Onboarding}
         option={{
           headerTransparent: true,
         }}
       /> : null}
-      { profile == null? <Stack.Screen name="Register" component={Register} /> : null}
-      <Stack.Screen name="App" component={AppStack} />
+      { profile === "" ? <Stack.Screen name="Register" component={Register} /> : null}
+      <Stack.Screen name="App" component={AppStack} /> 
     </Stack.Navigator>
   );
+
 }
 
 function AppStack(props) {
@@ -252,7 +255,7 @@ function AppStack(props) {
 
   useEffect(() => {
     getIdentity()
-    console.log("fom appstack", did)
+    console.log("from appstack", did)
   }, []);
 
   return (
