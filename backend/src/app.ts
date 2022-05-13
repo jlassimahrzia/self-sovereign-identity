@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(require('./routes/did'));
 app.use(require('./routes/vc.schema'));
 app.use(require('./routes/vc'));
+app.use(require('./routes/issuer'));
 
 app.get('/', (req : any , res : any ) => {
     console.log("Hello World")

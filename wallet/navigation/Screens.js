@@ -20,6 +20,7 @@ import Register from "../screens/Register";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
+import OrgCredentials from "../screens/OrgCredentials";
 
 import SqliteService from "../services/SqliteService"
 
@@ -28,6 +29,12 @@ const { width } = Dimensions.get("screen");
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
+
+const category = [
+  { id: '1', title: 'Category 1' },
+  { id: '2', title: 'Category 2' },
+  { id: '3', title: 'Category 3' }
+]
 
 function QrCodeStack(props) {
   return (
@@ -70,11 +77,28 @@ function OrganisationsStack(props) {
           header: ({ navigation, scene }) => (
             <Header
               title="Organisations"
+              search
+              tabs={category}
               navigation={navigation}
               scene={scene}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Credentials"
+        component={OrgCredentials}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Credentials"
+              back
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
         }}
       />
     </Stack.Navigator>
@@ -141,12 +165,12 @@ function CredentialsStack(props) {
       }}
     >
       <Stack.Screen
-        name="Credentials"
+        name="Verifiable Credentials"
         component={Credentials}
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              title="Credentials"
+              title="Verifiable Credentials"
               navigation={navigation}
               scene={scene}
             />

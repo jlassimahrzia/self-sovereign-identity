@@ -4,7 +4,8 @@ import {
   Dimensions,
   Image,
   FlatList,
-  TouchableWithoutFeedback, Linking, Platform
+  TouchableWithoutFeedback, Linking, Platform,
+  ActivityIndicator
 } from "react-native";
 import { Block, Text, theme } from "galio-framework";
 // butoane text mai gros ca la register screen
@@ -14,6 +15,10 @@ import { Images, argonTheme } from "../constants";
 import Icon from '../components/Icon';
 import { AntDesign, MaterialCommunityIcons , Ionicons} from '@expo/vector-icons'; 
 import ViewMoreText from 'react-native-view-more-text';
+import IssuerService from "../services/IssuerService";
+import { environment } from '../constants/env';
+import { useNavigation } from '@react-navigation/native'
+
 const { width } = Dimensions.get("screen");
 
 
@@ -28,8 +33,24 @@ renderViewLess = (onPress) =>{
   )
 }
 
-renderProduct = ({ item }) => {
-    //const { navigation } = this.props;
+renderEmpty = () => {
+    return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The cart is empty</Text>;
+}
+
+function Organisations({navigation}) {
+
+    const [organisations, setOrganisations] = useState([])
+    const [img, setimg] = useState("")
+
+    const retrieveIssuersList = async () => {
+      let data = await IssuerService.getIssuerList()
+      setOrganisations(data)
+    }
+    
+    useEffect(() => {
+      retrieveIssuersList();
+    }, [])
+
     const openTel = number => {
       let phoneNumber = ''
       if (Platform.OS === 'android') {
@@ -51,147 +72,109 @@ renderProduct = ({ item }) => {
     const openMap = address => {
       Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + address)
     }
-    
-    return (
-      <Block>
-        <Block card shadow style={styles.product}>
-            <Block flex row>
-                {/* <TouchableWithoutFeedback
-                onPress={() => navigation.navigate("Product", { product: item })}
-                > */}
-                <Block style={styles.imageHorizontal}>
-                    <Image
-                    source={Image.logoCNSS}
-                    style={styles.imageStyle}
-                    />
-                </Block>
-                {/*  </TouchableWithoutFeedback> */}
-                <Block flex style={styles.productDescription}>
-                  <Block
-                    middle
-                    row
-                    space="evenly"
-                  >
-                  <Text size={14} style={styles.productTitle} color={argonTheme.COLORS.PRIMARY}
-                  style={{fontWeight: "bold",margin: 5}}>
-                    {item.name}
-                  </Text>
-                  </Block>
-                  <Block
-                    middle
-                    row
-                    space="evenly"
-                  >
-                    <Button
-                      small
-                      style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                      icon="mail" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                      onPress={() => openEmail(item.email)}
-                    >
-                      Email
-                    </Button>
-                    <Button
-                      small
-                      style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                      icon="link" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                      onPress={() => openUrl(item.site)}
-                    >
-                      Website
-                    </Button>
-                  </Block>  
-                  <Block
-                    middle
-                    row
-                    space="evenly"
-                  >
-                    <Button
-                      small
-                      style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                      icon="home" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                      onPress={() => openMap(item.address)}
-                    >
-                      Address
-                    </Button>
-                    <Button
-                      small
-                      style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                      icon="mobile1" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                      onPress={() => openTel(item.tel)}
-                    >
-                      Mobile
-                    </Button>
-                  </Block>  
-                </Block>
-            </Block>
-            <Block flex style={styles.productDescription}>
-                    <ViewMoreText
-                      numberOfLines={2}
-                      renderViewMore={renderViewMore}
-                      renderViewLess={renderViewLess}
-                    >
-                      <Text size={14} style={styles.productTitle} muted style={{margin: 3, textAlign: "justify"}}>
-                        {item.description}
-                      </Text>
-                    </ViewMoreText>
-            </Block>
-        </Block>
-      </Block>
-    );
-};
-
-renderEmpty = () => {
-    return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The cart is empty</Text>;
-}
-
-function Organisations() {
-
-    const [organisations, setOrganisations] = useState([])
-
-    let data = [
-        {
-            id: 1,
-            name: "Municipalité De Tunis",
-            description: "L'Association de la sauvegarde de la médina, l'Agence municipale de gestion et l'Agence municipale des services environnementaux sont trois établissements municipaux.",
-            address: "Avenue 2 Mars 1934 1008 - la Kasbah Tunis",
-            tel: "71571198",
-            email: "Webmaster@commune-tunis.gov.tn",
-            site: "http://www.commune-tunis.gov.tn",
-            date_creation: "10/05/2022",
-            category: "Municipal Affairs",
-            logo: `${Image.logoMunicipalite}`
-        },
-        {
-          id: 2,
-          name: "Caisse Nationale de Sécurité Sociale",
-          description: "La CNSS a été instituée en vertu de  la loi n°60-30 du 14 décembre 1960 .La CNSS est un établissement public doté de la personnalité civile et de l'autonomie financière et rattaché au Ministère des Affaires Sociales.",
-          address: "49, avenue Taïeb M'hiri. 1002 Tunis",
-          tel: "71796744",
-          email: "cnss.dg@cnss.nat.tn",
-          site: "https://www.cnss.tn/fr/",
-          date_creation: "10/05/2022",
-          category: "National Security",
-          logo: `${Image.logoCNSS}`
-        }
-    ]
-
-
-    useEffect(() => {
-        setOrganisations(data)
-        console.log("Organisations : ",organisations)
-    }, [])
 
     return (
       <Block flex center style={styles.cart}>
         <FlatList
-          data={organisations}
-          renderItem={renderProduct}
-          showsVerticalScrollIndicator={false}
-          keyExtractor={(item, index) => `${index}-${item.title}`}
-          ListEmptyComponent={renderEmpty}
+            data={organisations}
+            renderItem={({item}) => (
+              <Block>
+                <Block card shadow style={styles.product}>
+                    <Block flex row>
+                        <TouchableWithoutFeedback
+                          onPress={() => navigation.navigate("Credentials", { org : item})}
+                        > 
+                        <Block style={styles.imageHorizontal}>
+                            <Image
+                            source={{uri: `${environment.SERVER_API_URL}/image/` + item.logo}}
+                            style={styles.imageStyle }
+                            resizeMode="contain"
+                            />
+                        </Block>
+                        </TouchableWithoutFeedback>
+                        <Block flex style={styles.productDescription}>
+
+                          <Block
+                            middle
+                            row
+                            space="evenly"
+                          >
+                          <TouchableWithoutFeedback
+                            onPress={() => navigation.navigate("Credentials", { org : item})}
+                          >
+                            <Text size={14} style={styles.productTitle} color={argonTheme.COLORS.PRIMARY}
+                            style={{fontWeight: "bold",margin: 5}}>
+                              {item.name}
+                            </Text>
+                          </TouchableWithoutFeedback>
+                          </Block>
+                          <Block
+                            middle
+                            row
+                            space="evenly"
+                          >
+                            <Button
+                              small
+                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
+                              icon="mail" iconFamily="antdesign" iconSize={13} iconColor="#fff"
+                              onPress={() => openEmail(item.email)}
+                            >
+                              Email
+                            </Button>
+                            <Button
+                              small
+                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
+                              icon="link" iconFamily="antdesign" iconSize={13} iconColor="#fff"
+                              onPress={() => openUrl(item.site)}
+                            >
+                              Website
+                            </Button>
+                          </Block>  
+                          <Block
+                            middle
+                            row
+                            space="evenly"
+                          >
+                            <Button
+                              small
+                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
+                              icon="home" iconFamily="antdesign" iconSize={13} iconColor="#fff"
+                              onPress={() => openMap(item.address)}
+                            >
+                              Address
+                            </Button>
+                            <Button
+                              small
+                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
+                              icon="mobile1" iconFamily="antdesign" iconSize={13} iconColor="#fff"
+                              onPress={() => openTel(item.tel)}
+                            >
+                              Mobile
+                            </Button>
+                          </Block>  
+                        </Block>
+                    </Block>
+                    <Block flex style={styles.productDescription}>
+                            <ViewMoreText
+                              numberOfLines={2}
+                              renderViewMore={renderViewMore}
+                              renderViewLess={renderViewLess}
+                            >
+                              <Text size={14} style={styles.productTitle} style={{color:argonTheme.COLORS.BLACK,margin: 3, textAlign: "justify"}}>
+                                {item.description}
+                              </Text>
+                            </ViewMoreText>
+                    </Block>
+                </Block>
+              </Block>
+            )}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => `${index}-${item.title}`}
+            ListEmptyComponent={renderEmpty}
         />
       </Block>
   );
-}
+} 
 
 const styles = StyleSheet.create({
   cart: {
@@ -315,6 +298,15 @@ const styles = StyleSheet.create({
     },
     shadowRadius: theme.SIZES.BASE / 4,
     shadowOpacity: 1
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  horizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
   }
 });
 
