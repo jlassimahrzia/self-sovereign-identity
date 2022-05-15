@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from "react";
 import { StyleSheet, Dimensions, FlatList, Modal } from "react-native";
 import { Block, Text,theme ,Button, view} from "galio-framework";
 import { Card } from "../components";
@@ -6,7 +7,9 @@ import { Icon } from "../components";
 import { argonTheme } from "../constants";
 import { Feather, Ionicons } from '@expo/vector-icons'; 
 import { AntDesign } from '@expo/vector-icons';
-import { useState } from "react";
+import IssuerService from "../services/IssuerService";
+import Toast from 'react-native-toast-message';
+import SqliteService from "../services/SqliteService"
 const { width } = Dimensions.get("screen");
 
 renderEmpty = () => {
@@ -15,26 +18,88 @@ renderEmpty = () => {
 
 function OrgCredentials({ route, navigation }) {
     const { org } = route.params;
-    const credentials = [
-        {
-            id: 1,
-            name:  "PersonalId Credentials"
-        },
-        {
-            id: 2,
-            name:  "PersonalId Credentials"
-        },
-        {
-            id: 3,
-            name:  "PersonalId Credentials"
-        },
-    ]
+    const db = SqliteService.openDatabase()
     const [modalVisible, setModalVisible] = useState(false);
+    const [credentials, setCredentials] = useState([]);
+    const [schema, setSchema] = useState({});
+    const [did, setDid] = useState(null)
+    const [credential, setCredential] = useState({})
 
-    const toggleModal = () => {
-      setModalVisible(!modalVisible);
+    const getIdentity = async () => {
+        await db.transaction((tx) => {
+          tx.executeSql(
+            `select * from identity`,
+            [],(transaction, resultSet) => { 
+              if(resultSet.rows.length != 0){
+                setDid(resultSet.rows._array[0].did)
+                }
+            },
+            (transaction, error) => console.log(error)
+          );
+        });
+    }
+
+    const retrieveCredentialsList = async () => {
+        let data = await IssuerService.getSchemasList(org.did)
+        let finalRes = [];
+        data.forEach((schemaRes, id) => {
+            let name = schemaRes[0];
+            let path = schemaRes[1];
+            let result = {
+                id,
+                name,
+                path
+            }
+            finalRes.push(result);
+        });
+        return finalRes;
+    }
+
+    const openModal = async (item) => {
+        setCredential(item)
+        let data = await IssuerService.resolveSchema(org.did,item.name)
+        let properties = Object.entries(data.properties.credentialSubject.properties);
+        let finaleSchema = {
+            title : data.title,
+            description : data.description,
+            properties : properties
+        }
+        setSchema(finaleSchema)
+        setModalVisible(true)
     };
 
+    const closeModal = () => {
+        setModalVisible(false)
+        setSchema({})
+        setCredential({})
+    };
+
+    const sendRequest = async () => {
+        let id = await IssuerService.sendVcRequest(did , org.did, credential.name)
+        if(id){
+            Toast.show({
+                type: 'success',
+                text1: 'Info',
+                text2: 'Your request is being processed'
+            });
+        }
+        else {
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to send Credential Request'
+            });
+        }
+        closeModal()
+    }
+
+    useEffect(() => {
+        retrieveCredentialsList().then((res) => {
+            setCredentials(res);
+        });
+        getIdentity()
+    }, [])
+    
     return(
         <>
        <Block flex center style={styles.cart}>
@@ -56,7 +121,7 @@ function OrgCredentials({ route, navigation }) {
                             <Block style={{width: width*0.25}}>
                                 <Button onlyIcon icon="search1" iconFamily="antdesign" iconSize={15} 
                                 color={argonTheme.COLORS.PRIMARY} iconColor="#fff" 
-                                style={{ width: 28, height: 28 }} onPress={toggleModal}>
+                                style={{ width: 28, height: 28 }} onPress={() => openModal(item)}>
                                 </Button>
                             </Block>
                         </Block>
@@ -71,10 +136,6 @@ function OrgCredentials({ route, navigation }) {
                 animationType="slide"
                 transparent={false}
                 visible={modalVisible}
-                onRequestClose={() => {
-                Alert.alert("Modal has been closed.");
-                setModalVisible(!modalVisible);
-                }}
             >
             <Block style={styles.centeredView}>
                 <Block style={styles.modalView}>
@@ -82,7 +143,7 @@ function OrgCredentials({ route, navigation }) {
                     <Block style={styles.card}>
                         <Block flexDirection="row-reverse" style={{margin: 3}}>
                             <AntDesign name="closesquareo" size={24} color={argonTheme.COLORS.PRIMARY} 
-                            onPress={() => setModalVisible(!modalVisible)}/>
+                            onPress={closeModal}/>
                         </Block>
                         <Block style={styles.cardHeader}>
                             <Text
@@ -90,53 +151,39 @@ function OrgCredentials({ route, navigation }) {
                             style={{ fontFamily: "open-sans-bold" }}
                             color={argonTheme.COLORS.TEXT}
                             >
-                            PersonalId Credentials
+                                {schema.title}
                             </Text>
-                        </Block>
-                        <Block column style={{ paddingRight: 3, paddingLeft: 12, margin: 5 }}>
-                            <Block row space="between" style={{ height: 18 }}>
-                                <Text color={argonTheme.COLORS.MUTED1} style={{ fontFamily: 'open-sans-bold' }} size={14}>
-                                 familyName :
-                                </Text>
-                            </Block>
                             <Text
                                 color={argonTheme.COLORS.BLACK}
                                 size={14}
                                 style={{ fontFamily: "open-sans-regular"}}
                             >
-                                Defines current family name(s) of the credential subject
+                                {schema.description}
                             </Text>
                         </Block>
-                        <Block column style={{ paddingRight: 3, paddingLeft: 12, margin: 5  }}>
-                            <Block row space="between" style={{ height: 18 }}>
-                                <Text color={argonTheme.COLORS.MUTED1} style={{ fontFamily: 'open-sans-bold' }} size={14}>
-                                firstName :
-                                </Text>
-                            </Block>
-                            <Text
-                                color={argonTheme.COLORS.BLACK}
-                                size={14}
-                                style={{ fontFamily: "open-sans-regular"}}
-                            >
-                                Defines current first name(s) of the credential subject
-                            </Text>
-                        </Block>
-                        <Block column style={{ paddingRight: 3, paddingLeft: 12, margin: 5  }}>
-                            <Block row space="between" style={{ height: 18 }}>
-                                <Text color={argonTheme.COLORS.MUTED1} style={{ fontFamily: 'open-sans-bold' }} size={14}>
-                                dateOfBirth :
-                                </Text>
-                            </Block>
-                            <Text
-                                color={argonTheme.COLORS.BLACK}
-                                size={14}
-                                style={{ fontFamily: "open-sans-regular"}}
-                            >
-                               Defines date of birth of the credential subject
-                            </Text>
-                        </Block>
+                        {  schema.properties ? 
+                            (schema.properties.map((item, index) => {
+                                return ( 
+                                <Block column style={{ paddingRight: 3, paddingLeft: 12, margin: 5 }}
+                                key={index}>
+                                    <Block row space="between" style={{ height: 18 }}>
+                                        <Text color={argonTheme.COLORS.MUTED1} style={{ fontFamily: 'open-sans-bold' }} size={14}>
+                                            {item[0]}
+                                        </Text>
+                                    </Block>
+                                    <Text
+                                        color={argonTheme.COLORS.BLACK}
+                                        size={14}
+                                        style={{ fontFamily: "open-sans-regular"}}
+                                    >
+                                        { item[1].description ?  item[1].description : null } 
+                                    </Text>
+                                </Block>
+                            );}))
+                        : null}
+                        
                         <Block style={{ margin: 5  }}>
-                        <Button style={styles.button}>
+                        <Button style={styles.button} onPress={sendRequest}>
                             <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
                                 Send Request
                             </Text>

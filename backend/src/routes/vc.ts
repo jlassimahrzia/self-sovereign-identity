@@ -18,13 +18,14 @@ import { JwtCredentialPayload, createVerifiableCredentialJwt } from 'did-jwt-vc'
 // Request vc from issuer
 
 const sendVCRequest = (data: any): any => {
-  let did = data.did
-  let state = data.state
+  let did_holder = data.did_holder
+  let did_issuer = data.did_issuer
+  let vc_name = data.vc_name
 
-  let query = "INSERT INTO vcrequest (did) VALUES (?);"
+  let query = "INSERT INTO vcrequest (did_holder, did_issuer, vc_name) VALUES (?,?,?);"
 
   return new Promise((resolve, reject) => {
-      db.query(query, [did,state], (err: any, res: any) => {
+      db.query(query, [did_holder, did_issuer, vc_name], (err: any, res: any) => {
           if (err) {
               console.log("error: ", err);
               reject(err);
@@ -97,6 +98,7 @@ const updateStatus = (data: any): any => {
   }
   
   
+
   const updateStatusDeclined = (data: any): any => {
       let ID = data
       console.log(ID)
@@ -155,11 +157,11 @@ const updateStatus = (data: any): any => {
 
 router.post('/api/vcRequest', async (req: any, res: any) => {
   let _request = {
-      did: req.body.did
-    
+    did_holder: req.body.did_holder,
+    did_issuer: req.body.did_issuer,
+    vc_name: req.body.vc_name
   }
   const id = await sendVCRequest(_request)
-  console.log(id)
   res.json({ id })
 })
 
