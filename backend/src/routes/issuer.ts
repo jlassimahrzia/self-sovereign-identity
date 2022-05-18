@@ -7,14 +7,27 @@ import { Wallet } from '@ethersproject/wallet'
 import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
 var nodemailer = require("nodemailer");
-var QRCode = require('qrcode')
-const multer = require('multer')
-const path = require('path')
+// var QRCode = require('qrcode')
+// const multer = require('multer')
+// const path = require('path')
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken");
 var fileUpload = require('express-fileupload')
+
 let base64Img = require('base64-img');
+
+// IPFS
+const ipfsClient = require('ipfs-http-client')
+const ipfs = ipfsClient.create('http://127.0.0.1:5001')
+
+// Contract
+const Web3 = require('web3')
+const web3 = new Web3('http://127.0.0.1:7545')  
+let contract = new web3.eth.Contract(config.ABI_ISSUER_REGISTRY_CONTRACT, config.ISSUER_REGISTRY_CONTRACT_ADDRESS)
+
+// MySQL
+const db = require("../config/db.config.js");
 
 app.use(fileUpload());
 app.use(cors());
@@ -22,18 +35,18 @@ app.use(express.static("./public"))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// var storage = multer.diskStorage({
-//     destination: (req: any, file: any, callBack: (arg0: any, arg1: string) => void) => {
-//         callBack(null, './public/images/')     // './public/images/' directory name where save the file
-//     },
-//     filename: (req: any, file: { fieldname: string; originalname: any; }, callBack: (arg0: any, arg1: string) => void) => {
-//         callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
-//     }
-// })
+/* var storage = multer.diskStorage({
+    destination: (req: any, file: any, callBack: (arg0: any, arg1: string) => void) => {
+        callBack(null, './public/images/')     // './public/images/' directory name where save the file
+    },
+    filename: (req: any, file: { fieldname: string; originalname: any; }, callBack: (arg0: any, arg1: string) => void) => {
+        callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    }
+}) */
 
-// var upload = multer({
-//     storage: storage
-// });
+/* var upload = multer({
+    storage: storage
+}); */
 
 // router.post("/api/upload", upload.single('image'), (req:any, res: any) => {
 //     if (!req.file) {
@@ -49,18 +62,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //     }
 // });
 
-
-// IPFS
-const ipfsClient = require('ipfs-http-client')
-const ipfs = ipfsClient.create('http://127.0.0.1:5001')
-
-// Contract
-const Web3 = require('web3')
-const web3 = new Web3('http://127.0.0.1:7545')  
-let contract = new web3.eth.Contract(config.ABI_ISSUER_REGISTRY_CONTRACT, config.ISSUER_REGISTRY_CONTRACT_ADDRESS)
-
-// MySQL
-const db = require("../config/db.config.js");
 
 
 // Types
@@ -114,22 +115,22 @@ const sendIssuerRequest = (data : any) : any => {
     });
 }
 
-   
+
 /**
  *  3- Get Issuer list requests
  */
 
- const getIssuerRequestList = () : any => {
+const getIssuerRequestList = () : any => {
     let query = "SELECT * FROM issuerrequest"
     return new Promise((resolve, reject) => {
         db.query( query, (err: any, res: any) => {
             if (err) {
                console.log("error: ", err);
                reject(err);
-            }}); 
-        }); 
-    }
-
+            }
+        })
+    })
+}
 
 
 const getIssuersList = () : any => {
@@ -233,11 +234,6 @@ const addIssuer = ( did: string, name: any, category: any, domain:any, email:any
     });
 }
 
-
-
-
-
-
 /**
  *  Routes
  */
@@ -250,7 +246,6 @@ const addIssuer = ( did: string, name: any, category: any, domain:any, email:any
 
 router.post('/api/IssuerRequest', async (req : any , res : any) => {
     
-
     let _request = {
         name: req.body.name,
         category: req.body.category,
@@ -263,10 +258,6 @@ router.post('/api/IssuerRequest', async (req : any , res : any) => {
         publicKey: req.body.publicKey,
         logo: req.body.logo, 
         file: req.body.file
-        
-    
-        
-
     }
     const id = await sendIssuerRequest(_request)
     console.log(id)
@@ -278,8 +269,6 @@ router.get('/api/IssuerRequestList', async (req : any , res : any) => {
     res.json({list})
 })
 
-
-
 // Ethereum tx registring ipfs hash 
 router.post('/api/mappingDidToHash', async (req : any , res : any) => {
     let _cid = req.body.cid
@@ -289,8 +278,6 @@ router.post('/api/mappingDidToHash', async (req : any , res : any) => {
         gas:3000000});
     res.json({result}) 
 }) 
-
-
 
 // Resolve DID 
 router.post('/api/resolve', async (req : any , res : any) => {
@@ -302,9 +289,6 @@ router.post('/api/resolve', async (req : any , res : any) => {
     
     res.json({did,ipfshash,ddo}) 
 }) 
-
-
-
 
 router.post('/api/createIssuer',async (req : any , res : any) => {
     let publickey = req.body.publickey
@@ -345,20 +329,15 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
        {
          expiresIn: "1h",
        }
-     )
-
+    )
 
     emailSenderFunction(email, "http://localhost:3000/password/"+token,result,identifier);
-
     
     // 6 - add a new issuer to issuers list 
     const issuer = addIssuer(identifier,name,category,domain,email,date,website,phone)
   
     res.json({ identifier, cid, status })
 })
-
-
-
 
 router.post('/api/createIssuerFailed', async (req: any, res: any) => {
     let email = req.body.email
@@ -367,7 +346,6 @@ router.post('/api/createIssuerFailed', async (req: any, res: any) => {
     const status = updateStatusDeclined(id)
     res.json({ status })
 })
-
 
 // Email function when success 
 function emailSenderFunction(target: String, message: String,numero: String,identifier:String) {
@@ -398,7 +376,6 @@ function emailSenderFunction(target: String, message: String,numero: String,iden
     });
 }
 
-
 // Email function when failure
 function emailSenderFailure(target: String) {
     const transporter = nodemailer.createTransport({
@@ -418,7 +395,6 @@ function emailSenderFailure(target: String) {
         text: "DID Issuance Request Declined",
         html:
             "<h4>Your request has been declined due to integrity and security reasons. </h4>  "
-
         ,
     };
     transporter.sendMail(mailOptions, function (error: String) {
@@ -427,10 +403,6 @@ function emailSenderFailure(target: String) {
         }
     });
 }
-
-
-
-
 
 const getImage = (path: String) : any => {
     let image = `public/${path}`
@@ -456,7 +428,5 @@ router.get('/api/image/:path', async (req : any , res : any) => {
     });
     res.end(img);
 })
-
-
 
 module.exports = router;

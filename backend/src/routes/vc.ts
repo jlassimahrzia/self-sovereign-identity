@@ -39,12 +39,10 @@ const sendVCRequest = (data: any): any => {
 
 //Get VC creation requests
 
-const getVCRequestList = (data:any): any => {
-    let didIssuer = data
-   
-  let query = "SELECT * FROM vcrequest WHERE did_issuer= '" + didIssuer+ "'"
+const getVCRequestList = (): any => {
+  let query = "SELECT * FROM vcrequest"
   return new Promise((resolve, reject) => {
-      db.query(query,[didIssuer], (err: any, res: any) => {
+      db.query(query, (err: any, res: any) => {
           if (err) {
               console.log("error: ", err);
               reject(err);
@@ -167,9 +165,8 @@ router.post('/api/vcRequest', async (req: any, res: any) => {
   res.json({ id })
 })
 
-router.post('/api/vcRequestList', async (req: any, res: any) => {
-  let didIssuer = req.body.didIssuer
-  const list = await getVCRequestList(didIssuer)
+router.get('/api/vcRequestList', async (req: any, res: any) => {
+  const list = await getVCRequestList()
   res.json({ list })
 })
 

@@ -1,9 +1,8 @@
 import React from 'react'
-import jwt from 'jwt-decode' 
 import {
     Button,
     FormGroup,
- 
+    Form,
     Input,
      Label
   } from "reactstrap";
@@ -17,16 +16,9 @@ import {
   } from "reactstrap";
   import PageHeader from "components/Headers/PageHeader.js"; 
   import VCService from 'services/VCService';
-  import Form from "@rjsf/bootstrap-4";
-  import VcSchemaService from 'services/VcSchemaService';
-
 
 function VC() {
-  const[vcModal, setVcModal] = useState(false)
-  const[item, setItem] = useState({})
-  const [additionalData, setAdditionalData] = useState("")
-
-
+    
     const [did, setDid] = useState("")
     const [id, setId] = useState("")
 
@@ -36,53 +28,19 @@ function VC() {
     const [privateKey, setPrivateKey] = useState("")
     const [signModal, setSignModal] = useState(false)
     const [status, setStatus] = useState(0);
-    
-    
+
+
     const [vcRequestsList, setvcRequestsList] = useState([]);
     const [didModal, setDidModal] = useState(false);
-
-    const [schema, setSchema] = useState({});
-    const [schemasList, setSchemasList] = useState([]);
-
-    const retrieveSchemasList = async () => {
-        let data = await VcSchemaService.getSchemas()
-        let finalRes = [];
-        data.forEach(schemaRes => {
-            let name = schemaRes[0];
-            let path = schemaRes[1];
-            let result = {
-              name,
-                path
-            }
-            finalRes.push(result);
-        });
-        return finalRes;
-    }
-   
-       
-   
-    
     const retrieveVcRequestsList = async () => {
-      
-   
-      let didIssuer = (jwt(sessionStorage.getItem("token")) ).res[0].did
-     
-        let data = await VCService.getVCRequestList(didIssuer);
+        let data = await VCService.getVCRequestList();
     
         setvcRequestsList([...data])
-      }  
+      }
     
       useEffect(() => {
-     
-      
-     
         retrieveVcRequestsList();
-
-        retrieveSchemasList().then((res) => {
-          setSchemasList(res);
-         
-        });
-      }, [schemasList])
+      }, [])
 
       useEffect(() => {
       }, [vcRequestsList])
@@ -132,24 +90,6 @@ function VC() {
     createVCFailed(item.id)
   }
 
-  const openVcModal = async (item) => {
-    setItem(item)
-    setVcModal(true)
-  
-      let schema = await VcSchemaService.resolveSchema(item.vc_name)
-      setSchema(schema.vcSchema.properties.credentialSubject)
-      console.log("schema",schema.vcSchema.properties.credentialSubject)
-      console.log("item",item) 
-  }
-
-  const ClosevcModal = () => {
-    setVcModal(false)
-  }
-
-
- 
-  
-
   return (
     <div>
     <PageHeader />
@@ -190,27 +130,25 @@ function VC() {
               </thead>
               <tbody>{
                 vcRequestsList.map((item, index) => {
-                 
-                  
                   return  item.state === parseInt(status) ? 
                   <tr key={index} >
                     <td>{index + 1}</td>
-                    <td>{item.did_holder}</td>
+                    <td>{item.did}</td>
                     <td>{item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"}</td>
-                    <td>{item.vc_name}</td>
+                    <td>PersonalIDCredential</td>
                     <td>
                     <Button style={{background:"#d7363c",color:"white"}} onClick={() => OpenDidModal(item)}
                     disabled={item.state !== 0 ? true : false}>Create VC</Button>
                     <Button onClick={() => SendFailed(item)} id={item.id + "a"} 
                     disabled={item.state !== 0 ? true : false}>Decline Request</Button>
                     </td>
-                  </tr>: ""}) 
+                  </tr>: ""})
                 }</tbody>
             </Table>
           </Card>
         </div>
 
-        <Modal className="modal-dialog-centered" size='lg' isOpen={didModal} toggle={CloseDidModal} >
+          <Modal className="modal-dialog-centered" size='lg' isOpen={didModal} toggle={CloseDidModal} >
             <div className="modal-header">
               <h4 className="modal-title" id="modal-title-default">
                 Fill in the VC informations
@@ -253,15 +191,47 @@ function VC() {
                      onChange={(e) => setDateOfBirth(e.target.value)}
                   />
                 </FormGroup>
+          
+    
+            <Button className="my-4" color="primary" type="button" onClick={OpenSignModal} >
+               Sign
+              </Button>
+              <Modal className="modal-dialog-centered" size='xs' isOpen={signModal} toggle={CloseDidModal} >
+              <div className="modal-header">
+                <h4 className="modal-title" id="modal-title-default">
+                  Fill in your signature informations to confirm
+                </h4>
+                <button
+                aria-label="Close"
+                className="close"
+                data-dismiss="modal"
+                type="button"
+                onClick={ReturnDidModal}
+              >
+                <span aria-hidden={true}>×</span>
+              </button>
+                </div>
+                <div className="modal-body">
+                <div> 
+                <FormGroup>
+                  <Label>
+                      Private Key
+                  </Label>
+                  <Input
+                  onChange={(e) => setPrivateKey(e.target.value)}
+                  />
+                </FormGroup>
                 <Button className="my-4" color="primary" type="button" onClick={handleVC} >
                Confirm
               </Button>
+              <Button onClick={ReturnDidModal}>Return</Button>
+              <Button onClick={CloseDidModal}>Cancel</Button>
+                </div></div>
+                </Modal>
                 </Form>
-                </div>
               </div>
-            </Modal> 
-
-      
+            </div>
+          </Modal> 
 
       </Row>
 

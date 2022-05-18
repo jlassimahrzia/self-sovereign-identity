@@ -34,12 +34,10 @@ import {
   Media,
 } from "reactstrap";
 import { useHistory } from 'react-router-dom'; 
-import jwt from 'jwt-decode' 
 
 
 
 const AdminNavbar = (props) => {
-  const token = jwt(sessionStorage.getItem("token")) 
   const history = useHistory();
   const logout = ()=>{ 
       sessionStorage.removeItem("token")
@@ -82,7 +80,7 @@ const AdminNavbar = (props) => {
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                    {token.res[0].name}
+                      Jessica Jones
                     </span>
                   </Media>
                 </Media>

@@ -2,10 +2,9 @@ import axios from 'axios'
 
 class VCService {
 
-    async getVCRequestList(didIssuer) {
-       
+    async getVCRequestList() {
         let tab = []
-        await axios.post("http://localhost:8000/api/vcRequestList",{didIssuer})
+        await axios.get("http://localhost:8000/api/vcRequestList")
             .then(res => {
                 tab = res.data.list
             })
