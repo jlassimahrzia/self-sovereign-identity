@@ -39,10 +39,12 @@ const sendVCRequest = (data: any): any => {
 
 //Get VC creation requests
 
-const getVCRequestList = (): any => {
-  let query = "SELECT * FROM vcrequest"
+const getVCRequestList = (data:any): any => {
+    let didIssuer = data
+   
+  let query = "SELECT * FROM vcrequest WHERE did_issuer= '" + didIssuer+ "'"
   return new Promise((resolve, reject) => {
-      db.query(query, (err: any, res: any) => {
+      db.query(query,[didIssuer], (err: any, res: any) => {
           if (err) {
               console.log("error: ", err);
               reject(err);
@@ -165,8 +167,9 @@ router.post('/api/vcRequest', async (req: any, res: any) => {
   res.json({ id })
 })
 
-router.get('/api/vcRequestList', async (req: any, res: any) => {
-  const list = await getVCRequestList()
+router.post('/api/vcRequestList', async (req: any, res: any) => {
+  let didIssuer = req.body.didIssuer
+  const list = await getVCRequestList(didIssuer)
   res.json({ list })
 })
 
@@ -186,6 +189,7 @@ router.post('/api/createVC', (req: any, res: any) => {
     let familyName = req.body.familyName
     let firstName = req.body.firstName
     let dateOfBirth = req.body.dateOfBirth 
+    let privateKey = req.body.privateKey
     
     let vcPayload: JwtCredentialPayload = {
         sub: did,

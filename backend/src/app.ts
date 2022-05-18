@@ -14,6 +14,9 @@ app.use(require('./routes/vc.schema'));
 app.use(require('./routes/vc'));
 app.use(require('./routes/issuer'));
 
+app.use(require('./routes/auth'));
+
+
 app.get('/', (req : any , res : any ) => {
     console.log("Hello World")
     res.send('Well done!');
