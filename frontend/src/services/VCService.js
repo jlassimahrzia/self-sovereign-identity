@@ -14,9 +14,9 @@ class VCService {
         return tab;
     }
 
-    async createVC(id,did,familyName, firstName, dateOfBirth,privateKey) {
+    async createVC(id,did,familyName, firstName, dateOfBirth) {
         let x
-        await axios.post("http://localhost:8000/api/createVC", {id,did,familyName, firstName, dateOfBirth,privateKey })
+        await axios.post("http://localhost:8000/api/createVC", {id,did,familyName, firstName, dateOfBirth })
             .then(res => {
                 console.log(res.data)
                 x = res.data.x

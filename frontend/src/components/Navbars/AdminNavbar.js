@@ -33,16 +33,9 @@ import {
   Container,
   Media,
 } from "reactstrap";
-import { useHistory } from 'react-router-dom'; 
-
-
 
 const AdminNavbar = (props) => {
-  const history = useHistory();
-  const logout = ()=>{ 
-      sessionStorage.removeItem("token")
-      history.push('/login')
-  }
+  
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -106,18 +99,10 @@ const AdminNavbar = (props) => {
                   <span>Support</span>
                 </DropdownItem> */}
                 <DropdownItem divider />
-
-                <DropdownItem >
-                <i className="ni ni-single-02" />
-                <span>Profile</span>
-              </DropdownItem>
-
-                <DropdownItem  onClick={logout}>
+                <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </DropdownItem>
-               
-              
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>

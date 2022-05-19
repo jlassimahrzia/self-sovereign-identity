@@ -20,15 +20,8 @@ import CreateIdentity from "views/issuer/CreateIdentity.js";
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 import CreateCredential from "views/issuer/CreateCredential";
-import CreateIssuer from "views/issuer/CreateIssuer";
-
-
-
-
-
 
 var routes = [
- 
   /* , */
   {
     path: "/index",
@@ -44,32 +37,25 @@ var routes = [
     component: CreateIdentity,
     layout: "/issuer",
   },
-  // {
-  //   path: "/vcSchema",
-  //   name: "Verifiable Credential Schema",
-  //   icon: "ni ni-credit-card text-black",
-  //   component: VcSchema,
-  //   layout: "/issuer",
-  // },
-  // {
-  //   path: "/ceateVc",
-  //   name: "Create Verifiable Credential",
-  //   icon: "ni ni-fat-add text-black",
-  //   component: CreateCredential,
-  //   layout: "/issuer",
-  // },
-  // {
-  //   path: "/vc",
-  //   name: "Verifiable Credential Request",
-  //   icon: "ni ni-check-bold text-black",
-  //   component: VC,
-  //   layout: "/issuer",
-  // }, 
   {
-    path: "/createIssuer",
-    name: "Issuer DID Request",
-    icon: "ni ni-air-baloon text-black",
-    component: CreateIssuer,
+    path: "/vcSchema",
+    name: "Verifiable Credential Schema",
+    icon: "ni ni-credit-card text-black",
+    component: VcSchema,
+    layout: "/issuer",
+  },
+  {
+    path: "/ceateVc",
+    name: "Create Verifiable Credential",
+    icon: "ni ni-fat-add text-black",
+    component: CreateCredential,
+    layout: "/issuer",
+  },
+  {
+    path: "/vc",
+    name: "Verifiable Credential Request",
+    icon: "ni ni-check-bold text-black",
+    component: VC,
     layout: "/issuer",
   }
   
@@ -117,4 +103,3 @@ var routes = [
   }, */
 ];
 export default routes;
-

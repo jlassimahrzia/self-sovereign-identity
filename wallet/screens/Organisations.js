@@ -125,7 +125,7 @@ function Organisations({navigation}) {
                               small
                               style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
                               icon="link" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openUrl(item.site)}
+                              onPress={() => openUrl(item.website)}
                             >
                               Website
                             </Button>
@@ -139,7 +139,7 @@ function Organisations({navigation}) {
                               small
                               style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
                               icon="home" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openMap(item.address)}
+                              onPress={() => openMap(item.location)}
                             >
                               Address
                             </Button>
@@ -147,7 +147,7 @@ function Organisations({navigation}) {
                               small
                               style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
                               icon="mobile1" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openTel(item.tel)}
+                              onPress={() => openTel(item.phone)}
                             >
                               Mobile
                             </Button>

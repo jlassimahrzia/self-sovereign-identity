@@ -4,7 +4,9 @@ import {
     FormGroup,
     Form,
     Input,
-     Label
+    InputGroupAddon,
+    InputGroupText,
+    InputGroup, Label
   } from "reactstrap";
 import {useState, useEffect} from 'react'
 //import Sidebar from "components/Sidebar/Sidebar.js";
@@ -25,8 +27,7 @@ function VC() {
     const [firstName, setFirstname] = useState("")
     const [familyName, setFamilyname] = useState("")
     const [dateOfBirth, setDateOfBirth] = useState("")
-    const [privateKey, setPrivateKey] = useState("")
-    const [signModal, setSignModal] = useState(false)
+
     const [status, setStatus] = useState(0);
 
 
@@ -46,7 +47,7 @@ function VC() {
       }, [vcRequestsList])
     const handleVC = async () => {
         try {
-            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth,privateKey)
+            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth)
             
             console.log(data)
             CloseDidModal()
@@ -55,14 +56,6 @@ function VC() {
           } catch (err) {
             console.log("error");
           }   
-    }
-
-    const OpenSignModal = () =>{ 
-      setSignModal(true)
-    }
-   
-    const ReturnDidModal=()=>{ 
-      setSignModal(false)
     }
 
       const OpenDidModal = (item) => {
@@ -76,7 +69,6 @@ function VC() {
 
   const CloseDidModal = () => {
     setDidModal(false)
-    setSignModal(false)
   }
 
   const createVCFailed= async (id) => {
@@ -191,43 +183,60 @@ function VC() {
                      onChange={(e) => setDateOfBirth(e.target.value)}
                   />
                 </FormGroup>
-          
+            {/* <FormGroup className="mb-3">
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  DID
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input
+                className="input"
+                value={did}
+                readOnly
+                />
+            </InputGroup>
+          </FormGroup> */}
+  
+         {/*  <FormGroup>
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                familyName
+              </InputGroupAddon>
+              <Input
+                className="input"
+                onChange={(e) => setFamilyname(e.target.value)}
+              />
+            </InputGroup>
+          </FormGroup>
+  
+          <FormGroup>
+            <InputGroup className="input-group-alternative">
+              <InputGroupAddon addonType="prepend">
+                firstName
+              </InputGroupAddon>
+              <Input
+                className="input"
+                onChange={(e) => setFirstname(e.target.value)}
+              />
+            </InputGroup>
+          </FormGroup>
+  
+          <FormGroup>
+          <InputGroup className="input-group-alternative">
+            <InputGroupAddon addonType="prepend">
+                dateOfBirth
+            </InputGroupAddon>
+            <Input
+              className="input"
+              onChange={(e) => setDateOfBirth(e.target.value)}
+            />
+          </InputGroup>
+        </FormGroup> */}
     
-            <Button className="my-4" color="primary" type="button" onClick={OpenSignModal} >
-               Sign
+            <Button className="my-4" color="primary" type="button" onClick={handleVC} >
+                Submit
               </Button>
-              <Modal className="modal-dialog-centered" size='xs' isOpen={signModal} toggle={CloseDidModal} >
-              <div className="modal-header">
-                <h4 className="modal-title" id="modal-title-default">
-                  Fill in your signature informations to confirm
-                </h4>
-                <button
-                aria-label="Close"
-                className="close"
-                data-dismiss="modal"
-                type="button"
-                onClick={ReturnDidModal}
-              >
-                <span aria-hidden={true}>×</span>
-              </button>
-                </div>
-                <div className="modal-body">
-                <div> 
-                <FormGroup>
-                  <Label>
-                      Private Key
-                  </Label>
-                  <Input
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                  />
-                </FormGroup>
-                <Button className="my-4" color="primary" type="button" onClick={handleVC} >
-               Confirm
-              </Button>
-              <Button onClick={ReturnDidModal}>Return</Button>
-              <Button onClick={CloseDidModal}>Cancel</Button>
-                </div></div>
-                </Modal>
                 </Form>
               </div>
             </div>

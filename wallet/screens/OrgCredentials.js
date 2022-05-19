@@ -102,7 +102,7 @@ function OrgCredentials({ route, navigation }) {
     
     return(
         <>
-       <Block flex center style={styles.cart}>
+        <Block flex center style={styles.cart}>
         <FlatList
             data={credentials}
             renderItem={({item}) => (
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
         elevation: 5
     },
     card: {
-        width: '100%',
+        width: 280,
         backgroundColor: argonTheme.COLORS.WHITE,
     },
     cardHeader: {

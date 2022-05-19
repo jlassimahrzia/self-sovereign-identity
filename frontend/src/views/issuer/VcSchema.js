@@ -50,7 +50,7 @@ return (
               <FormBuilder
                 schema={schema}
                 uischema={uischema}
-                onChange={(newSchema, newUiSchema) => {
+                onChange={(newSchema: string, newUiSchema: string) => {
                   setSchema(newSchema)
                   setUiSchema(newUiSchema)
                 }}

@@ -35,13 +35,14 @@ function CustomDrawerContent({
   useEffect(() => {
     getIdentity()
     console.log("fom appstack", did)
-    if(did !== null){
+    setRoutes([...screens])
+    /* if(did !== null){
       setRoutes([...screens])
     }
     else {
       //setRoutes([...screens2])
       setRoutes([...screens])
-    }
+    } */
   }, []);
 
 
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 28,
     paddingBottom: theme.SIZES.BASE,
-    paddingTop: theme.SIZES.BASE * 3,
+    paddingTop: theme.SIZES.BASE * 1.5,
     justifyContent: "center",
   },
 });
