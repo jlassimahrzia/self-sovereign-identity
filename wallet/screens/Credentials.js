@@ -124,6 +124,14 @@ function Credentials() {
                                     <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>2022</Text>
                                 </Block>
                             </Block>
+                            <Block row space="between" style={styles.cardBody}>
+                                <Block>
+                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Final Grades</Text>
+                                </Block>
+                                <Block >
+                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>B+</Text>
+                                </Block>
+                            </Block>
                         </Block>
                 </Block>
             </TouchableOpacity>

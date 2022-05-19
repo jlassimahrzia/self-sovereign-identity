@@ -171,6 +171,7 @@ function CredentialsStack(props) {
           header: ({ navigation, scene }) => (
             <Header
               title="Verifiable Credentials"
+              search
               navigation={navigation}
               scene={scene}
             />
