@@ -36,7 +36,6 @@ const sendVCRequest = (data: any): any => {
 
 }
 
-
 //Get VC creation requests
 
 const getVCRequestList = (): any => {
@@ -52,7 +51,20 @@ const getVCRequestList = (): any => {
   });
 }
 
+router.post('/api/vcRequest', async (req: any, res: any) => {
+  let _request = {
+    did_holder: req.body.did_holder,
+    did_issuer: req.body.did_issuer,
+    vc_name: req.body.vc_name
+  }
+  const id = await sendVCRequest(_request)
+  res.json({ id })
+})
 
+router.get('/api/vcRequestList', async (req: any, res: any) => {
+  const list = await getVCRequestList()
+  res.json({ list })
+})
 
 //Cloud Azure Key Vault 
 /* const credential = new DefaultAzureCredential();  
@@ -78,16 +90,15 @@ let secretKey="";
 exportPrivateKey().then(function(result) {
   secretKey=result
   console.log(secretKey)
- }) */
+}) */
 
 const issuer = new EthrDID({
     identifier: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
     privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
 }) as Issuer
 
- // Update status after creating VC
+// Update status after creating VC
  
-  
 const updateStatus = (data: any): any => {
       let ID = data
       console.log(ID)
@@ -95,18 +106,16 @@ const updateStatus = (data: any): any => {
       return new Promise(() => {
           db.query(query, [ID])
       })
-  }
+}
   
-  
-
-  const updateStatusDeclined = (data: any): any => {
+const updateStatusDeclined = (data: any): any => {
       let ID = data
       console.log(ID)
       let query = "Update vcrequest SET state='2' where id =" + ID
       return new Promise(() => {
           db.query(query, [ID])
       })
-  }
+}
 
 // const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
 //     modulusLength: 550,
@@ -154,21 +163,6 @@ const updateStatus = (data: any): any => {
   
 //   // isVerified should be `true` if the signature is valid
 //   console.log("signature verified: ", isVerified);
-
-router.post('/api/vcRequest', async (req: any, res: any) => {
-  let _request = {
-    did_holder: req.body.did_holder,
-    did_issuer: req.body.did_issuer,
-    vc_name: req.body.vc_name
-  }
-  const id = await sendVCRequest(_request)
-  res.json({ id })
-})
-
-router.get('/api/vcRequestList', async (req: any, res: any) => {
-  const list = await getVCRequestList()
-  res.json({ list })
-})
 
 
 var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -287,8 +281,6 @@ async function CreateJWT( index: String,  value: String,vcPayload:any) {
         //   }
         
          }}
-    
-
  
 }
 

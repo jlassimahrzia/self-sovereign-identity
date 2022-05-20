@@ -1,6 +1,6 @@
 import React from 'react';
 import { withNavigation } from '@react-navigation/compat';
-import { TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
+import { TouchableOpacity, StyleSheet, Platform, Dimensions, Keyboard } from 'react-native';
 import { Button, Block, NavBar, Text, theme } from 'galio-framework';
 
 import Icon from './Icon';
@@ -112,9 +112,23 @@ class Header extends React.Component {
         right
         color="black"
         style={styles.search}
-        placeholder="What are you looking for?"
+        placeholder="Search"
         placeholderTextColor={'#8898AA'}
-        onFocus={() => navigation.navigate('Pro')}
+        onFocus={() => {Keyboard.dismiss(); navigation.navigate('Search');}}
+        iconContent={<Icon size={16} color={theme.COLORS.MUTED} name="search-zoom-in" family="ArgonExtra" />}
+      />
+    );
+  }
+  renderCredSearch = () => {
+    const { navigation } = this.props;
+    return (
+      <Input
+        right
+        color="black"
+        style={styles.search}
+        placeholder="Search"
+        placeholderTextColor={'#8898AA'}
+        onFocus={() => {Keyboard.dismiss(); navigation.navigate('CredSearch');}}
         iconContent={<Icon size={16} color={theme.COLORS.MUTED} name="search-zoom-in" family="ArgonExtra" />}
       />
     );
@@ -153,11 +167,12 @@ class Header extends React.Component {
     )
   }
   renderHeader = () => {
-    const { search, options, tabs } = this.props;
-    if (search || tabs || options) {
+    const { search, options, tabs, credsearch } = this.props;
+    if (search || tabs || options || credsearch) {
       return (
         <Block center>
           {search ? this.renderSearch() : null}
+          {credsearch ? this.renderCredSearch() : null}
           {options ? this.renderOptions() : null}
           {tabs ? this.renderTabs() : null}
         </Block>
@@ -167,7 +182,7 @@ class Header extends React.Component {
   render() {
     const { back, title, white, transparent, bgColor, iconColor, titleColor, navigation, ...props } = this.props;
 
-    const noShadow = ['Search', 'Categories', 'Deals', 'Pro', 'Profile'].includes(title);
+    const noShadow = ['CredSearch','Search', 'Categories', 'Deals', 'Pro', 'Profile'].includes(title);
     const headerStyles = [
       !noShadow ? styles.shadow : null,
       transparent ? { backgroundColor: 'rgba(0,0,0,0)' } : null,

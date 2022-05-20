@@ -21,8 +21,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
 import OrgCredentials from "../screens/OrgCredentials";
+import Search from "../screens/Search";
 
 import SqliteService from "../services/SqliteService"
+import CredSearch from "../components/CredSearch";
 
 const { width } = Dimensions.get("screen");
 
@@ -101,6 +103,16 @@ function OrganisationsStack(props) {
           cardStyle: { backgroundColor: "#F8F9FE" }
         }}
       />
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header title="Search" back navigation={navigation} scene={scene} />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -171,12 +183,22 @@ function CredentialsStack(props) {
           header: ({ navigation, scene }) => (
             <Header
               title="Verifiable Credentials"
-              search
+              credsearch
               navigation={navigation}
               scene={scene}
             />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="CredSearch"
+        component={CredSearch}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header title="Search" back navigation={navigation} scene={scene} />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
         }}
       />
     </Stack.Navigator>

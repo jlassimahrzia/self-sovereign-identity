@@ -93,7 +93,6 @@ function Organisations({navigation}) {
                         </Block>
                         </TouchableWithoutFeedback>
                         <Block flex style={styles.productDescription}>
-
                           <Block
                             middle
                             row
