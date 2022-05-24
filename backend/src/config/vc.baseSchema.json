@@ -155,17 +155,15 @@
                 "description": "Contains information about the verification method / proof mechanisms",
                 "type": "string"
               },
-              "jws": {
+              "proofValue": {
                 "description": "Defines the proof value in JWS format",
                 "type": "string"
               }
             },
             "required": [
               "type",
-              "proofPurpose",
               "created",
-              "verificationMethod",
-              "jws"
+              "proofValue"
             ]
         }
     },

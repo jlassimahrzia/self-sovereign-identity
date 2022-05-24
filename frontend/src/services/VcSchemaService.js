@@ -34,6 +34,7 @@ class VcSchemaService {
 
     async createVcSchema(data) {
         let did = jwt(sessionStorage.getItem("token")).res[0].did
+        console.log("did",did);
         await axios.post("http://localhost:8000/api/createCredentialSchema", {data, did}).then(res => {
             console.log("res", res.data)
         }).catch(error => {
@@ -44,6 +45,7 @@ class VcSchemaService {
     async getSchemas() {
         let tab
         let did = jwt(sessionStorage.getItem("token")).res[0].did
+        console.log("did",did);
         await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
             tab = res.data
             

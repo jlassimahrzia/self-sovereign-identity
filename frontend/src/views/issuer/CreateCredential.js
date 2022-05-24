@@ -47,7 +47,7 @@ function CreateCredential() {
     useEffect(() => {
       retrieveSchemasList().then((res) => {
         setSchemasList(res);
-        console.log("schemasList", schemasList);
+        //console.log("schemasList", schemasList);
       });
     
     }, [])
@@ -62,7 +62,7 @@ function CreateCredential() {
       setVcModal(true)
       let schema = await VcSchemaService.resolveSchema(item.name)
       setSchema(schema.vcSchema.properties.credentialSubject)
-      console.log("schema",schema.vcSchema.properties.credentialSubject)
+      //console.log("schema",schema.vcSchema.properties.credentialSubject)
     
     
       setK(item.name)
@@ -91,7 +91,7 @@ function CreateCredential() {
           setFormData(formData)
  
           // console.log(formData)
-          // let data = await VcSchemaService.issueVC({formData},schemaName); 
+          //let data = await VcSchemaService.issueVC({formData},schemaName); 
         
       
          

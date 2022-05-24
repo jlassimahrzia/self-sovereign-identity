@@ -9,142 +9,169 @@ const db = require("../config/db.config.js");
 const jwt = require("jsonwebtoken");
 const EthereumEncryption = require('ethereum-encryption');
 
-import { EthrDID } from 'ethr-did'
+import {EthrDID} from 'ethr-did'
 
 
 // Request vc from issuer
 
-const sendVCRequest = (data: any): any => {
-  let did_holder = data.did_holder
-  let did_issuer = data.did_issuer
-  let vc_name = data.vc_name
+const sendVCRequest = (data : any) : any => {
+    let did_holder = data.did_holder
+    let did_issuer = data.did_issuer
+    let vc_name = data.vc_name
 
-  let query = "INSERT INTO vcrequest (did_holder, did_issuer, vc_name) VALUES (?,?,?);"
+    let query = "INSERT INTO vcrequest (did_holder, did_issuer, vc_name) VALUES (?,?,?);"
 
-  return new Promise((resolve, reject) => {
-      db.query(query, [did_holder, did_issuer, vc_name], (err: any, res: any) => {
-          if (err) {
-              console.log("error: ", err);
-              reject(err);
-          }
-          resolve(res.insertId);
-      });
-  });
+    return new Promise((resolve, reject) => {
+        db.query(query, [
+            did_holder, did_issuer, vc_name
+        ], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res.insertId);
+        });
+    });
 
 }
 
-//Get VC creation requests
+// Get VC creation requests
 
-const getVCRequestList = (data:any): any => {
-  let didIssuer = data
-   
-  let query = "SELECT * FROM vcrequest WHERE did_issuer= '" + didIssuer+ "'"
-  return new Promise((resolve, reject) => {
-      db.query(query,[didIssuer], (err: any, res: any) => {
-          if (err) {
-              console.log("error: ", err);
-              reject(err);
-          }
-          resolve(res);
-      });
-  });
+const getVCRequestList = (data : any) : any => {
+    let didIssuer = data
+
+    let query = "SELECT * FROM vcrequest WHERE did_issuer= '" + didIssuer + "'"
+    return new Promise((resolve, reject) => {
+        db.query(query, [didIssuer], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
 }
 
 // Update status after creating VC
- 
-const updateStatus = (data: any): any => {
-      let ID = data
-      console.log(ID)
-      let query = "Update vcrequest SET state='1' where did_holder =" + "'" + ID + "'"
-      return new Promise(() => {
-          db.query(query, [ID])
-      })
-  }
-  
-  
 
-const updateStatusDeclined = (data: any): any => {
-      let ID = data
-      console.log(ID)
-      let query = "Update vcrequest SET state='2' where id =" + ID
-      return new Promise(() => {
-          db.query(query, [ID])
-      })
+const updateStatus = (data : any) : any => {
+    let ID = data
+    console.log(ID)
+    let query = "Update vcrequest SET state='1' where did_holder =" + "'" + ID + "'"
+    return new Promise(() => {
+        db.query(query, [ID])
+    })
 }
 
 
-router.post('/api/vcRequest', async (req: any, res: any) => {
-  let _request = {
-    did_holder: req.body.did_holder,
-    did_issuer: req.body.did_issuer,
-    vc_name: req.body.vc_name
-  }
-  const id = await sendVCRequest(_request)
-  res.json({ id })
+const updateStatusDeclined = (data : any) : any => {
+    let ID = data
+    console.log(ID)
+    let query = "Update vcrequest SET state='2' where id =" + ID
+    return new Promise(() => {
+        db.query(query, [ID])
+    })
+} 
+router.post('/api/vcRequest', async (req : any, res : any) => {
+    let _request = {
+        did_holder: req.body.did_holder,
+        did_issuer: req.body.did_issuer,
+        vc_name: req.body.vc_name
+    }
+    const id = await sendVCRequest(_request)
+    res.json({id})
 })
 
-router.post('/api/vcRequestList', async (req: any, res: any) => {
-  let didIssuer = req.body.didIssuer
-  const list = await getVCRequestList(didIssuer)
-  res.json({ list })
+router.post('/api/vcRequestList', async (req : any, res : any) => {
+    let didIssuer = req.body.didIssuer
+    const list = await getVCRequestList(didIssuer)
+    res.json({list})
 })
 
 
 var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 var charactersLength = characters.length;
-let result="";
+let result = "";
 for (var i = 0; i < 10; i++) {
-    result += characters.charAt(Math.floor(Math.random() *
-    charactersLength));
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
 }
 
+/*
+const data = {
+    "@context": ["https://www.w3.org/2018/credentials/v1"],
+    "id": "urn:did:123456",
+    "type": ["VerifiableCredential", "PersonalID"],
+    "issuer": "did:exemple:9999999",
+    "issuanceDate": "2021-11-01T00:00:00Z",
+    "credentialSubject": {
+        "id": "did:exemple:123",
+        "firstName": "Mahrzia",
+        "dateOfBirth": "1997-08-07"
+    },
+    "credentialSchema": {
+        "id": "https://exemple/personlId",
+        "type": "JsonSchemaValidator2018"
+    }
+}
+*/
 
-router.post('/api/issueVC',async(req: any,res: any)=>{ 
+router.post('/api/issueVC', async (req : any, res : any) => {
     let {formData} = req.body.formData
     let didHolder = formData.id
     let schemaName = req.body.schemaName
     let did = req.body.did
     let privateKey = (req.body.privateKey).substr(2)
     let holder_pubKey = (req.body.holder_pubKey).substr(2)
-    console.log(privateKey)
-    
-    let VerifiableCredential ={ 
+    //console.log(privateKey)
+
+    let VerifiableCredential = {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
-        id:'credential/'+result,
-        type: ['VerifiableCredential , '  +schemaName],
-        issuer:did,
+        id: 'credential/' + result,
+        type: [
+            "VerifiableCredential", schemaName
+        ],
+        issuer: did,
         issuanceDate: (new Date(Date.now())).toISOString(),
-        sub:formData.id,
-  
         credentialSubject: {},
-
-        proof:""
+        credentialSchema: {
+            "id": schemaName,
+            "type": "JsonSchemaValidator2018"
+        },
+        proof: {}
     }
-    let k={}
+    let k = {}
 
-        Object.keys(formData).map(function(key, index) {
-        if(index!==0){
-               console.log(key,"****",formData[key],index)
+    Object.keys(formData).map(function (key, index) {
+        if (index !== 0) {
+            //console.log(key, "****", formData[key], index)
 
-               const hash = EthereumEncryption.hash(formData[key]);
-               const signature = EthereumEncryption.signHash(
-                privateKey, // privateKey of issuer
-                hash // hash
-               );
-                const k1={"value":formData[key],"proof":signature}
-                k={...k,[key]:k1} 
-        }   
-     
+            const hash = EthereumEncryption.hash(formData[key]);
+            const signature = EthereumEncryption.signHash(privateKey, // privateKey of issuer
+            hash // hash
+            );
+            const k1 = {
+                "value": formData[key],
+                "proof": signature
+            }
+            k = {
+                ... k,
+                [key]: k1
+            }
+        }
+    });
+    
+    Object.assign(VerifiableCredential.credentialSubject, k)
 
-      });
-      console.log(k)
-      Object.assign( VerifiableCredential.credentialSubject,k)
+    console.log("VerifiableCredential : ",VerifiableCredential);
+    
 
-      const hashVC = EthereumEncryption.hash(JSON.stringify(VerifiableCredential));
-      const signatureVC = EthereumEncryption.signHash(
+    const hashVC = EthereumEncryption.hash(JSON.stringify(VerifiableCredential));
+    const signatureVC = EthereumEncryption.signHash(
         privateKey, // privateKey of  issuer
         hashVC // hash
-        );
+    );
+    
+    console.log("signatureVC by Issuer: ",signatureVC);
 
     // const valid = EthereumEncryption.verifyHashSignature(
     //     "035a0020899a5059ce2a69a51d32c9e3992a210935f25b8529af9ca11acdc3d350", // publicKey
@@ -154,38 +181,43 @@ router.post('/api/issueVC',async(req: any,res: any)=>{
     
     // console.log(valid)
  
-    VerifiableCredential.proof=signatureVC
+    VerifiableCredential.proof = {
+        type : "sha3_256",
+        created : (new Date(Date.now())).toISOString(),
+        proofValue : signatureVC
+    }
 
+    console.log("VerifiableCredential with proof : ",VerifiableCredential);
 
-    const token = jwt.sign(
-        VerifiableCredential ,
-        privateKey,
+    /*     
+        const token = jwt.sign(VerifiableCredential, privateKey,
         // private key of issuer
-        {
-         expiresIn: "1h",
-        }
-     )
+        {expiresIn: "1h"})
+    */
 
     const encrypted = EthereumEncryption.encryptWithPublicKey(
-        holder_pubKey
-        , // publicKey of holder
-        token // data
+        holder_pubKey, // publicKey of holder
+        JSON.stringify(VerifiableCredential) // data
     );
-    
-        
-    console.log(VerifiableCredential)
+
+
+    console.log("encrypted : ", encrypted.length)
+
     const status = updateStatus(didHolder)
     res.json({formData})
 
-    const value = JSON.stringify(VerifiableCredential)
+    //const value = JSON.stringify(VerifiableCredential)
 
-    console.log(token)
+    //console.log(token)
     // console.log(JSON.parse(value).vc.credentialSubject.name)
 
-    QRCode.toDataURL(encrypted, { type: 'terminal' }, function (err: any, url: any) {
-        if (err) return console.log("error occured",err)
+    QRCode.toDataURL(encrypted, {
+        type: 'terminal'
+    }, function (err : any, url : any) {
+        if (err) 
+            return console.log("error occured", err)
         emailSenderFunction('jlassimahrzia111@gmail.com', url);
-    })
+    }) 
 })
 
 
@@ -194,14 +226,14 @@ router.post('/api/issueVC',async(req: any,res: any)=>{
 
 
 
-router.post('/api/createVCFailed', async (req: any, res: any) => {
-  let id = req.body.id
-  emailSenderFailure('khalfaoui.emnaa@gmail.com')
-  const status = updateStatusDeclined(id)
-  res.json({ status })
+router.post('/api / createVCFailed ', async (req: any, res: any) => {
+ let id = req.body.id
+    emailSenderFailure('khalfaoui.emnaa@gmail.com')
+    const status = updateStatusDeclined(id)
+    res.json({status})
 })
 
-function emailSenderFunction(target: String, message: String) {
+function emailSenderFunction(target : String, message : String) {
     const transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
@@ -218,11 +250,9 @@ function emailSenderFunction(target: String, message: String) {
         subject: "DID Issuance",
         attachDataUrls: true,
 
-        html:
-            "<h4>Scan the QR code to get your Verifiable credentials. </h4><br><img src=" + message + ">"
-        ,
+        html: "<h4>Scan the QR code to get your Verifiable credentials. </h4><br><img src=" + message + ">"
     };
-    transporter.sendMail(mailOptions, function (error: String) {
+    transporter.sendMail(mailOptions, function (error : String) {
         if (error) {
             console.log(error);
         }
@@ -231,31 +261,28 @@ function emailSenderFunction(target: String, message: String) {
 
 
 // Email function when failure
-function emailSenderFailure(target: String) {
-  const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      requireTLS: true,
-      auth: {
-          user: 'did.issuance@gmail.com',
-          pass: 'talan2022'
-      }
-  });
-  var mailOptions = {
-      from: "did.issuance@gmail.com",
-      to: target,
-      subject: "VC Issuance Request Declined",
-      text: "VC Issuance Request Declined",
-      html:
-          "<h4>Your request has been declined due to integrity and security reasons. </h4>  "
-
-      ,
-  };
-  transporter.sendMail(mailOptions, function (error: String) {
-      if (error) {
-          console.log(error);
-      }
-  });
+function emailSenderFailure(target : String) {
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: {
+            user: 'did.issuance@gmail.com',
+            pass: 'talan2022'
+        }
+    });
+    var mailOptions = {
+        from: "did.issuance@gmail.com",
+        to: target,
+        subject: "VC Issuance Request Declined",
+        text: "VC Issuance Request Declined",
+        html: "<h4>Your request has been declined due to integrity and security reasons. </h4>  "
+    };
+    transporter.sendMail(mailOptions, function (error : String) {
+        if (error) {
+            console.log(error);
+        }
+    });
 }
 module.exports = router;

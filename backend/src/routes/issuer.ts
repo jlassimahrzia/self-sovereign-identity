@@ -359,7 +359,8 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
             valign: 'center', 
             
         })
-        .text("")
+        .text("Organization")
+        .text(name)
         doc.moveTo(500, 200)
         .text("Your DID has been approved, these are your credentials", 80, 300)
         .text("address")
