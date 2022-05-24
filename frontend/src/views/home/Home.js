@@ -22,7 +22,7 @@ const Home = () => {
       }
     ],
     logo: {
-        img: require("../../assets/img/brand/argon-react.png").default, 
+        img: require("../../assets/img/brand/argon-logo-onboarding.png").default, 
         imgAlt: "...",
         background:"white"
         

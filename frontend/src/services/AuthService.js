@@ -2,9 +2,9 @@ import axios from 'axios'
 
 class AuthService {
  
-    async sendAuthCreds(did,password){
+    async sendAuthCreds(password,did){
         let done = false
-        await axios.post("http://localhost:8000/api/sendAuthCreds", { did,password })
+        await axios.post("http://localhost:8000/api/sendAuthCreds", {password,did })
             .then(res => {
                 done = true
             })
@@ -29,7 +29,7 @@ class AuthService {
             x=error
         });
     
-    return { x,done };
+        return { x,done };
     }
 
 }

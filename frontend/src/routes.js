@@ -1,28 +1,14 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import Index from "views/Index.js";
 import CreateIdentity from "views/issuer/CreateIdentity.js";
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 import CreateCredential from "views/issuer/CreateCredential";
+import CreateIssuer from "views/issuer/CreateIssuer";
+import Log from "views/examples/Log";
+import Register from "views/examples/Register";
+import Password from "views/password/Password";
 
 var routes = [
-  /* , */
   {
     path: "/index",
     name: "Home",
@@ -32,74 +18,35 @@ var routes = [
   },
   {
     path: "/createIdentity",
-    name: "Create identity",
+    name: "Holder DID request",
     icon: "ni ni-single-02 text-black",
     component: CreateIdentity,
     layout: "/issuer",
   },
+
   {
-    path: "/vcSchema",
-    name: "Verifiable Credential Schema",
-    icon: "ni ni-credit-card text-black",
-    component: VcSchema,
+    path: "/createIssuer",
+    name: "Issuer DID Request",
+    icon: "ni ni-air-baloon text-black",
+    component: CreateIssuer,
     layout: "/issuer",
-  },
-  {
-    path: "/ceateVc",
-    name: "Create Verifiable Credential",
-    icon: "ni ni-fat-add text-black",
-    component: CreateCredential,
-    layout: "/issuer",
-  },
-  {
-    path: "/vc",
-    name: "Verifiable Credential Request",
-    icon: "ni ni-check-bold text-black",
-    component: VC,
-    layout: "/issuer",
-  }
-  
-  /* {
-    path: "/icons",
-    name: "Icons",
-    icon: "ni ni-planet text-blue",
-    component: Icons,
-    layout: "/admin",
-  },
-  {
-    path: "/maps",
-    name: "Maps",
-    icon: "ni ni-pin-3 text-orange",
-    component: Maps,
-    layout: "/admin",
-  },
-  {
-    path: "/user-profile",
-    name: "User Profile",
-    icon: "ni ni-single-02 text-yellow",
-    component: Profile,
-    layout: "/admin",
-  },
-  {
-    path: "/tables",
-    name: "Tables",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: Tables,
-    layout: "/admin",
-  },
+  }, 
   {
     path: "/login",
-    name: "Login",
-    icon: "ni ni-key-25 text-info",
-    component: Login,
+    component: Log,
     layout: "/auth",
   },
   {
     path: "/register",
-    name: "Register",
-    icon: "ni ni-circle-08 text-pink",
     component: Register,
     layout: "/auth",
-  }, */
+  },
+
+  {
+    path: "/password/:id",
+    component: Password,
+    layout: "/auth",
+  }
 ];
 export default routes;
+

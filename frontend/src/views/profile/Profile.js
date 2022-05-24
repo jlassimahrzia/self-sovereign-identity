@@ -137,7 +137,7 @@ function Profile() {
           </h6>
           <div className="pl-lg-4">
             <Row>
-              <Col md="12">
+              <Col md="6">
                 <FormGroup>
                   <label
                     className="form-control-label"
@@ -149,6 +149,24 @@ function Profile() {
                     className="form-control-alternative"
                     defaultValue="jesse@example.com"
                     value={token.res[0].email}
+                    id="input-address"
+                    placeholder="Home Address"
+                    type="text"
+                  />
+                </FormGroup>
+              </Col>
+              <Col md="6">
+                <FormGroup>
+                  <label
+                    className="form-control-label"
+                    htmlFor="input-address"
+                  >
+                   Location
+                  </label>
+                  <Input
+                    className="form-control-alternative"
+                    defaultValue="jesse@example.com"
+                    value={token.res[0].location}
                     id="input-address"
                     placeholder="Home Address"
                     type="text"
@@ -188,7 +206,7 @@ function Profile() {
                     defaultValue="New York"
                     id="input-city"
                     placeholder="City"
-                    value={token.res[0].date}
+                    value={token.res[0].dateCreation}
                     type="text"
                   />
                 </FormGroup>
@@ -219,13 +237,13 @@ function Profile() {
           <h6 className="heading-small text-muted mb-4">About me</h6>
           <div className="pl-lg-4">
             <FormGroup>
-              <label>Description</label>
+              <label className="form-control-label"
+              htmlFor="input-country">Description</label>
               <Input
                 className="form-control-alternative"
                 placeholder="A few words about you ..."
                 rows="4"
-                defaultValue="A beautiful Dashboard for Bootstrap 4. It is Free and
-                Open Source."
+                value={token.res[0].description}
                 type="textarea"
               />
             </FormGroup>

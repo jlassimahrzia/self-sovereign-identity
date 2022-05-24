@@ -4,12 +4,11 @@ import {
     FormGroup,
     Form,
     Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup, Label
+     Label
   } from "reactstrap";
 import {useState, useEffect} from 'react'
-//import Sidebar from "components/Sidebar/Sidebar.js";
+import swal from 'sweetalert';
+
 import {
     Table, Container, Modal,
     Row, Col,
@@ -18,6 +17,7 @@ import {
   } from "reactstrap";
   import PageHeader from "components/Headers/PageHeader.js"; 
   import VCService from 'services/VCService';
+  import jwt from 'jwt-decode'
 
 function VC() {
     
@@ -27,14 +27,18 @@ function VC() {
     const [firstName, setFirstname] = useState("")
     const [familyName, setFamilyname] = useState("")
     const [dateOfBirth, setDateOfBirth] = useState("")
-
+    const [privateKey, setPrivateKey] = useState("")
+    const [signModal, setSignModal] = useState(false)
     const [status, setStatus] = useState(0);
 
 
     const [vcRequestsList, setvcRequestsList] = useState([]);
     const [didModal, setDidModal] = useState(false);
     const retrieveVcRequestsList = async () => {
-        let data = await VCService.getVCRequestList();
+      let a = sessionStorage.getItem("token")
+      let didIssuer = (jwt(sessionStorage.getItem("token")) ).res[0].did
+
+        let data = await VCService.getVCRequestList(didIssuer);
     
         setvcRequestsList([...data])
       }
@@ -44,18 +48,29 @@ function VC() {
       }, [])
 
       useEffect(() => {
+        console.log((jwt(sessionStorage.getItem("token")) ))
       }, [vcRequestsList])
     const handleVC = async () => {
         try {
-            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth)
+            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth,privateKey)
             
             console.log(data)
+            swal("A new verifiable credential is issued!", "An email will be send to the user!",  "success");
+
             CloseDidModal()
             retrieveVcRequestsList()
            
           } catch (err) {
             console.log("error");
           }   
+    }
+
+    const OpenSignModal = () =>{ 
+      setSignModal(true)
+    }
+   
+    const ReturnDidModal=()=>{ 
+      setSignModal(false)
     }
 
       const OpenDidModal = (item) => {
@@ -69,6 +84,7 @@ function VC() {
 
   const CloseDidModal = () => {
     setDidModal(false)
+    setSignModal(false)
   }
 
   const createVCFailed= async (id) => {
@@ -115,8 +131,9 @@ function VC() {
                 <tr>
                   <th scope="col"># </th>
                   <th scope="col">DID </th>
-                  <th scope="col">State </th> 
+                  
                   <th scope="col">Credential Type </th> 
+                  <th scope="col">State </th> 
                   <th scope="col">Actions </th>
                 </tr>
               </thead>
@@ -125,12 +142,12 @@ function VC() {
                   return  item.state === parseInt(status) ? 
                   <tr key={index} >
                     <td>{index + 1}</td>
-                    <td>{item.did}</td>
+                    <td>{item.did_holder}</td>
+                    <td>{item.vc_name}</td>
                     <td>{item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"}</td>
-                    <td>PersonalIDCredential</td>
+                    
                     <td>
-                    <Button style={{background:"#d7363c",color:"white"}} onClick={() => OpenDidModal(item)}
-                    disabled={item.state !== 0 ? true : false}>Create VC</Button>
+                   
                     <Button onClick={() => SendFailed(item)} id={item.id + "a"} 
                     disabled={item.state !== 0 ? true : false}>Decline Request</Button>
                     </td>
@@ -140,107 +157,6 @@ function VC() {
           </Card>
         </div>
 
-          <Modal className="modal-dialog-centered" size='lg' isOpen={didModal} toggle={CloseDidModal} >
-            <div className="modal-header">
-              <h4 className="modal-title" id="modal-title-default">
-                Fill in the VC informations
-              </h4>
-              <button
-                aria-label="Close"
-                className="close"
-                data-dismiss="modal"
-                type="button"
-                onClick={CloseDidModal}
-              >
-                <span aria-hidden={true}>×</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div> 
-                <Form role="form">
-                <FormGroup>
-                  <Label>
-                    familyName
-                  </Label>
-                  <Input
-                     onChange={(e) => setFamilyname(e.target.value)}
-                  />
-                </FormGroup>
-                
-                <FormGroup>
-                  <Label>
-                    firstName
-                  </Label>
-                  <Input
-                     onChange={(e) => setFirstname(e.target.value)}
-                  />
-                </FormGroup>
-                <FormGroup>
-                  <Label>
-                      dateOfBirth
-                  </Label>
-                  <Input
-                     onChange={(e) => setDateOfBirth(e.target.value)}
-                  />
-                </FormGroup>
-            {/* <FormGroup className="mb-3">
-            <InputGroup className="input-group-alternative">
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  DID
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                className="input"
-                value={did}
-                readOnly
-                />
-            </InputGroup>
-          </FormGroup> */}
-  
-         {/*  <FormGroup>
-            <InputGroup className="input-group-alternative">
-              <InputGroupAddon addonType="prepend">
-                familyName
-              </InputGroupAddon>
-              <Input
-                className="input"
-                onChange={(e) => setFamilyname(e.target.value)}
-              />
-            </InputGroup>
-          </FormGroup>
-  
-          <FormGroup>
-            <InputGroup className="input-group-alternative">
-              <InputGroupAddon addonType="prepend">
-                firstName
-              </InputGroupAddon>
-              <Input
-                className="input"
-                onChange={(e) => setFirstname(e.target.value)}
-              />
-            </InputGroup>
-          </FormGroup>
-  
-          <FormGroup>
-          <InputGroup className="input-group-alternative">
-            <InputGroupAddon addonType="prepend">
-                dateOfBirth
-            </InputGroupAddon>
-            <Input
-              className="input"
-              onChange={(e) => setDateOfBirth(e.target.value)}
-            />
-          </InputGroup>
-        </FormGroup> */}
-    
-            <Button className="my-4" color="primary" type="button" onClick={handleVC} >
-                Submit
-              </Button>
-                </Form>
-              </div>
-            </div>
-          </Modal> 
 
       </Row>
 

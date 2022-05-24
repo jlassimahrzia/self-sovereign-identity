@@ -1,19 +1,16 @@
 var config = require('../config/config.js');
-const { SecretClient } = require("@azure/keyvault-secrets");
-const { DefaultAzureCredential } = require("@azure/identity");
 var nodemailer = require("nodemailer");
 var QRCode = require('qrcode')
 var express = require('express');
 var app = express();
 const router = express.Router()
 const db = require("../config/db.config.js");
-const crypto = require("crypto")
+
 const jwt = require("jsonwebtoken");
-var fs = require('fs');
+const EthereumEncryption = require('ethereum-encryption');
 
 import { EthrDID } from 'ethr-did'
-import { Issuer } from 'did-jwt-vc'
-import { JwtCredentialPayload, createVerifiableCredentialJwt } from 'did-jwt-vc'
+
 
 // Request vc from issuer
 
@@ -38,10 +35,12 @@ const sendVCRequest = (data: any): any => {
 
 //Get VC creation requests
 
-const getVCRequestList = (): any => {
-  let query = "SELECT * FROM vcrequest"
+const getVCRequestList = (data:any): any => {
+  let didIssuer = data
+   
+  let query = "SELECT * FROM vcrequest WHERE did_issuer= '" + didIssuer+ "'"
   return new Promise((resolve, reject) => {
-      db.query(query, (err: any, res: any) => {
+      db.query(query,[didIssuer], (err: any, res: any) => {
           if (err) {
               console.log("error: ", err);
               reject(err);
@@ -50,6 +49,29 @@ const getVCRequestList = (): any => {
       });
   });
 }
+
+// Update status after creating VC
+ 
+const updateStatus = (data: any): any => {
+      let ID = data
+      console.log(ID)
+      let query = "Update vcrequest SET state='1' where did_holder =" + "'" + ID + "'"
+      return new Promise(() => {
+          db.query(query, [ID])
+      })
+  }
+  
+  
+
+const updateStatusDeclined = (data: any): any => {
+      let ID = data
+      console.log(ID)
+      let query = "Update vcrequest SET state='2' where id =" + ID
+      return new Promise(() => {
+          db.query(query, [ID])
+      })
+}
+
 
 router.post('/api/vcRequest', async (req: any, res: any) => {
   let _request = {
@@ -61,108 +83,11 @@ router.post('/api/vcRequest', async (req: any, res: any) => {
   res.json({ id })
 })
 
-router.get('/api/vcRequestList', async (req: any, res: any) => {
-  const list = await getVCRequestList()
+router.post('/api/vcRequestList', async (req: any, res: any) => {
+  let didIssuer = req.body.didIssuer
+  const list = await getVCRequestList(didIssuer)
   res.json({ list })
 })
-
-//Cloud Azure Key Vault 
-/* const credential = new DefaultAzureCredential();  
-const url = "https://issuerkeypairs.vault.azure.net/";
-const client = new SecretClient(url, credential); */
-
-
-//Exporting Keys from Azure
-/* const exportPublicKey = async (): Promise<string> => {
-    const publicKey = await (await client.getSecret("publicKey")).value; 
-    return publicKey;
-}
-let publickey="";
-exportPublicKey().then(function(result) { 
-    publickey = result
-    
- })
- const exportPrivateKey = async (): Promise<string> => {
-    const secretKey = await (await client.getSecret("secretKey")).value; 
-    return secretKey;
-}
-let secretKey="";
-exportPrivateKey().then(function(result) {
-  secretKey=result
-  console.log(secretKey)
-}) */
-
-const issuer = new EthrDID({
-    identifier: '0xf1232f840f3ad7d23fcdaa84d6c66dac24efb198',
-    privateKey: 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75'
-}) as Issuer
-
-// Update status after creating VC
- 
-const updateStatus = (data: any): any => {
-      let ID = data
-      console.log(ID)
-      let query = "Update vcrequest SET state='1' where id =" + ID
-      return new Promise(() => {
-          db.query(query, [ID])
-      })
-}
-  
-const updateStatusDeclined = (data: any): any => {
-      let ID = data
-      console.log(ID)
-      let query = "Update vcrequest SET state='2' where id =" + ID
-      return new Promise(() => {
-          db.query(query, [ID])
-      })
-}
-
-// const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
-//     modulusLength: 550,
-//     publicKeyEncoding: {
-//       type: "pkcs1",
-//       format: "pem",
-//     },
-//     privateKeyEncoding: {
-//       type: "pkcs1",
-//       format: "pem",
-//     },
-//   });
-
-//   fs.writeFileSync("backend/keyFileStore/public.pem", publicKey);
-//   fs.writeFileSync("backend/keyFileStore/private.pem", privateKey); 
-
-  
-//   fs.readFile('../keyFileStore/private.pem', 'utf8', function(err: any, data: any){
-      
-//     // Display the file content
-//     console.log(data);
-// });
-
-// const verifiableData = "this need to be verified";
-// const privateKey = require("../keyFileStore/private.pem")
-// const publicKey = require("../keyFileStore/public.pem")
-// // The signature method takes the data we want to sign, the
-// // hashing algorithm, and the padding scheme, and generates
-// // a signature in the form of bytes
-// const signature = crypto.sign("sha256", Buffer.from(verifiableData), {
-//   key: privateKey,
-//   padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-// });
-// console.log("signature"+signature.toString("base64"));
-
-// const isVerified = crypto.verify(
-//     "sha256",
-//     Buffer.from(verifiableData),
-//     {
-//       key: publicKey,
-//       padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
-//     },
-//     signature
-//   );
-  
-//   // isVerified should be `true` if the signature is valid
-//   console.log("signature verified: ", isVerified);
 
 
 var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -172,117 +97,101 @@ for (var i = 0; i < 10; i++) {
     result += characters.charAt(Math.floor(Math.random() *
     charactersLength));
 }
-  
-router.post('/api/createVC', (req: any, res: any) => {
 
-    let id = req.body.id
+
+router.post('/api/issueVC',async(req: any,res: any)=>{ 
+    let {formData} = req.body.formData
+    let didHolder = formData.id
+    let schemaName = req.body.schemaName
     let did = req.body.did
-    let familyName = req.body.familyName
-    let firstName = req.body.firstName
-    let dateOfBirth = req.body.dateOfBirth 
-    let privateKey = req.body.privateKey
+    let privateKey = (req.body.privateKey).substr(2)
+    let holder_pubKey = (req.body.holder_pubKey).substr(2)
+    console.log(privateKey)
     
-    let vcPayload: JwtCredentialPayload = {
-        sub: did,
-        nbf: 1562950282,
-        vc: {
-            id: 'credential/'+result,
-            issuanceDate: (new Date(Date.now())).toISOString(),
-        
-            '@context': ['https://www.w3.org/2018/credentials/v1'],
-            type: ['VerifiableCredential'],
-            credentialSubject: {
-                degree: {
-                    familyName:{ 
-                        value: familyName ,  
-                    },
-                    firstName:{ 
-                        value: firstName,
-                    },
-                    dateOfBirth:{ 
-                    value: dateOfBirth,
-                    }
-                }
-            }, 
+    let VerifiableCredential ={ 
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        id:'credential/'+result,
+        type: ['VerifiableCredential , '  +schemaName],
+        issuer:did,
+        issuanceDate: (new Date(Date.now())).toISOString(),
+        sub:formData.id,
+  
+        credentialSubject: {},
+
+        proof:""
+    }
+    let k={}
+
+        Object.keys(formData).map(function(key, index) {
+        if(index!==0){
+               console.log(key,"****",formData[key],index)
+
+               const hash = EthereumEncryption.hash(formData[key]);
+               const signature = EthereumEncryption.signHash(
+                privateKey, // privateKey of issuer
+                hash // hash
+               );
+                const k1={"value":formData[key],"proof":signature}
+                k={...k,[key]:k1} 
+        }   
+     
+
+      });
+      console.log(k)
+      Object.assign( VerifiableCredential.credentialSubject,k)
+
+      const hashVC = EthereumEncryption.hash(JSON.stringify(VerifiableCredential));
+      const signatureVC = EthereumEncryption.signHash(
+        privateKey, // privateKey of  issuer
+        hashVC // hash
+        );
+
+    // const valid = EthereumEncryption.verifyHashSignature(
+    //     "035a0020899a5059ce2a69a51d32c9e3992a210935f25b8529af9ca11acdc3d350", // publicKey
+    //     hashVC, // hash
+    //     signatureVC // signature
+    // );
+    
+    // console.log(valid)
+ 
+    VerifiableCredential.proof=signatureVC
+
+
+    const token = jwt.sign(
+        VerifiableCredential ,
+        privateKey,
+        // private key of issuer
+        {
+         expiresIn: "1h",
         }
-    }
+     )
 
-    Object.keys(req.body).forEach(function (key){
-        CreateJWT(key,req.body[key],vcPayload)
-    }) 
+    const encrypted = EthereumEncryption.encryptWithPublicKey(
+        holder_pubKey
+        , // publicKey of holder
+        token // data
+    );
     
-    const vc0 = async (): Promise<string> => {
-        const vcJwt = await createVerifiableCredentialJwt(vcPayload, issuer)
-        return vcJwt  
-    }
+        
+    console.log(VerifiableCredential)
+    const status = updateStatus(didHolder)
+    res.json({formData})
 
-        let vcJwt=""
-        vc0().then(function(result) { 
-           
-            vcJwt = result
-            console.log(result)
-            vcPayload.vc = { ...vcPayload.vc, jwt:vcJwt };
+    const value = JSON.stringify(VerifiableCredential)
 
-            const status = updateStatus(id)
-            res.json( vcPayload)
+    console.log(token)
+    // console.log(JSON.parse(value).vc.credentialSubject.name)
 
-         })
-        const value = JSON.stringify(vcPayload)
-
-    QRCode.toDataURL(value, { type: 'terminal' }, function (err: any, url: any) {
-        if (err) return console.log("error occured")
+    QRCode.toDataURL(encrypted, { type: 'terminal' }, function (err: any, url: any) {
+        if (err) return console.log("error occured",err)
         emailSenderFunction('jlassimahrzia111@gmail.com', url);
     })
-
 })
 
 
-async function CreateJWT( index: String,  value: String,vcPayload:any) {
-    
 
-    console.log(index +" "+value+"\n" )
-    
+  
 
-    if(index!=="did"){
-        if(index==="familyName"){
-            const x={familyName: vcPayload.vc.credentialSubject.degree.familyName}
-            const token = jwt.sign(
-                 x ,
-                 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
-                {
-                  expiresIn: "1h",
-                }
-              )
-        
-            vcPayload.vc.credentialSubject.degree.familyName= { ...vcPayload.vc.credentialSubject.degree.familyName,proof: token };
-
-           
-           }else if(index==="firstName"){
-            const x={firstName: vcPayload.vc.credentialSubject.degree.firstName}
-            const token = jwt.sign(
-                 x ,
-                 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
-                {
-                  expiresIn: "1h",
-                }
-              )
-              vcPayload.vc.credentialSubject.degree.firstName= { ...vcPayload.vc.credentialSubject.degree.firstName,proof: token };
-            }else{
-            const x={dateOfBirth: vcPayload.vc.credentialSubject.degree.dateOfBirth}
-            const token = jwt.sign(
-                 x ,
-                 'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
-                {
-                  expiresIn: "1h",
-                }
-              )
-              vcPayload.vc.credentialSubject.degree.dateOfBirth= { ...vcPayload.vc.credentialSubject.degree.dateOfBirth,proof: token };
-
-        //   }
-        
-         }}
- 
-}
 
 
 router.post('/api/createVCFailed', async (req: any, res: any) => {
@@ -305,7 +214,7 @@ function emailSenderFunction(target: String, message: String) {
     });
     var mailOptions = {
         from: "did.issuance@gmail.com",
-        to: target,
+        to: "jlassimahrzia111@gmail.com",
         subject: "DID Issuance",
         attachDataUrls: true,
 

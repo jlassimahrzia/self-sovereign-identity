@@ -1,9 +1,39 @@
-import axios from 'axios'
+import axios from 'axios' 
+import jwt from 'jwt-decode' 
 
 class VcSchemaService {
 
+    async resolve(did) {
+        let ddo = {}
+        await axios.post("http://localhost:8000/api/resolve", { did })
+            .then(res => {
+                ddo = res.data.ddo
+                console.log(res)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return ddo
+    }
+
+    async issueVC(formData,schemaName,privateKey,holder_pubKey){ 
+        console.log(formData)
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
+        let done = false
+        await axios.post("http://localhost:8000/api/issueVC",{formData,schemaName,did,privateKey,holder_pubKey})
+        .then(res=>{
+            done=true 
+            console.log(done)
+            
+        }).catch(error=>{ 
+            console.log(error)
+        })
+     
+
+    }
+
     async createVcSchema(data) {
-        let did = "did:exemple:0x03099c28987c908674a0afd613ad7f91839816d83ad2a47e34936bc4417825b851"
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
         await axios.post("http://localhost:8000/api/createCredentialSchema", {data, did}).then(res => {
             console.log("res", res.data)
         }).catch(error => {
@@ -13,7 +43,7 @@ class VcSchemaService {
 
     async getSchemas() {
         let tab
-        let did = "did:exemple:0x03099c28987c908674a0afd613ad7f91839816d83ad2a47e34936bc4417825b851"
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
         await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
             tab = res.data
             
@@ -25,7 +55,7 @@ class VcSchemaService {
 
     async resolveSchema(name) {
         let schema
-        let did = "did:exemple:0x03099c28987c908674a0afd613ad7f91839816d83ad2a47e34936bc4417825b851"
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
         await axios.post("http://localhost:8000/api/resolveSchema", {did,name}).then(res => {
             schema = res.data
         }).catch(error => {

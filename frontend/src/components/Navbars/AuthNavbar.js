@@ -32,13 +32,13 @@ import {
 const AdminNavbar = () => {
   return (
     <>
-      <Navbar className="navbar-top navbar-horizontal navbar-dark" expand="md">
+      <Navbar className="navbar-top  navbar-dark" expand="md">
         <Container className="px-4">
           <NavbarBrand to="/" tag={Link}>
             <img
               alt="..."
               src={
-                require("../../assets/img/brand/argon-react-white.png").default
+                require("../../assets/img/brand/argon-logo-onboarding.png").default
               }
             />
           </NavbarBrand>
@@ -68,12 +68,7 @@ const AdminNavbar = () => {
               </Row>
             </div>
             <Nav className="ml-auto" navbar>
-              <NavItem>
-                <NavLink className="nav-link-icon" to="/" tag={Link}>
-                  <i className="ni ni-planet" />
-                  <span className="nav-link-inner--text">Dashboard</span>
-                </NavLink>
-              </NavItem>
+              
               <NavItem>
                 <NavLink
                   className="nav-link-icon"
@@ -85,7 +80,7 @@ const AdminNavbar = () => {
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink className="nav-link-icon" to="/auth/login" tag={Link}>
+                <NavLink className="nav-link-icon" to="/auth/log" tag={Link}>
                   <i className="ni ni-key-25" />
                   <span className="nav-link-inner--text">Login</span>
                 </NavLink>

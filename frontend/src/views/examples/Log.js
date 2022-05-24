@@ -46,8 +46,8 @@ const Login = () => {
 
   return (
     <>
-      <Col lg="5" md="7">
-        <Card className="bg-secondary shadow border-0">
+      <Col lg="5" md="7" >
+        <Card className=" shadow border-0" style={{borderColor:"#d7363c"}}>
           
           <CardBody className="px-lg-5 py-lg-5">
             <div className="text-center text-muted mb-4">
@@ -86,7 +86,7 @@ const Login = () => {
               </FormGroup>
               
               <div className="text-center">
-                <Button className="my-4" color="primary" type="button" onClick={login}>
+                <Button className="my-4" style={{background:"#d7363c",color:"white"}} type="button" onClick={login}>
                   Sign in
                 </Button>
               </div>

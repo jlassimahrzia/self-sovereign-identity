@@ -33,9 +33,13 @@ import {
   Container,
   Media,
 } from "reactstrap";
+import { useHistory } from 'react-router-dom'; 
+import jwt from 'jwt-decode'
+
+
 
 const AdminNavbar = (props) => {
-  
+
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -69,11 +73,11 @@ const AdminNavbar = (props) => {
                         require("../../assets/img/theme/team-4-800x800.jpg")
                           .default
                       }
-                    />
+                    /> 
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                      Jessica Jones
+                  Issuer
                     </span>
                   </Media>
                 </Media>
@@ -99,10 +103,19 @@ const AdminNavbar = (props) => {
                   <span>Support</span>
                 </DropdownItem> */}
                 <DropdownItem divider />
-                <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+
+                <DropdownItem >
+                <i className="ni ni-single-02" />
+                <span>Profile</span>
+              </DropdownItem>
+    
+
+                <DropdownItem  >
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </DropdownItem>
+               
+              
               </DropdownMenu>
             </UncontrolledDropdown>
           </Nav>

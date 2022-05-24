@@ -1,27 +1,29 @@
 import axios from 'axios'
 
-class RegisterService { 
+class RegisterService {
 
-    async createKeyPair(){
-        let keyPair = {}
-        
-        await axios.get("http://localhost:8000/api/createKeyPair")
-            .then(res => {
-                keyPair = res.data._keypair 
-            })
-            .catch(error => {
-                console.log(error)
-            });
-        return keyPair;
-    }
 
-    async sendIssuerRequest(category, name, email,phone, domain, website, date,address,publicKey, logo,file){ 
+    async sendIssuerRequest(category, name, email, phone, domain, website, dateCreation, description, location, fileName, formData2) {
         let done = false
-        await axios.post("http://localhost:8000/api/IssuerRequest",{category, name, email,phone, domain, website, date,address,publicKey,logo,file})
-        .then(res=>{ 
-            done=true 
+        await axios.post("http://localhost:8000/api/IssuerRequest", {
+            category,
+            name,
+            email,
+            phone,
+            domain,
+            website,
+            dateCreation,
+            description,
+            location,
+            fileName,
+            formData2,
+            headers: { // Multer only parses "multipart/form-data" requests
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(res => {
+            done = true
             console.log(done)
-            
+
         })
     }
 

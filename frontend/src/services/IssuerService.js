@@ -3,11 +3,14 @@ import axios from 'axios'
 class IssuerService { 
 
    
-    async getIssuerRequestList() {
+    async getIssuersList() {
         let tab = []
         await axios.get("http://localhost:8000/api/IssuerRequestList")
+     
             .then(res => {
+                console.log(res)
                 tab = res.data.list
+                
             })
             .catch(error => {
                 console.log(error)
@@ -19,7 +22,7 @@ class IssuerService {
     async createIssuer(name, category,domain, publickey, email,id, date, website, phone) {
         let identifier
         let cid
-        await axios.post("http://localhost:8000/api/createIssuer", { name, category,domain, publickey, email ,id,date, website, phone})
+        await axios.post("http://localhost:8000/api/createIssuer", {name, category,domain, publickey, email ,id,date, website, phone})
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid

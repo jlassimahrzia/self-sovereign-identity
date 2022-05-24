@@ -14,9 +14,6 @@ function Login() {
   const [password, setPassword] = useState("")
   const history = useHistory();
 
- 
- 
-
   const login =async()=>{ 
     try{ 
       const data = await AuthService.login(did,password)

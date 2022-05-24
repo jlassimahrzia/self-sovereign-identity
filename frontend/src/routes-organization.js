@@ -3,8 +3,7 @@ import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 import CreateCredential from "views/issuer/CreateCredential";
 import Profile from "views/profile/Profile"
-
-
+import IndexOrganization from "views/IndexOrganization";
 
 var OrganizationRoutes = [
 
@@ -12,7 +11,7 @@ var OrganizationRoutes = [
         path: "/index",
         name: "Home",
         icon: "ni ni-tag text-black",
-        component: Index,
+        component: IndexOrganization,
         layout: "/organization",
       },
       {

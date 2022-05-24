@@ -4,6 +4,7 @@ var app = express();
 const router = express.Router()
 const jwt = require("jsonwebtoken");
 var mysql = require('mysql');
+const bcrypt = require("bcrypt");
 
 
 // MySQL
@@ -11,11 +12,19 @@ const db = require("../config/db.config.js");
 
 
 // send New password to db 
-const sendAuthCreds = (data:any):any=>{ 
-    let query = "INSERT INTO authcreds (did,password) VALUES (?, ?);"
+const sendAuthCreds = (data:any,data2:any):any=>{ 
+    let did = data2
+    let password = data
+    console.log(did)
+    bcrypt
+    .hash(password, 10)
+    .then(async (hashedPassword: any) => {
+
+   
+    let query = "UPDATE issuers SET password = '" +  hashedPassword +  "' WHERE did ='" + did + "'"
     return new Promise((resolve, reject) => { 
 
-        db.query( query, [ data.did, data.password ] , (err : any, res : any) => {
+        db.query( query, [ password,did ] , (err : any, res : any) => {
             if (err) {
               console.log("error: ", err);
               reject(err);
@@ -23,6 +32,7 @@ const sendAuthCreds = (data:any):any=>{
             resolve(res.insertId);
         });
     });
+})
 }
 
 //login 
@@ -31,9 +41,11 @@ const sendAuthCreds = (data:any):any=>{
 const login=(data:any,resultat:any):any=>{ 
     let did = data.did 
     let password = data.password  
-    let query = "SELECT * FROM authcreds WHERE did = ? AND password = ?"
+  
+
+    let query = "SELECT * FROM issuers WHERE did = ? " 
     
-    db.query(query,[did,password],(err:any,res:any)=> {
+    db.query(query,[did],(err:any,res:any)=> {
     if (err) {console.log("error: ", err);
     resultat.status(500).json({ err });
         }
@@ -42,22 +54,32 @@ const login=(data:any,resultat:any):any=>{
     
     if (res.length>0)
     {console.log("ok");
-    let query = "SELECT * from issuers WHERE did=?"
-    db.query(query,[did],(err:any,res:any)=>{ 
+    
+    bcrypt
+    .compare(password, res[0].password)
+    .then(async (samePassword:any) => {
+        
+      if (samePassword) {
+        console.log("ok");
+
         const  token = jwt.sign(
-            { res},
+            { res} ,
             "privateKey",
             {
               expiresIn: "1h",
             }
           )
+          //console.log(token);
         resultat.status(201).json({ token });
-    })
+    }})
    
     }
     else {resultat.status(404).json("err") 
     console.log("404")}
-})}
+    
+})
+   
+}
 
 /**
  *  Routes
@@ -68,19 +90,17 @@ router.post('/api/login',async(req:any,res:any)=>{
     did : req.body.did ,
     password : req.body.password
     }
- login(_request,res)
-
+    login(_request,res)
 })
 
 
 
 
  router.post('/api/sendAuthCreds', async (req : any , res : any) => {
- let _request = {
-    did : req.body.did,
-    password: req.body.password
-}
-const id = await sendAuthCreds(_request)
+ let did = req.body.did
+ let password= req.body.password
+console.log(did)
+const id = await sendAuthCreds(password,did)
 console.log(id)
 res.json({id})
 })

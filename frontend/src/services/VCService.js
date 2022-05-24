@@ -2,9 +2,12 @@ import axios from 'axios'
 
 class VCService {
 
-    async getVCRequestList() {
+
+
+    async getVCRequestList(didIssuer) {
+       
         let tab = []
-        await axios.get("http://localhost:8000/api/vcRequestList")
+        await axios.post("http://localhost:8000/api/vcRequestList",{didIssuer})
             .then(res => {
                 tab = res.data.list
             })
@@ -14,9 +17,9 @@ class VCService {
         return tab;
     }
 
-    async createVC(id,did,familyName, firstName, dateOfBirth) {
+    async createVC(id,did,familyName, firstName, dateOfBirth,privateKey) {
         let x
-        await axios.post("http://localhost:8000/api/createVC", {id,did,familyName, firstName, dateOfBirth })
+        await axios.post("http://localhost:8000/api/createVC", {id,did,familyName, firstName, dateOfBirth,privateKey })
             .then(res => {
                 console.log(res.data)
                 x = res.data.x

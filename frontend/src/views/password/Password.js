@@ -1,11 +1,11 @@
 import React from 'react'
-import{Form, FormGroup,Label,Input,Button} from "reactstrap";
+import{Form, FormGroup,Label,Input,Button,Col,Card,CardBody,InputGroup,InputGroupAddon,InputGroupText} from "reactstrap";
 import { useParams } from "react-router-dom";
 import jwt from 'jwt-decode' // import dependency
 import {useState} from 'react'
 import AuthService from 'services/AuthService';
 import { useHistory } from 'react-router-dom';
-import Home from 'views/home/Home';
+
 
 function Password() {
   const history = useHistory();
@@ -52,9 +52,9 @@ function Password() {
 
   const sendAuthCreds = async()=>{ 
     try{ 
-      const data = await AuthService.sendAuthCreds(did,password)
+      const data = await AuthService.sendAuthCreds(password,did)
       console.log(data)
-      history.push('/login'); 
+      history.push('/auth/login'); 
     }catch{ 
       console.log("error")
 
@@ -62,73 +62,99 @@ function Password() {
   }
 
   return (
-    <div><Home/>
-    <div class="row align-items-center vh-100" >
-        <div class="col-3 mx-auto" >
-            <div class="card shadow border" >
-                <div class="card-body d-flex flex-column align-items-center" >
+    <>
+     
     
     
     
 {ok? 
-    <Form> 
+
+    <Col lg="5" md="7">
+    <Card className="bg-secondary shadow border-0">
+      
+    <CardBody className="px-lg-5 py-lg-5">
+      <div className="text-center text-muted mb-4">
+        <small>Sign up with credentials</small>
+      </div>
+      <Form role="form">
     <FormGroup>
-    <Label for="exampleName">
-      Password
-    </Label>
+    <InputGroup className="input-group-alternative">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText>
+        <i className="ni ni-lock-circle-open" />
+      </InputGroupText>
+    </InputGroupAddon>
     <Input
       id="exampleName"
       name="password"
       placeholder="password"
       type="password"
       onChange={(e) => saveFile(e.target.value)}
-    />
+    /></InputGroup>
     </FormGroup> 
     </Form>
+          </CardBody>
+        </Card>
+      </Col>
     
     
-    : <Form> 
+    : <Col lg="5" md="7">
+    <Card className="bg-secondary shadow border-0">
+      
+    <CardBody className="px-lg-5 py-lg-5">
+      <div className="text-center text-muted mb-4">
+        <small>Sign up with credentials</small>
+      </div>
+      <Form role="form">
 <FormGroup>
-<Label for="exampleName">
-  New Password
-</Label>
+<InputGroup className="input-group-alternative">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText>
+        <i className="ni ni-lock-circle-open" />
+      </InputGroupText>
+    </InputGroupAddon>
 <Input
   id="exampleName"
   name="newpassword"
-  placeholder="password"
+  placeholder="Choose a password"
   type="password"
   value={password}
   onChange={(e) => button1(e.target.value)}
 
-/>
+/></InputGroup>
 </FormGroup>
 <FormGroup>
-<Label for="exampleName">
-  Confirm Password
-</Label>
+<InputGroup className="input-group-alternative">
+    <InputGroupAddon addonType="prepend">
+      <InputGroupText>
+        <i className="ni ni-lock-circle-open" />
+      </InputGroupText>
+    </InputGroupAddon>
 <Input
   id="exampleName"
   name="newpassword"
-  placeholder="password"
+  placeholder="Confirm the password"
   type="password"
   value={newpassword}
   onChange={(e) => button(e.target.value)}
 
-/>
+/></InputGroup>
 
 </FormGroup> 
 <Button  disabled={disabled} style={{background:"#d7363c",color:"white"}} onClick={sendAuthCreds} >
   Submit
 </Button>
-</Form>}
+</Form>
+</CardBody>
+</Card>
+</Col>
+}
 
 
 
 
 
-</div></div></div>
-    
-    </div></div>
+      </>
   )
 }
 
