@@ -5,6 +5,7 @@ import { BarCodeScanner } from 'expo-barcode-scanner';
 import SqliteService from "../services/SqliteService"
 import { argonTheme, Images } from "../constants";
 const { width } = Dimensions.get("screen");
+
 export default function QrCode() {
 
   const [hasPermission, setHasPermission] = useState(null)
@@ -59,11 +60,12 @@ export default function QrCode() {
     setScanned(true)
     //alert(`${data}`)
     //console.log(data)
-    if(did ===null){
+    if(did === null){
       setDID(db,data)
     }
     else{
-      openModal()
+      console.log("VC", data)
+
     }
     SqliteService.getIdentity(db)
   };
