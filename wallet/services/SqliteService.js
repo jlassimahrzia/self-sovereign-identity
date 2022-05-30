@@ -14,20 +14,25 @@ class SqliteService {
               "create table if not exists profile (id integer primary key not null, firstname text, lastname text, email text, photo text);"
             );
         });
+        db.transaction((tx) => {
+          tx.executeSql(
+            "create table if not exists verifiableCredentials (id integer primary key not null, vc_id text ,vc text);"
+          );
+        });
         return db;
     }
 
     deleteTable(db){
         db.transaction((tx) => {
             tx.executeSql(
-              "drop table identity"
+              "drop table verifiableCredentials"
             );
         });
-        db.transaction((tx) => {
+       /*  db.transaction((tx) => {
             tx.executeSql(
               "drop table profile"
             );
-        });
+        }); */
     }
 
     getIdentity(db){

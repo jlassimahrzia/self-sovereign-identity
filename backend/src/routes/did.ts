@@ -131,11 +131,11 @@ const resolve = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = ipfs.cat(ipfsHash)
     console.log(asyncitr)
+    let data 
     for await (const itr of asyncitr) {
-
-        let data = Buffer.from(itr).toString()
-        return JSON.parse(data.toString());
+        data = Buffer.from(itr).toString()
     } 
+    return JSON.parse(data.toString());
 } 
 
 /**

@@ -4,14 +4,19 @@ import { View, StyleSheet, Dimensions, Modal, TouchableOpacity, Image } from 're
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import SqliteService from "../services/SqliteService"
 import { argonTheme, Images } from "../constants";
+import VcService from '../services/VcService';
 const { width } = Dimensions.get("screen");
+import Toast from 'react-native-toast-message';
 
-export default function QrCode() {
+export default function QrCode({navigation}) {
 
   const [hasPermission, setHasPermission] = useState(null)
   const [scanned, setScanned] = useState(false)
   const [did, setDid] = useState(null)
+  const [privateKey, setPrivateKey] = useState(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [tab, settab] = useState([])
+  const [vc, setvc] = useState(null)
   const db = SqliteService.openDatabase()
   
   const openModal = () => {
@@ -28,7 +33,9 @@ export default function QrCode() {
         `select * from identity`,
         [],(transaction, resultSet) => { 
           if(resultSet.rows.length != 0){
-            setDid(resultSet.rows._array[0].did)}
+            setDid(resultSet.rows._array[0].did)
+            setPrivateKey(resultSet.rows._array[0].privateKey)
+          }
         },
         (transaction, error) => console.log(error)
       );
@@ -56,7 +63,7 @@ export default function QrCode() {
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
+  const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true)
     //alert(`${data}`)
     //console.log(data)
@@ -64,10 +71,32 @@ export default function QrCode() {
       setDID(db,data)
     }
     else{
-      console.log("VC", data)
-
+      let res = await VcService.verifyVC(data,privateKey)
+      //console.log("res  ",res);
+      if(res.test){
+        setvc(res.decrypted)
+        let items = Object.keys(vc.credentialSubject)
+        let tabs = []
+        items.forEach(element => {
+          if(element != "id")
+            tabs.push({
+              key : element,
+              value : vc.credentialSubject[element]
+            })
+        });
+        console.log("tabs",tabs);
+        settab([...tabs])
+        console.log("tab",tab);
+        openModal()
+      }
+      else{
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: res.msg
+        });
+      }
     }
-    SqliteService.getIdentity(db)
   };
 
   if (hasPermission === null) {
@@ -75,6 +104,27 @@ export default function QrCode() {
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
+  }
+
+  const decline = () => {
+    closeModal()
+    Toast.show({
+      type: 'info',
+      text1: 'Info',
+      text2: "Credential Request Declined"
+    });
+  }
+ 
+  const accept = async () => {
+    let res = await VcService.signVC(vc,privateKey)
+    db.transaction(tx => {
+      tx.executeSql('INSERT INTO verifiableCredentials (vc_id, vc) values (?, ?)', 
+      [res.id , JSON.stringify(res) ],
+        (txObj, resultSet) => console.log("resultSet",resultSet.insertId),
+        (txObj, error) => console.log('Error', error))
+    }) 
+    closeModal()
+    navigation.navigate("Credentials") 
   }
 
   return (
@@ -87,7 +137,7 @@ export default function QrCode() {
         {scanned && <Button onPress={() => setScanned(false)} size="small" 
         style={{width: width , margin:0, borderRadius: 0, backgroundColor: "#172B4D"}}>Tap to Scan Again</Button>}
       </View>
-      <Modal
+      { vc && tab ? <Modal
             animationType="slide"
             transparent={false}
             visible={modalVisible}
@@ -108,7 +158,7 @@ export default function QrCode() {
                                     <Block >
                                     <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.WHITE}
                                         style={{fontWeight: "bold"}}>
-                                        Diplome
+                                        {vc.credentialSchema.id}
                                     </Text>
                                     <Text size={14} style={{marginVertical: 5}} color={argonTheme.COLORS.WHITE}>
                                         Ecole Nationale des Sciences de l'Informatique
@@ -118,38 +168,20 @@ export default function QrCode() {
                             </Block>
                         </Block>
                         <Block style={{marginBottom: 20}}>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Name</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>Jlassi Mahrzia</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Program Name</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>Computer Science Engineer</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Graduation Year</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>2022</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Final Grades</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>B+</Text>
-                                </Block>
-                            </Block>
+                            {tab.map((item, index) => {  return (
+                              <Block row space="between" style={styles.cardBody} key={index}>
+                                  <Block>
+                                      <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.BLACK}>
+                                      {item.key}
+                                      </Text>
+                                  </Block>
+                                  <Block >
+                                      <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>
+                                      {item.value}
+                                      </Text>
+                                  </Block>
+                              </Block>
+                            )})}
                         </Block>
                 </View>
                 <View style={styles.bottom}>
@@ -158,18 +190,18 @@ export default function QrCode() {
                         You have received a credential
                     </Text>
                     <Block row space="between" >
-                        <Button color="secondary">
+                        <Button color="secondary" onPress={decline}>
                             <Text style={{ fontFamily: 'open-sans-regular',textAlign: 'center' }} size={14} 
                             color={argonTheme.COLORS.BLACK}>Decline </Text>
                         </Button>
-                        <Button color="success">
+                        <Button color="success" onPress={accept}>
                             <Text style={{ fontFamily: 'open-sans-regular' }} size={16}
                             color={argonTheme.COLORS.WHITE}> Accept</Text>
                         </Button>
                     </Block>
                 </View>
             </View>
-        </Modal>
+      </Modal> : null }
         </>
   );
 }

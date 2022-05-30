@@ -50,7 +50,7 @@ class IssuerService {
 
     async mappingDidToHash(cid, did) {
         let done = false
-        await axios.post("http://localhost:8000/api/mappingDidToHash", { cid, did })
+        await axios.post("http://localhost:8000/api/mappingDidToHashIssuer", { cid, did })
             .then(res => {
                 done = true
                 console.log(res)
@@ -63,7 +63,7 @@ class IssuerService {
 
     async resolve(did) {
         let ddo = {}
-        await axios.post("http://localhost:8000/api/resolve", { did })
+        await axios.post("http://localhost:8000/api/resolveIssuer", { did })
             .then(res => {
                 ddo = res.data.ddo
                 console.log(res)

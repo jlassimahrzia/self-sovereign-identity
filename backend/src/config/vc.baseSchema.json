@@ -14,8 +14,7 @@
         },
         "id": {
             "description": "Defines unique identifier of the Verifiable Credential Exemple : did:exemple:abcdefghi;id=17de181feb67447da4e78259d92d0240;version=1.0",
-            "type": "string",
-            "format": "uri"
+            "type": "string"
         },
         "type": {
           "description": "Defines the Verifiable Credential type",
@@ -45,7 +44,8 @@
           "properties": {
             "id": {
               "description": "Defines the DID of the subject that is described by the Verifiable Credential",
-              "type": "string"
+              "type": "string",
+              "format": "uri"
             }
           },
           "required": [
@@ -74,8 +74,7 @@
             "properties": {
               "id": {
                 "description": "References the credential schema (template) stored on the (relevant) Schemas Registry (SR) on which the Verifiable Authorisation is based",
-                "type": "string",
-                "format": "uri"
+                "type": "string"
               },
               "type": {
                 "description": "Defines credential schema type",
@@ -134,8 +133,8 @@
               ]
             }
         }, 
-        "proof": {
-            "description": "Contains information about the proof",
+        "issuerProof": {
+            "description": "Contains information about the Issuer proof",
             "type": "object",
             "properties": {
               "type": {
@@ -155,6 +154,10 @@
                 "description": "Contains information about the verification method / proof mechanisms",
                 "type": "string"
               },
+              "hash": {
+                "description": "Defines the hash of VC",
+                "type": "string"
+              },
               "proofValue": {
                 "description": "Defines the proof value in JWS format",
                 "type": "string"
@@ -163,8 +166,46 @@
             "required": [
               "type",
               "created",
+              "hash",
               "proofValue"
             ]
+        },
+        "holderProof": {
+          "description": "Contains information about the holder proof",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Defines the proof type",
+              "type": "string"
+            },
+            "proofPurpose": {
+              "description": "Defines the purpose of the proof",
+              "type": "string"
+            },
+            "created": {
+              "description": "Defines the date and time, when the proof has been created",
+              "type": "string",
+              "format": "date-time"
+            },
+            "verificationMethod": {
+              "description": "Contains information about the verification method / proof mechanisms",
+              "type": "string"
+            },
+            "hash": {
+              "description": "Defines the hash of VC",
+              "type": "string"
+            },
+            "proofValue": {
+              "description": "Defines the proof value in JWS format",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "created",
+            "hash",
+            "proofValue"
+          ]
         }
     },
     "required": [
@@ -173,6 +214,7 @@
       "type",
       "issuer",
       "credentialSubject",
-      "credentialSchema"
+      "credentialSchema",
+      "issuerProof"
     ]
 }

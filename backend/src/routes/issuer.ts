@@ -149,6 +149,20 @@ const getIssuersList = () : any => {
     });
 }
 
+const getIssuersByDid = (did : string) : any => {
+    let query = 'SELECT * FROM issuers WHERE did = ? '
+    return new Promise((resolve, reject) => {
+        db.query(query, [did] ,(err: any, res: any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+
 const updateStatus = (data: any): any => {
     let ID = data
     console.log(ID)
@@ -189,7 +203,7 @@ const createDDO = (identifier: string, publicKey: string, email: string,name:str
         name: name, 
         category: category,
         created: (new Date(Date.now())).toISOString()
-    } //YYYY-MM-DDTHH:mm:ss.sssZ
+    } 
 };
 
 
@@ -207,21 +221,20 @@ const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
  */
 
 const resolve = async (ipfsHash: String)  : Promise<any> => {
-    //let res= await ipfs.get(ipfsHash)
+    
     let asyncitr = ipfs.cat(ipfsHash)
-    console.log(asyncitr)
+    let data
     for await (const itr of asyncitr) {
-
-        let data = Buffer.from(itr).toString()
-        return JSON.parse(data.toString());
+        data = Buffer.from(itr).toString()    
     } 
+    return JSON.parse(data.toString());
 } 
 
 /**
  *  Routes
  */
 
- router.get('/api/createKeyPair', (req : any , res : any) => {
+router.get('/api/createKeyPair', (req : any , res : any) => {
     let _keypair: KeyPair
     _keypair = createKeyPair()
     res.json({_keypair})
@@ -266,10 +279,14 @@ router.get('/api/IssuerRequestList', async (req : any , res : any) => {
     res.json({list})
 })
 
-
+router.post('/api/IssuerByDID', async (req : any , res : any) => {
+    let did = req.body.did
+    const list = await getIssuersByDid(did)
+    res.json({list})
+})
 
 // Ethereum tx registring ipfs hash 
-router.post('/api/mappingDidToHash', async (req : any , res : any) => {
+router.post('/api/mappingDidToHashIssuer', async (req : any , res : any) => {
     let _cid = req.body.cid
     let _did = req.body.did
     let accounts = await web3.eth.getAccounts()
@@ -281,14 +298,13 @@ router.post('/api/mappingDidToHash', async (req : any , res : any) => {
 
 
 // Resolve DID 
-router.post('/api/resolve', async (req : any , res : any) => {
+router.post('/api/resolveIssuer', async (req : any , res : any) => {
     let did = req.body.did
     console.log(did)
     const ipfshash = await contract.methods.getDidToHash(did).call();
     console.log("hash",ipfshash)
     let ddo = await resolve(ipfshash)
-    
-    res.json({did,ipfshash,ddo}) 
+    res.json({ipfshash,ddo}) 
 }) 
 
 
@@ -321,6 +337,8 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
     const ddo = createDDO(identifier, publickey, email,name,category)
     // 3- add did doc to ipfs and get the cid
     const cid = await pushDDO_ipfs(ddo)
+    
+    //console.log("cid",cid)
     // 4 - update status il
     const status = updateStatus(id)
 

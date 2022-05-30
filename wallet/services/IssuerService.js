@@ -15,6 +15,18 @@ class IssuerService {
         return list;
     }
 
+    async getIssuerByDid(did){
+        let issuer = {}
+        await axios.post(`${environment.SERVER_API_URL}/IssuerByDID`,{did})
+            .then(res => {
+                issuer = res.data.list[0]
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return issuer;
+    }
+
     async getSchemasList(did){
         let list = []
         await axios.post(`${environment.SERVER_API_URL}/schemas`, { did })

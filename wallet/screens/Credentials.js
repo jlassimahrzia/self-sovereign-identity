@@ -1,31 +1,87 @@
 
 import { Block, Text, theme } from "galio-framework";
 import {
-    StyleSheet, Dimensions, Image, Modal, TouchableWithoutFeedback, TouchableOpacity
+    StyleSheet, Dimensions, Image, Modal, TouchableWithoutFeedback, TouchableOpacity,FlatList
 } from "react-native";
 import { argonTheme, Images } from "../constants";
 import { Button } from "../components/";
 import { AntDesign } from '@expo/vector-icons';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const { width } = Dimensions.get("screen");
+import SqliteService from "../services/SqliteService"
+import IssuerService from "../services/IssuerService";
+import { environment } from '../constants/env';
+
 function Credentials() {
     const [modalVisible, setModalVisible] = useState(false);
-    const openModal = () => {
+    const [vcList, setvcList] = useState([])
+    const [credentialList, setcredentialList] = useState([])
+    const [item, setitem] = useState(null)
+    const [tab, settab] = useState([])
+    
+    const db = SqliteService.openDatabase()
+
+    const openModal = (item) => {
+        setitem(item.vc)
+        let items = Object.keys(item.vc.credentialSubject)
+        let tabs = []
+        items.forEach(element => {
+          if(element != "id")
+            tabs.push({
+              key : element,
+              value : item.vc.credentialSubject[element]
+            })
+        });
+        console.log("tabs",tabs);
+        settab([...tabs]) 
         setModalVisible(true)
     };
 
     const closeModal = () => {
         setModalVisible(false)
     };
+
+    const getCredentials = async () => {
+        db.transaction((tx) => {
+            tx.executeSql(
+              `select * from verifiableCredentials`,
+              [],(transaction, resultSet) => setvcList(resultSet.rows._array),
+              (transaction, error) => console.log(error)
+            );
+        });
+        let credentials = []
+        vcList.forEach( async (element) => {
+            let vc = JSON.parse(element.vc)
+            let issuer = await IssuerService.getIssuerByDid(vc.issuer)
+            vc = {...vc, issuerInfo : issuer}
+            credentials.push({ id : element.id , vc: vc})
+        });
+        console.log("Credentials", credentials);
+        setcredentialList(credentials)
+    }
+
+    useEffect(() => {
+        getCredentials()
+        console.log("vcList",credentialList);
+    }, [])
+    
+    renderEmpty = () => {
+        return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The cart is empty</Text>;
+    }
+
     return(
         <>
         <Block flex center style={styles.cart}>
-                <TouchableWithoutFeedback onPress={openModal}>
+        <FlatList
+            data={credentialList}
+            renderItem={({item}) => (
+                <Block>
                     <Block card shadow style={styles.product}>
-                        <Block row>
+                        <TouchableWithoutFeedback onPress={() => openModal(item)}>
+                            <Block row>
                             <Block style={{width: width*0.2, alignItems: 'center'}} >
                                 <Image
-                                    source={Images.logoEnsi}
+                                    source={{uri: `${environment.SERVER_API_URL}/image/` + item.vc.issuerInfo.logo}}
                                     style={styles.image}
                                     resizeMode="contain"
                                 />
@@ -33,39 +89,23 @@ function Credentials() {
                             <Block style={styles.rightSide}>
                                 <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
                                     style={{fontWeight: "bold"}}>
-                                    Diplome
+                                    {item.vc.credentialSchema.id}
                                 </Text>
                                 <Text size={14} muted style={{marginVertical: 5}}>
-                                    Ecole Nationale des Sciences de l'Informatique
+                                    {item.vc.issuerInfo.name}
                                 </Text>
                             </Block>
                         </Block>
-                    </Block>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback onPress={openModal}>
-                    <Block card shadow style={styles.product}>
-                        <Block row>
-                            <Block style={{width: width*0.2, alignItems: 'center'}} >
-                                <Image
-                                    source={Images.logoMunicipalite}
-                                    style={styles.image}
-                                    resizeMode="contain"
-                                />
-                            </Block>
-                            <Block style={styles.rightSide}>
-                                <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
-                                    style={{fontWeight: "bold"}}>
-                                    Extrait de naissance
-                                </Text>
-                                <Text size={14} muted style={{marginVertical: 5}}>
-                                    Municipalite de Tunis
-                                </Text>
-                            </Block>
-                        </Block>
-                    </Block>
-                </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
+                </Block>
+                </Block>
+            )}
+            showsVerticalScrollIndicator={false}
+            keyExtractor={(item, index) => `${index}-${item.id}`}
+            ListEmptyComponent={renderEmpty}
+        />
         </Block>
-        <Modal
+        {item ? <Modal
             animationType="slide"
             transparent={false}
             visible={modalVisible}
@@ -86,56 +126,34 @@ function Credentials() {
                                     <Block >
                                     <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.WHITE}
                                         style={{fontWeight: "bold"}}>
-                                        Diplome
+                                        {item.credentialSchema.id}
                                     </Text>
                                     <Text size={14} style={{marginVertical: 5}} color={argonTheme.COLORS.WHITE}>
-                                        Ecole Nationale des Sciences de l'Informatique
+                                        {item.issuerInfo.name}
                                     </Text>
-                                    </Block>
-                                    {/* <Block>
-                                        <AntDesign name="closesquareo" size={24} color={argonTheme.COLORS.WHITE} 
-                                        onPress={closeModal}/>
-                                    </Block> */} 
+                                    </Block> 
                                 </Block>
                             </Block>
                         </Block>
                         <Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Name</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>Jlassi Mahrzia</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Program Name</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>Computer Science Engineer</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Graduation Year</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>2022</Text>
-                                </Block>
-                            </Block>
-                            <Block row space="between" style={styles.cardBody}>
-                                <Block>
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.TEXT}>Final Grades</Text>
-                                </Block>
-                                <Block >
-                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>B+</Text>
-                                </Block>
-                            </Block>
+                            {tab.map((item, index) => {  return (
+                              <Block row space="between" style={styles.cardBody} key={index}>
+                                  <Block>
+                                      <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.BLACK}>
+                                      {item.key}
+                                      </Text>
+                                  </Block>
+                                  <Block >
+                                      <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>
+                                      {item.value}
+                                      </Text>
+                                  </Block>
+                              </Block>
+                            )})}
                         </Block>
                 </Block>
             </TouchableOpacity>
-        </Modal>
+        </Modal> : null}
         </>
     )
 }

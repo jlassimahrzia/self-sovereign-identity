@@ -40,7 +40,7 @@ function CreateIssuer() {
             await IssuerService.mappingDidToHash(data.cid.path, data.identifier)
 
             const ddo = await IssuerService.resolve(data.identifier)
-            console.log("ddo", ddo)
+            console.log("ddo from Create Issuer", ddo)
         }
     }
     const createIss = (item) => {
