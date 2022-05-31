@@ -11,28 +11,27 @@ const { width } = Dimensions.get("screen");
 import SqliteService from "../services/SqliteService"
 import IssuerService from "../services/IssuerService";
 import { environment } from '../constants/env';
-
+import * as SQLite from 'expo-sqlite';
 function Credentials() {
     const [modalVisible, setModalVisible] = useState(false);
     const [vcList, setvcList] = useState([])
     const [credentialList, setcredentialList] = useState([])
     const [item, setitem] = useState(null)
     const [tab, settab] = useState([])
+    const [organisations, setOrganisations] = useState([])
     
-    const db = SqliteService.openDatabase()
 
     const openModal = (item) => {
-        setitem(item.vc)
-        let items = Object.keys(item.vc.credentialSubject)
+        setitem(item)
+        let items = Object.keys(item.credentialSubject)
         let tabs = []
         items.forEach(element => {
           if(element != "id")
             tabs.push({
               key : element,
-              value : item.vc.credentialSubject[element]
+              value : item.credentialSubject[element]
             })
         });
-        console.log("tabs",tabs);
         settab([...tabs]) 
         setModalVisible(true)
     };
@@ -42,27 +41,48 @@ function Credentials() {
     };
 
     const getCredentials = async () => {
+        const db = SqliteService.openDatabase()
         db.transaction((tx) => {
             tx.executeSql(
               `select * from verifiableCredentials`,
               [],(transaction, resultSet) => setvcList(resultSet.rows._array),
               (transaction, error) => console.log(error)
             );
-        });
-        let credentials = []
-        vcList.forEach( async (element) => {
-            let vc = JSON.parse(element.vc)
-            let issuer = await IssuerService.getIssuerByDid(vc.issuer)
-            vc = {...vc, issuerInfo : issuer}
-            credentials.push({ id : element.id , vc: vc})
-        });
-        console.log("Credentials", credentials);
-        setcredentialList(credentials)
+        }); 
+    }
+
+    const retrieveIssuersList = async () => {
+        let data = await IssuerService.getIssuerList()
+        setOrganisations(data)
+    }
+
+    async function openDb() {
+        return SQLite.openDatabase("wallet.db");
     }
 
     useEffect(() => {
-        getCredentials()
-        console.log("vcList",credentialList);
+        retrieveIssuersList()
+        openDb().then(db =>{
+            db.transaction((tx) => {
+                tx.executeSql(
+                  `select * from verifiableCredentials`,
+                  [],(transaction, resultSet) => setvcList(resultSet.rows._array),
+                  (transaction, error) => console.log(error)
+                )
+            })
+        })
+        console.log("vcList",vcList);
+        let credentials = []
+        vcList.forEach((element) => {
+            let vc = JSON.parse(element.vc)
+            const result = organisations.filter(item => item.did === vc.issuer);
+            console.log("result",result);
+            vc = {...vc, issuerInfo : result[0]}
+            credentials.push(vc)
+        });
+        
+        setcredentialList(credentials)
+        console.log("credentialList",credentialList);
     }, [])
     
     renderEmpty = () => {
@@ -72,6 +92,7 @@ function Credentials() {
     return(
         <>
         <Block flex center style={styles.cart}>
+        {credentialList ?
         <FlatList
             data={credentialList}
             renderItem={({item}) => (
@@ -81,7 +102,7 @@ function Credentials() {
                             <Block row>
                             <Block style={{width: width*0.2, alignItems: 'center'}} >
                                 <Image
-                                    source={{uri: `${environment.SERVER_API_URL}/image/` + item.vc.issuerInfo.logo}}
+                                    source={{uri: `${environment.SERVER_API_URL}/image/` + item.issuerInfo.logo}}
                                     style={styles.image}
                                     resizeMode="contain"
                                 />
@@ -89,21 +110,21 @@ function Credentials() {
                             <Block style={styles.rightSide}>
                                 <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
                                     style={{fontWeight: "bold"}}>
-                                    {item.vc.credentialSchema.id}
+                                    {item.credentialSchema.id}
                                 </Text>
                                 <Text size={14} muted style={{marginVertical: 5}}>
-                                    {item.vc.issuerInfo.name}
+                                    {item.issuerInfo.name}
                                 </Text>
                             </Block>
-                        </Block>
-                    </TouchableWithoutFeedback>
-                </Block>
+                            </Block>
+                        </TouchableWithoutFeedback>
+                    </Block>
                 </Block>
             )}
             showsVerticalScrollIndicator={false}
             keyExtractor={(item, index) => `${index}-${item.id}`}
             ListEmptyComponent={renderEmpty}
-        />
+        /> : null} 
         </Block>
         {item ? <Modal
             animationType="slide"
@@ -117,7 +138,7 @@ function Credentials() {
                             <Block row>
                                 <Block style={styles.imageContainer}>
                                     <Image
-                                        source={Images.logoEnsi}
+                                        source={{uri: `${environment.SERVER_API_URL}/image/` + item.issuerInfo.logo}}                               
                                         style={styles.imageModal}
                                         resizeMode= 'contain'
                                     />
@@ -170,7 +191,7 @@ const styles = StyleSheet.create({
       paddingBottom: 6
     },
     product: {
-        width: width * 0.95,
+        width: width * 0.90,
         borderWidth: 0,
         marginVertical: theme.SIZES.BASE / 2,
         marginHorizontal: theme.SIZES.BASE,

@@ -17,6 +17,7 @@ export default function QrCode({navigation}) {
   const [modalVisible, setModalVisible] = useState(false)
   const [tab, settab] = useState([])
   const [vc, setvc] = useState(null)
+  const [id, setid] = useState("")
   const db = SqliteService.openDatabase()
   
   const openModal = () => {
@@ -63,6 +64,18 @@ export default function QrCode({navigation}) {
     );
   }
 
+  const verif = (db, id) =>{
+    db.transaction(
+      (tx) => {
+        tx.executeSql("select * from verifiableCredentials where vc_id = ? ", 
+        [id],
+        (tx, resultSet) => console.log("resultSet",resultSet),
+        (tx, error) => console.log(error)
+        );
+      }
+    );
+  }
+
   const handleBarCodeScanned = async ({ type, data }) => {
     setScanned(true)
     //alert(`${data}`)
@@ -75,7 +88,7 @@ export default function QrCode({navigation}) {
       //console.log("res  ",res);
       if(res.test){
         setvc(res.decrypted)
-        let items = Object.keys(vc.credentialSubject)
+        let items = Object.keys(res.decrypted.credentialSubject)
         let tabs = []
         items.forEach(element => {
           if(element != "id")
@@ -137,7 +150,7 @@ export default function QrCode({navigation}) {
         {scanned && <Button onPress={() => setScanned(false)} size="small" 
         style={{width: width , margin:0, borderRadius: 0, backgroundColor: "#172B4D"}}>Tap to Scan Again</Button>}
       </View>
-      { vc && tab ? <Modal
+        { vc && tab ? <Modal
             animationType="slide"
             transparent={false}
             visible={modalVisible}

@@ -49,6 +49,7 @@ function Organisations({navigation}) {
     
     useEffect(() => {
       retrieveIssuersList();
+      console.log("useEffect org");
     }, [])
 
     const openTel = number => {

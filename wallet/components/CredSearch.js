@@ -7,35 +7,60 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Image, Linking, Platform
+  Image, Linking, Platform, Modal
 } from "react-native";
 import { Block, Text, Input, theme } from "galio-framework";
 import { environment } from '../constants/env';
 const { width } = Dimensions.get("screen");
-import ViewMoreText from 'react-native-view-more-text';
 import { argonTheme, Images } from "../constants/";
 import { Icon, Card, Select, Button } from "../components/";
-
+import SqliteService from "../services/SqliteService"
 import IssuerService from "../services/IssuerService";
+import * as SQLite from 'expo-sqlite'
+
 function CredSearch({navigation}){
 
   const [results, setresults] = useState([])
   const [search, setsearch] = useState("")
   const [active, setactive] = useState(false)
+  const [vcList, setvcList] = useState([])
+  const [credentialList, setcredentialList] = useState([])
   const [organisations, setOrganisations] = useState([])
+  let animatedValue = new Animated.Value(0)
+  const db = SqliteService.openDatabase()
 
   const retrieveIssuersList = async () => {
     let data = await IssuerService.getIssuerList()
     setOrganisations(data)
   }
-   
+
+  const getCredentials = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from verifiableCredentials`,
+        [],(transaction, resultSet) => setvcList(resultSet.rows._array),
+        (transaction, error) => console.log(error)
+      )
+    })
+    console.log("vcList",vcList);
+    let credentials = []
+    vcList.forEach((element) => {
+      let vc = JSON.parse(element.vc)
+      const result = organisations.filter(item => item.did === vc.issuer);
+      console.log("result",result);
+      vc = {...vc, issuerInfo : result[0]}
+      credentials.push(vc)
+    });
+    setcredentialList(credentials)  
+  }
+
   useEffect(() => {
-    retrieveIssuersList();
+    retrieveIssuersList()
+    getCredentials()
+    console.log("credentialList",credentialList);
   }, [])
 
-  let animatedValue = new Animated.Value(0);
-  const animate = () => {
-    
+  const animate = () => { 
     animatedValue.setValue(0);
 
     Animated.timing(animatedValue, {
@@ -46,12 +71,13 @@ function CredSearch({navigation}){
   }
 
   const handleSearchChange = search => {
-    const results = organisations.filter(
-      item => search && item.name.toLowerCase().includes(search)
+    const tab = credentialList.filter(
+      item => search && item.credentialSchema.id.toLowerCase().includes(search)
     );
-    setresults(results)
+    setresults(tab)
+    console.log("results",results);
     setsearch(search)
-    animate()
+    animate() 
   };
 
   const renderSearch = () => {
@@ -94,7 +120,7 @@ function CredSearch({navigation}){
   const renderNotFound = () => {
     return (
       <Block style={styles.notfound}>
-        <Text style={{ fontFamily: 'open-sans-regular' }} size={18} color={argonTheme.COLORS.TEXT}>
+        <Text style={{ fontFamily: 'open-sans-regular' }} size={16} color={argonTheme.COLORS.TEXT}>
           We didn’t find "<Text bold>{search}</Text>" in our system.
         </Text>
       </Block>
@@ -102,146 +128,155 @@ function CredSearch({navigation}){
   };
 
   const renderResult = result => {
+    
 
-    const openTel = number => {
-      let phoneNumber = ''
-      if (Platform.OS === 'android') {
-        phoneNumber = `tel:${number}`
-      } else {
-        phoneNumber = `telprompt:${number}`
-      }
-      Linking.openURL(phoneNumber)
-    }
-    
-    const openUrl = url => {
-      Linking.openURL(url)
-    }
-    
-    const openEmail = mail => {
-      Linking.openURL('mailto:' + mail)
-    }
-    
-    const openMap = address => {
-      Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + address)
-    }
 
+    return (
+      
+      <Block flex center style={styles.cart}>  
+        <Text>hgghudu</Text>
+          {/* <Block card shadow style={styles.product}>
+                        <TouchableWithoutFeedback onPress={() => openModal(result)}>
+                            <Block row>
+                            <Block style={{width: width*0.2, alignItems: 'center'}} >
+                                <Image
+                                    source={{uri: `${environment.SERVER_API_URL}/image/` + item.vc.issuerInfo.logo}}
+                                    style={styles.image}
+                                    resizeMode="contain"
+                                />
+                            </Block>
+                            <Block style={styles.rightSide}>
+                                <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
+                                    style={{fontWeight: "bold"}}>
+                                    {result.credentialSchema.id}
+                                </Text>
+                                <Text size={14} muted style={{marginVertical: 5}}>
+                                    {result.issuerInfo.name}
+                                </Text>
+                            </Block>
+                        </Block>
+                    </TouchableWithoutFeedback>
+          </Block>    */}
+      </Block>
+      /*     */
+    );
+  };
+
+  const renderResults = () => {
+
+    const [item, setitem] = useState(null)
+    const [tab, settab] = useState([])
+    const [modalVisible, setModalVisible] = useState(false);
     const opacity = animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [0.8, 1],
       extrapolate: "clamp"
     });
+    
+    const openModal = (item) => {
+      setitem(item)
+      let items = Object.keys(item.credentialSubject)
+      let tabs = []
+      items.forEach(element => {
+        if(element != "id")
+          tabs.push({
+            key : element,
+            value : item.credentialSubject[element]
+          })
+      });
+      settab(tabs) 
+      setModalVisible(true)
+    };
 
+    const closeModal = () => {
+      setModalVisible(false)
+    };
+    
     return (
-      <Animated.View
-        key={`result-${result.name}`}
-      >
-              <Block>
-                <Block card shadow style={styles.product}>
-                    <Block flex row>
-                        <TouchableWithoutFeedback
-                          onPress={() => navigation.navigate("Credentials", { org : result})}
-                        > 
-                        <Block style={styles.imageHorizontal}>
-                            <Image
-                            source={{uri: `${environment.SERVER_API_URL}/image/` + result.logo}}
-                            style={styles.imageStyle}
-                            resizeMode="contain"
-                            />
-                        </Block>
-                        </TouchableWithoutFeedback>
-                        <Block flex style={styles.productDescription}>
-
-                          <Block
-                            middle
-                            row
-                            space="evenly"
-                          >
-                          <TouchableWithoutFeedback
-                            onPress={() => navigation.navigate("Credentials", { org : result})}
-                          >
-                            <Text size={14} style={styles.productTitle} color={argonTheme.COLORS.PRIMARY}
-                            style={{fontWeight: "bold",margin: 5}}>
-                              {result.name}
-                            </Text>
-                          </TouchableWithoutFeedback>
-                          </Block>
-                          <Block
-                            middle
-                            row
-                            space="evenly"
-                          >
-                            <Button
-                              small
-                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                              icon="mail" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openEmail(result.email)}
-                            >
-                              Email
-                            </Button>
-                            <Button
-                              small
-                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                              icon="link" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openUrl(result.website)}
-                            >
-                              Website
-                            </Button>
-                          </Block>  
-                          <Block
-                            middle
-                            row
-                            space="evenly"
-                          >
-                            <Button
-                              small
-                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                              icon="home" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openMap(result.location)}
-                            >
-                              Address
-                            </Button>
-                            <Button
-                              small
-                              style={{ backgroundColor: argonTheme.COLORS.DEFAULT }}
-                              icon="mobile1" iconFamily="antdesign" iconSize={13} iconColor="#fff"
-                              onPress={() => openTel(result.phone)}
-                            >
-                              Mobile
-                            </Button>
-                          </Block>  
-                        </Block>
-                    </Block>
-                    <Block flex style={styles.productDescription}>
-                            <ViewMoreText
-                              numberOfLines={2}
-                              renderViewMore={renderViewMore}
-                              renderViewLess={renderViewLess}
-                            >
-                              <Text size={14} style={styles.productTitle} style={{color:argonTheme.COLORS.BLACK,margin: 3, textAlign: "justify"}}>
-                                {result.description}
-                              </Text>
-                            </ViewMoreText>
-                    </Block>
-                </Block>
-              </Block>
-      </Animated.View>
-    );
-  };
-
-  const renderResults = () => {
-    if (results.length === 0 && search) {
-      return (
+      <>
+      {results.length === 0 && search ? (
         <Block style={{ width: width - 40 }}>
           {renderNotFound()}
         </Block>
-      );
-    }
-
-    return (
-      <Block style={{ paddingTop: theme.SIZES.BASE * 2 }}>
-        {results.map(result => renderResult(result))}
-      </Block>
-    );
+      ) : (
+        <Block flex center style={styles.cart}>  
+          {results.map((result, index) =>{ return (
+            <TouchableWithoutFeedback onPress={() => openModal(result)}>
+              <Block card shadow style={styles.product} key={index} >
+                      <Block row>
+                        <Block style={{width: width*0.2, alignItems: 'center'}} >
+                          <Image
+                              source={{uri: `${environment.SERVER_API_URL}/image/` + result.issuerInfo.logo}}
+                              style={styles.image}
+                              resizeMode="contain"
+                          />
+                        </Block>
+                        <Block style={styles.rightSide}>
+                              <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
+                              style={{fontWeight: "bold"}}>
+                                  {result.credentialSchema.id}
+                              </Text>
+                              <Text size={14} muted style={{marginVertical: 5}}>
+                                  {result.issuerInfo.name}
+                              </Text>
+                        </Block>
+                      </Block>
+              </Block>
+            </TouchableWithoutFeedback>
+          )})}
+        </Block>
+      )}
+      {item ? <Modal
+          animationType="slide"
+          transparent={false}
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
+          <TouchableOpacity style={styles.centeredView} onPress={closeModal}>
+              <Block style={styles.modalView}>
+                      <Block style={styles.cardHeader}>                           
+                          <Block row>
+                              <Block style={styles.imageContainer}>
+                                  <Image
+                                      source={{uri: `${environment.SERVER_API_URL}/image/` + item.issuerInfo.logo}}
+                                      style={styles.imageModal}
+                                      resizeMode= 'contain'
+                                  />
+                              </Block>
+                              <Block row style={styles.rightSideModal}>
+                                  <Block >
+                                  <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.WHITE}
+                                      style={{fontWeight: "bold"}}>
+                                      {item.credentialSchema.id}
+                                  </Text>
+                                  <Text size={14} style={{marginVertical: 5}} color={argonTheme.COLORS.WHITE}>
+                                      {item.issuerInfo.name}
+                                  </Text>
+                                  </Block> 
+                              </Block>
+                          </Block>
+                      </Block>
+                      <Block>
+                          {tab.map((item, index) => {  return (
+                            <Block row space="between" style={styles.cardBody} key={index}>
+                                <Block>
+                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.BLACK}>
+                                    {item.key}
+                                    </Text>
+                                </Block>
+                                <Block >
+                                    <Text style={{ fontFamily: 'open-sans-regular' }} size={14} color={argonTheme.COLORS.MUTED}>
+                                    {item.value}
+                                    </Text>
+                                </Block>
+                            </Block>
+                          )})}
+                      </Block>
+              </Block>
+          </TouchableOpacity>
+        </Modal>: null }
+    </>
+    )
   };
 
   return (
@@ -286,87 +321,99 @@ const styles = StyleSheet.create({
     zIndex: 2
   },
   notfound: {
-    marginVertical: theme.SIZES.BASE * 2
-  },
-  suggestion: {
-    height: theme.SIZES.BASE * 1.5,
-    marginBottom: theme.SIZES.BASE
-  },
-  result: {
-    backgroundColor: theme.COLORS.WHITE,
-    marginBottom: theme.SIZES.BASE,
-    borderWidth: 0
-  },
-  resultTitle: {
-    flex: 1,
-    flexWrap: "wrap",
-    paddingBottom: 6
-  },
-  resultDescription: {
-    padding: theme.SIZES.BASE / 2
-  },
-  image: {
-    overflow: "hidden",
-    borderBottomLeftRadius: 4,
-    borderTopLeftRadius: 4
-  },
-  dealsContainer: {
-    justifyContent: "center",
-    paddingTop: theme.SIZES.BASE
-  },
-  deals: {
-    backgroundColor: theme.COLORS.WHITE,
-    marginBottom: theme.SIZES.BASE,
-    borderWidth: 0
-  },
-  dealsTitle: {
-    flex: 1,
-    flexWrap: "wrap",
-    paddingBottom: 6
-  },
-  dealsDescription: {
-    padding: theme.SIZES.BASE / 2
-  },
-  imageHorizontal: {
-    overflow: "hidden",
-    borderBottomLeftRadius: 4,
-    borderTopLeftRadius: 4
-  },
-  imageVertical: {
-    overflow: "hidden",
-    borderTopRightRadius: 4,
-    borderTopLeftRadius: 4
-  },
-  product: {
-    width: width * 0.9,
-    borderWidth: 0,
-    marginVertical: theme.SIZES.BASE,
-    marginHorizontal: theme.SIZES.BASE,
-    backgroundColor: theme.COLORS.WHITE,
-    shadowColor: "black",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: theme.SIZES.BASE / 4,
-    shadowOpacity: 0.1
-  },
-  productTitle: {
-    fontFamily: 'open-sans-regular',
-    flex: 1,
-    flexWrap: "wrap",
-    paddingBottom: 6
-  },
-  productDescription: {
-    padding: theme.SIZES.BASE / 2
-  },
-  cart: {
-    width: width
-  },
-  imageStyle : {
-    width: theme.SIZES.BASE * 6.25,
-    height: theme.SIZES.BASE * 8.25 ,
-    //marginTop: -theme.SIZES.BASE,
-    margin: theme.SIZES.BASE / 2,
-    borderRadius: 3
-  },
+    marginVertical: theme.SIZES.BASE * 2,
+    paddingLeft : 20
+  },cart: {
+        width: width,
+        marginTop: 15
+    },
+    productTitle: {
+      fontFamily: 'open-sans-bold',
+      flex: 1,
+      flexWrap: "wrap",
+      paddingBottom: 6
+    },
+    product: {
+        width: width * 0.90,
+        borderWidth: 0,
+        marginVertical: theme.SIZES.BASE / 2,
+        marginHorizontal: theme.SIZES.BASE,
+        backgroundColor: theme.COLORS.WHITE,
+        shadowColor: "black",
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: theme.SIZES.BASE / 4,
+        shadowOpacity: 0.1
+    },
+    rightSide : {
+        width: width*0.8, 
+        padding: 15,
+        borderLeftColor: "#dadde1",
+        borderStyle: "solid",
+        borderLeftWidth: 1,
+        height: 85
+    },
+    image: {
+        width: 50,
+        height: 50,
+        borderRadius: 50,
+        margin: 16,
+        overflow: 'hidden'
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        marginTop: 22
+    },
+    modalView: {
+        //margin: 20,
+        backgroundColor: "white",
+        //borderRadius: 20,
+        //padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+        width: 0,
+        height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    card: {
+        width: 280
+    },
+    cardHeader: {
+        width: 320,
+        backgroundColor: argonTheme.COLORS.DEFAULT,
+        marginBottom: 10,
+        paddingBottom: 5
+    },
+    rightSideModal : {
+        width: width*0.8, 
+        padding: 15,
+        height: 85
+    },
+    imageModal: {
+        width: 50,
+        height: 50,
+        margin: 16
+    },
+    imageContainer: {
+        width: width*0.2, 
+        alignItems: 'center',
+        height: 85,
+        backgroundColor: argonTheme.COLORS.WHITE,
+        borderColor: "#d7363c",
+        borderStyle: "solid",
+        borderWidth: 5,
+    },
+    cardBody: {
+        width: 320,
+        backgroundColor: argonTheme.COLORS.WHITE,
+        padding: 10
+    }
 })
 
 export default CredSearch;
