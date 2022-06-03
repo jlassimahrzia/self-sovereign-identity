@@ -2,28 +2,15 @@ import axios from 'axios'
 
 class RegisterService {
 
-
-    async sendIssuerRequest(category, name, email, phone, domain, website, dateCreation, description, location, fileName, formData2) {
+    async sendIssuerRequest(data , file , image) {
         let done = false
-        await axios.post("http://localhost:8000/api/IssuerRequest", {
-            category,
-            name,
-            email,
-            phone,
-            domain,
-            website,
-            dateCreation,
-            description,
-            location,
-            fileName,
-            formData2,
-            headers: { // Multer only parses "multipart/form-data" requests
-                'Content-Type': 'multipart/form-data'
-            }
-        }).then(res => {
+        //let finaldata = {...data, image : image}
+        //console.log(finaldata);
+        console.log("pdfFile",file);
+        console.log("photo",image);
+        await axios.post("http://localhost:8000/api/IssuerRequest", {file}).then(res => {
             done = true
             console.log(done)
-
         })
     }
 

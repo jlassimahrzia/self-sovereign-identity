@@ -27,10 +27,7 @@ ReactDOM.render(
       <Route path="/organization" render={(props) => <OrganizationLayout {...props} />} />
       <Route path="/profile" render={(props) => <Profile {...props} />} />
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
-
-
-
-      <Redirect from="/" to="/issuer/index" />
+      <Redirect from="/" to="/auth/login" />
     </Switch>
   </BrowserRouter>,
   document.getElementById("root")

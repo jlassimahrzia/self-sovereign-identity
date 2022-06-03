@@ -1,5 +1,5 @@
 {
-  "name": "argon-dashboard-react",
+  "name": "identityTN",
   "version": "1.2.1",
   "description": "React version of Argon Dashboard by Creative Tim",
   "main": "index.js",
@@ -54,6 +54,7 @@
     "chart.js": "2.9.4",
     "classnames": "2.3.1",
     "ethers": "^5.6.4",
+    "formik": "^2.2.9",
     "fs": "^0.0.1-security",
     "jwt-decode": "^3.1.2",
     "moment": "2.29.1",
@@ -72,7 +73,8 @@
     "react-scripts": "4.0.3",
     "reactstrap": "8.9.0",
     "responsive-navbar-react": "^1.2.1",
-    "sweetalert": "^2.1.2"
+    "sweetalert": "^2.1.2",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "gulp": "4.0.2",

@@ -6,21 +6,10 @@ const router = express.Router()
 import { Wallet } from '@ethersproject/wallet'
 import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
-// import  'buffer';
-const Blob = require('buffer')
 import PDFDocument from 'pdfkit'
 import fs from 'fs'
-  
-
 var nodemailer = require("nodemailer");
-var QRCode = require('qrcode')
-const multer = require('multer')
-const path = require('path')
-const cors = require("cors");
-const bodyParser = require('body-parser');
 const jwt = require("jsonwebtoken");
-var fileUpload = require('express-fileupload')
-
 let base64Img = require('base64-img');
 
 // IPFS
@@ -35,36 +24,24 @@ let contract = new web3.eth.Contract(config.ABI_ISSUER_REGISTRY_CONTRACT, config
 // MySQL
 const db = require("../config/db.config.js");
 
-
-app.use(fileUpload());
-app.use(cors());
-app.use(express.static("./public"))
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-//! Use of Multer
-
-//@type   POST
-//route for post data
+// File Upload Use of Multer
+const multer = require('multer')
+const path = require('path')
+app.use(express.static(__dirname + '/public'));
 
 
-// router.post("/upload", upload.single('file'), (req: { file: { filename: string; }; }, res: any) => {
-  
-//     if (!req.file) {
-//         console.log("No file upload");
-//     } else {
-//         console.log(req.file.filename)
-//         var imgsrc = 'http://127.0.0.1:3000/images/' + req.file.filename
-//         var insertData = "INSERT INTO issuers(logo)VALUES(?)"
-//         db.query(insertData, [imgsrc], (err: any, result: any) => {
-//             if (err) throw err
-//             console.log("file uploaded")
-//         })
-//     }
-// });
-
-
-
+var storage = multer.diskStorage({
+    destination: (req : any, file: any, callBack: any) => {
+        callBack(null, 'public/')     // './public/images/' directory name where save the file
+    },
+    filename: (req : any, file: any, callBack: any) => {
+        callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+    }
+})
+ 
+var upload = multer({
+    storage: storage
+});
 
 
 // Types
@@ -99,23 +76,7 @@ export interface DidDocument {
     return { address, privateKey, publicKey }
 }
 
-/**
- *  2- Request DID from did issuer
- */
-const sendIssuerRequest = (data : any) : any => {
 
-   let query = "INSERT INTO issuers (category, name, email,phone, domain, website, dateCreation,description,location, logo, file) VALUES (?,?,?,?,?,?,?,?,?,?,?);"
-    
-    return new Promise((resolve, reject) => {
-        db.query( query, [ data.category, data.name, data.email,data.phone, data.domain, data.website,  data.dateCreation, data.description,data.location,data.logo, data.file] , (err : any, res : any) => {
-           if (err) {
-              console.log("error: ", err);
-              reject(err);
-            }
-            resolve(res.insertId);
-        });
-    });
-}
 
 
 // Update issuers db by adding did 
@@ -241,37 +202,45 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
 })
 
 
-var storage = multer.diskStorage({
-    destination: (req: any, file: any, callBack: (arg0: any, arg1: string) => void) => {
-        callBack(null, './public/images/')     // './public/images/' directory name where save the file
-    },
-    filename: (req: any, file:any, callBack: (arg0: any, arg1: string) => void) => {
-        callBack(null, file.fieldname + '-' + Date.now() )
-    }
-})
- 
-var upload = multer({
-    storage: storage
-});
+/**
+ *  2- Request DID from did issuer
+ */
+ const sendIssuerRequest = (data : any) : any => {
 
-router.post('/api/IssuerRequest', upload.single('file') ,async(req:any , res : any) => {
-    //console.log(req.body)
-    let _request = {  
-        name: req.body.name,
-        category: req.body.category,
-        domain:req.body.domain, 
-        dateCreation:req.body.dateCreation, 
-        website:req.body.website,
-        description:req.body.description, 
-        location:req.body.location,
-        email: req.body.email,
-        phone:req.body.phone,
-        logo: req.body.fileName, 
-        file: 'aa'
-    }
-    const id = await sendIssuerRequest(_request)
-    //console.log(id)
-    res.json({id})
+    let query = "INSERT INTO issuers (category, name, email,phone, domain, website, dateCreation,description,location, logo, file) VALUES (?,?,?,?,?,?,?,?,?,?,?);"
+     
+     return new Promise((resolve, reject) => {
+         db.query( query, [ data.category, data.name, data.email,data.phone, data.domain, data.website,  data.dateCreation, data.description,data.location,data.logo, data.file] , (err : any, res : any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+             }
+             resolve(res.insertId);
+         });
+     });
+ }
+
+router.post('/api/IssuerRequest', upload.single('image') , (req:any , res : any) => {
+    
+    /* let request = {  
+        name : req.body.data.name,
+        email : req.body.data.email,
+        category : req.body.data.category,
+        domain : req.body.data.domain,
+        governorate : req.body.data.governorate,
+        description : req.body.data.description,
+        location : req.body.data.location,
+        url : req.body.data.url,
+        phone : req.body.data.phone,
+        creationDate : req.body.data.creationDate,
+    } */
+    
+    
+    console.log("file",req.file);
+    
+    //const id = await sendIssuerRequest(request)
+    
+    //res.json({id})
 })
 
 router.get('/api/IssuerRequestList', async (req : any , res : any) => {

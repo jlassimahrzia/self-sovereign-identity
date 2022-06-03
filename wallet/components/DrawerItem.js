@@ -6,9 +6,9 @@ import argonTheme from "../constants/Theme";
 
 import { Octicons , AntDesign } from '@expo/vector-icons'; 
 
-class DrawerItem extends React.Component {
+function DrawerItem({ title,focused,navigation }) {
   renderIcon = () => {
-    const { title, focused } = this.props;
+    //const { title, focused } = this.props;
 
     switch (title) {
       case "Home":
@@ -33,7 +33,7 @@ class DrawerItem extends React.Component {
         );
       case "Organisations":
         return (
-          <Octicons name="link" size={20} 
+          <AntDesign name="link" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
       case "Settings":
@@ -48,15 +48,15 @@ class DrawerItem extends React.Component {
     }
   };
 
-  render() {
-    const { focused, title, navigation } = this.props;
+  
+    //const { focused, title, navigation } = this.props;
 
     const containerStyles = [
       styles.defaultStyle,
       focused ? [styles.activeStyle, styles.shadow] : null
     ];
 
-    return (
+  return (
       <TouchableOpacity
         style={{ height: 60 }}
         onPress={() =>
@@ -69,7 +69,7 @@ class DrawerItem extends React.Component {
       >
         <Block flex row style={containerStyles}>
           <Block middle flex={0.1} style={{ marginRight: 5 }}>
-            {this.renderIcon()}
+            {renderIcon()}
           </Block>
           <Block row center flex={0.9}>
             <Text
@@ -82,8 +82,7 @@ class DrawerItem extends React.Component {
           </Block>
         </Block>
       </TouchableOpacity>
-    );
-  }
+  );
 }
 
 const styles = StyleSheet.create({

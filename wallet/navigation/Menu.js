@@ -67,6 +67,7 @@ function CustomDrawerContent({
               />
             );
           })}
+        </ScrollView>
           {/* <Block
             flex
             style={{ marginTop: 24, marginVertical: 8, paddingHorizontal: 8 }}
@@ -83,7 +84,7 @@ function CustomDrawerContent({
             </Text>
           </Block>
           <DrawerCustomItem title="Getting Started" navigation={navigation} /> */}
-        </ScrollView>
+       
       </Block>
     </Block>
   );

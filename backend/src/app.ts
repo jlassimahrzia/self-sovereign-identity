@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 app.use(require('./routes/did'));
 app.use(require('./routes/vc.schema'));
 app.use(require('./routes/vc'));

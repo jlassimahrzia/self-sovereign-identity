@@ -4,9 +4,11 @@ import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 import CreateCredential from "views/issuer/CreateCredential";
 import CreateIssuer from "views/issuer/CreateIssuer";
-import Log from "views/examples/Log";
-import Register from "views/examples/Register";
-import Password from "views/password/Password";
+
+/** Auth Routes */
+import Log from "views/auth/Log"
+import Register from "views/auth/Register";
+import Password from "views/auth/Password";
 
 var routes = [
   {

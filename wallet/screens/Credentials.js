@@ -12,7 +12,8 @@ import SqliteService from "../services/SqliteService"
 import IssuerService from "../services/IssuerService";
 import { environment } from '../constants/env';
 import * as SQLite from 'expo-sqlite';
-function Credentials() {
+
+function Credentials({navigation}) {
     const [modalVisible, setModalVisible] = useState(false);
     const [vcList, setvcList] = useState([])
     const [credentialList, setcredentialList] = useState([])
@@ -60,7 +61,7 @@ function Credentials() {
         return SQLite.openDatabase("wallet.db");
     }
 
-    useEffect(() => {
+    useEffect(() => {  
         retrieveIssuersList()
         openDb().then(db =>{
             db.transaction((tx) => {
@@ -83,8 +84,8 @@ function Credentials() {
         
         setcredentialList(credentials)
         console.log("credentialList",credentialList);
-    }, [])
-    
+    }, [])  
+
     renderEmpty = () => {
         return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The cart is empty</Text>;
     }
