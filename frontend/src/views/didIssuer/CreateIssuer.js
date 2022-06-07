@@ -8,17 +8,23 @@ import {
     Button,
     Card,
     CardHeader,
-    Input
+    Input, Badge, Modal
 } from "reactstrap";
 import PageHeader from "components/Headers/PageHeader.js";
-import IssuerService from '../../services/IssuerService';
+import IssuerService from 'services/IssuerService';
 import swal from 'sweetalert';
-
+import ReactReadMoreReadLess from "react-read-more-read-less";  
+import { environment } from 'environment/env';
+import Viewer, { Worker } from '@phuocng/react-pdf-viewer';
+import '@phuocng/react-pdf-viewer/cjs/react-pdf-viewer.css';
 
 function CreateIssuer() {
     const [IssuerRequestsList, setIssuerRequestsList] = useState([]);
     const [status, setStatus] = useState(0);
 
+    // PDF
+    const [pdfModal, setPdfModal] = useState(false);
+    const [pdf, setPdf] = useState("");
 
     const retrieveIssuerRequestsList = async () => {
         console.log("aaa")
@@ -31,36 +37,55 @@ function CreateIssuer() {
         retrieveIssuerRequestsList();
 
     }, [])
+    useEffect(() => {
+        retrieveIssuerRequestsList();
+    }, [IssuerRequestsList])
 
-    const createIssuer = async (name, category, domain, publickey, email, id, date, website, phone) => {
-        const data = await IssuerService.createIssuer(name, category, domain, publickey, email, id, date, website, phone)
+    const createIssuer = async (name,email, id) => {
+        const data = await IssuerService.createIssuer(name,email, id)
         console.log("data", data)
         if (data) {
 
             await IssuerService.mappingDidToHash(data.cid.path, data.identifier)
 
             const ddo = await IssuerService.resolve(data.identifier)
-            console.log("ddo from Create Issuer", ddo)
+            if(ddo){
+                swal("A new issuer has been created successfully!", "", "success");
+            }
+            else{
+                swal("Something went wrong try again!", "", "error");
+            }
+            
         }
     }
-    const createIss = (item) => {
-        createIssuer(item.name, item.category, item.domain, item.publicKey, item.email, item.id, item.date, item.website, item.phone)
-        document.getElementById(item.id).disabled = true;
-        document.getElementById(item.id + "a").disabled = true;
-        swal("A new issuer has been created successfully!", "", "success");
+    const createIss = async (item) => {
+        await createIssuer(item.name,item.email, item.id)
+       
     };
 
     const createIssuerFailed = async (email, id) => {
         const done = await IssuerService.createIssuerFailed(email, id)
         if (done) {
-            console.log('success')
+            swal("Issuer request declined!", "", "warning");
+        }
+        else{
+            swal("Something went wrong try again!", "", "error");
         }
     }
-    const SendFailed = (item) => {
-        createIssuerFailed(item.email, item.id)
-        document.getElementById(item.id).disabled = true;
-        document.getElementById(item.id + "a").disabled = true;
+    const SendFailed = async (item) => {
+        await createIssuerFailed(item.email, item.id)
+       
     }
+
+    // PDF Modal
+    const OpenPdfModal = (pdf) => {
+        setPdf(pdf)
+        setPdfModal(true)
+    };
+    const ClosePdfModal = () => {
+        setPdf("")
+        setPdfModal(false)
+    };
 
 
     return (
@@ -75,7 +100,7 @@ function CreateIssuer() {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <Col xs="8">
-                                        <h3 className="mb-0">DID Request</h3>
+                                        <h3 className="mb-0">Issuer DID Request</h3>
                                     </Col>
                                     <Col xs="4">
                                         <Input type="select" id="exampleSelect" name="select"
@@ -95,20 +120,23 @@ function CreateIssuer() {
                                 <thead className="thead-light">
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col">Address</th>
-                                        <th scope="col">Public Key</th>
+                                        <th scope="col">Logo</th>
                                         <th scope="col">Organization Name</th>
                                         <th scope="col">Category</th>
                                         <th scope="col">Domain</th>
-                                        <th scope="col">Description</th>
-                                        <th scope="col">Creation Date</th>
+                                        <th scope="col">Governorate</th>
                                         <th scope="col">Location</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Phone</th>
                                         <th scope="col">Website</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Creation Date</th>
+                                        <th scope="col">Address</th>
+                                        <th scope="col">Public Key</th>
+                                        <th scope="col">DID</th>
                                         <th scope="col">Status</th>
+                                        <th scope="col">Proof Document</th>
                                         <th scope="col">Actions</th>
-
                                     </tr>
                                 </thead>
                                 <tbody>{
@@ -117,12 +145,10 @@ function CreateIssuer() {
                                             <td>{
                                                 index + 1
                                             }</td>
-                                            <td>{
-                                                item.address === "" ? "Not defined" : item.address
-                                            }</td>
-                                            <td>{
-                                                item.publicKey === "" ? "Not defined" : item.publicKey
-                                            }</td>
+                                            <td>
+                                                <img style={{ width: "100%" }} alt="..."
+                                                    src={`${environment.SERVER_API_URL}/image/` + item.logo} />
+                                            </td>
                                             <td>{
                                                 item.name
                                             }</td>
@@ -133,10 +159,7 @@ function CreateIssuer() {
                                                 item.domain
                                             }</td>
                                             <td>{
-                                                item.description
-                                            }</td>
-                                            <td>{
-                                                item.dateCreation
+                                                item.governorate
                                             }</td>
                                             <td>{
                                                 item.location
@@ -148,11 +171,38 @@ function CreateIssuer() {
                                                 item.phone
                                             }</td>
                                             <td>{
-                                                item.website
+                                                <a href={item.website} style={{color: "#5e72e4"}} target="_blank"> {item.website}</a>
+                                            }</td>
+                                            <td style={{width : "200px", owhiteSpace : "normal"}}>
+                                                <ReactReadMoreReadLess
+                                                    charLimit={80}
+                                                    readMoreText={"Read more ▼"}
+                                                    readLessText={"Read less ▲"}
+                                                    readMoreStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                    readLessStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                >
+                                                    {item.description}
+                                                </ReactReadMoreReadLess>
+                                            </td>
+                                            <td>{
+                                                item.dateCreation
                                             }</td>
                                             <td>{
-                                                item.state === 0 ? "Pending" : item.state === 1 ? "Issued" : "Declined"
+                                                item.address === null ? "Not defined" : item.address
                                             }</td>
+                                            <td>{
+                                                item.publicKey === null ? "Not defined" : item.publicKey
+                                            }</td>
+                                             <td>{
+                                                item.did === '' ? "Not defined" : item.did
+                                            }</td>                    
+                                            <td>{
+                                                item.state === 0 ? <Badge color="warning">Pending</Badge> : item.state === 1 ? <Badge color="success">Issued</Badge> : <Badge color="danger">Declined</Badge>
+                                            }</td>
+                                            <td>
+                                                <Button color="primary" size="sm" type="button" 
+                                                onClick={() => OpenPdfModal(item.file)}>See proof doc</Button>
+                                            </td>
                                             <td>
                                                 <Button style={
                                                         {
@@ -188,6 +238,24 @@ function CreateIssuer() {
                         </Card>
                     </div>
                 </Row>
+                 {/* Pdf Modal */}
+                 <Modal
+                        className="modal-dialog-centered"
+                        size="lg"
+                        style={{ maxWidth: '1600px', width: '80%' }}
+                        isOpen={pdfModal}
+                        toggle={ClosePdfModal}
+                    >
+
+                        <div className="modal-body" style={{ padding: '0px' }}>
+                            <Worker workerUrl="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.4.456/build/pdf.worker.js">
+                                <div style={{ height: '85vh' }}>
+                                    <Viewer fileUrl={`${environment.SERVER_API_URL}/pdf/${pdf}`} />
+                                </div>
+                            </Worker>
+                        </div>
+
+                    </Modal>
             </Container>
         </>
     )

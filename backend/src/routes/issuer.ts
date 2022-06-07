@@ -7,7 +7,7 @@ import { Wallet } from '@ethersproject/wallet'
 import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
 import PDFDocument from 'pdfkit'
-import fs from 'fs'
+const fs = require('fs')
 var nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 let base64Img = require('base64-img');
@@ -27,14 +27,13 @@ const db = require("../config/db.config.js");
 // File Upload Use of Multer
 const multer = require('multer')
 const path = require('path')
-app.use(express.static(__dirname + '/public'));
-
+app.use(express.static("./public"))
 
 var storage = multer.diskStorage({
-    destination: (req : any, file: any, callBack: any) => {
+    destination: (req : any, file : any , callBack : any) => {
         callBack(null, 'public/')     // './public/images/' directory name where save the file
     },
-    filename: (req : any, file: any, callBack: any) => {
+    filename: (req : any, file : any, callBack : any) => {
         callBack(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
     }
 })
@@ -42,7 +41,6 @@ var storage = multer.diskStorage({
 var upload = multer({
     storage: storage
 });
-
 
 // Types
 export type KeyPair = {
@@ -58,7 +56,7 @@ export interface DidDocument {
     publicKey: string
     email: string
     name: string 
-    category: string
+    address: string
     updated?: string
     created?: string
 }
@@ -75,8 +73,6 @@ export interface DidDocument {
     const publicKey = computePublicKey(privateKey, true)
     return { address, privateKey, publicKey }
 }
-
-
 
 
 // Update issuers db by adding did 
@@ -154,15 +150,15 @@ const generateDID = (publicKey: string): string => {
  * 5- Create an Identity Document containing the Public Key
  */
 
-const createDDO = (identifier: string, publicKey: string, email: string,name:string,category:string): DidDocument => {
+const createDDO = (identifier: string, publicKey: string, email: string,name:string,address:string): DidDocument => {
     return {
         '@context': 'https://w3id.org/did/v1',
         '@type': 'Organization',
         id: identifier,
         publicKey: publicKey,
+        address: address,
         email: email,
         name: name, 
-        category: category,
         created: (new Date(Date.now())).toISOString()
     } 
 };
@@ -207,10 +203,10 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
  */
  const sendIssuerRequest = (data : any) : any => {
 
-    let query = "INSERT INTO issuers (category, name, email,phone, domain, website, dateCreation,description,location, logo, file) VALUES (?,?,?,?,?,?,?,?,?,?,?);"
+    let query = "INSERT INTO issuers (name, description, email, location, phone, website, logo, file, category, domain, governorate, dateCreation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
      
      return new Promise((resolve, reject) => {
-         db.query( query, [ data.category, data.name, data.email,data.phone, data.domain, data.website,  data.dateCreation, data.description,data.location,data.logo, data.file] , (err : any, res : any) => {
+         db.query( query, [data.name, data.description, data.email, data.location, data.phone, data.url, data.logo, data.file, data.category, data.domain, data.governorate, data.creationDate] , (err : any, res : any) => {
             if (err) {
                console.log("error: ", err);
                reject(err);
@@ -220,27 +216,32 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
      });
  }
 
-router.post('/api/IssuerRequest', upload.single('image') , (req:any , res : any) => {
+router.post('/api/uploadFiles', upload.array('files') , (req:any , res : any) => {
+
+    res.json({ logo: req.files[0].filename , file : req.files[1].filename})
+})
+
+router.post('/api/IssuerRequest', async (req:any , res : any) => {
     
-    /* let request = {  
-        name : req.body.data.name,
-        email : req.body.data.email,
-        category : req.body.data.category,
-        domain : req.body.data.domain,
-        governorate : req.body.data.governorate,
-        description : req.body.data.description,
-        location : req.body.data.location,
-        url : req.body.data.url,
-        phone : req.body.data.phone,
-        creationDate : req.body.data.creationDate,
-    } */
+    let request = {  
+        name : req.body.name,
+        email : req.body.email,
+        category : req.body.category,
+        domain : req.body.domain,
+        governorate : req.body.governorate,
+        description : req.body.description,
+        location : req.body.location,
+        url : req.body.url,
+        phone : req.body.phone,
+        creationDate : req.body.creationDate,
+        logo : req.body.logo,
+        file : req.body.file
+    }
     
+    const id = await sendIssuerRequest(request)
     
-    console.log("file",req.file);
+    res.json({id}) 
     
-    //const id = await sendIssuerRequest(request)
-    
-    //res.json({id})
 })
 
 router.get('/api/IssuerRequestList', async (req : any , res : any) => {
@@ -281,18 +282,10 @@ router.post('/api/resolveIssuer', async (req : any , res : any) => {
 
 router.post('/api/createIssuer',async (req : any , res : any) => {
 
-
-    // let publickey = req.body.publickey
     let email = req.body.email
     let name = req.body.name 
-    let category = req.body.category
     let id = req.body.id
-    let domain = req.body.domain
-    let date = req.body.date 
-    let website = req.body.website 
-    let phone = req.body.phone
 
-    
     // generate wallet
     let _keypair: KeyPair
     _keypair = createKeyPair()
@@ -303,7 +296,7 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
     // 1- generateDID
     const identifier = generateDID(publickey)
     // 2- Generate did doc
-    const ddo = createDDO(identifier, publickey, email,name,category)
+    const ddo = createDDO(identifier, publickey, email,name, address)
     // 3- add did doc to ipfs and get the cid
     const cid = await pushDDO_ipfs(ddo)
     
@@ -311,16 +304,8 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
     // 4 - update status il
     const status = updateStatus(id)
 
-
-
     UpdateIssuer(identifier, publickey, address, id)
 
-
-    // 5 - send qr code 
-    // QRCode.toDataURL(identifier, { type: 'terminal' }, function (err: any, url: any) {
-    //     if (err) return console.log("error occured")
-    //     emailSenderFunction(email, url);
-    // })
     var characters = '0123456789';
     var charactersLength = characters.length;
     let result="";
@@ -336,7 +321,6 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
        }
      )
        
-
         const doc = new PDFDocument();
         doc.pipe(fs.createWriteStream('C:/Users/ASUS/OneDrive/Bureau/PFE_SSI/backend/public/files/example.pdf'));
 
@@ -350,7 +334,9 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
         .text(name)
         doc.moveTo(500, 200)
         .text("Your DID has been approved, these are your credentials", 80, 300)
-        .text("address")
+        .text("Did")
+        .text(identifier)
+        .text("Address")
         .text(address)
         .text("Private Key")
         .text(privateKey)
@@ -396,7 +382,7 @@ function emailSenderFunction(target: String, message: String,numero: String,iden
           }],
 
         html:
-            "<h4>Your DID request as a trusted organization has been approved. <h4>Decentralized IDentifier (did):"+identifier+"</h4> </h4><br><h4>Use this link to login with the following code</h4><br>" + message + "<br>"+numero
+            "<h4>Your DID request as a trusted organization has been approved. <h4>Decentralized IDentifier (did):"+identifier+"</h4> </h4><br><h4>Use this link to login with the following code</h4><br>" + message + "<br>"+"Password : "+numero
         ,
     };
     transporter.sendMail(mailOptions, function (error: String) {
@@ -459,6 +445,11 @@ router.get('/api/image/:path', async (req : any , res : any) => {
     });
     res.end(img);
 })
+
+router.get('/api/pdf/:path', (req : any , res : any) => {
+    let path = req.params.path
+    res.sendFile(`C:/Users/ASUS/OneDrive/Bureau/PFE_SSI/backend/public/${path}`);
+});
 
 module.exports = router;
 

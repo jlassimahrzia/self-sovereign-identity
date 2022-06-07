@@ -47,7 +47,7 @@ function CreateCredential() {
     useEffect(() => {
       retrieveSchemasList().then((res) => {
         setSchemasList(res);
-        //console.log("schemasList", schemasList);
+        console.log("schemasList", schemasList);
       });
     
     }, [])
@@ -146,7 +146,7 @@ function CreateCredential() {
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>{
+                                <tbody>{/* {
                                     schemasList.map((listValue, index) => {
                                         return (
                                             <tr key={index}>
@@ -162,7 +162,7 @@ function CreateCredential() {
                                             </tr>
                                         );
                                     })
-                                }</tbody>
+                                } */}</tbody>
                             </Table>
                         </Card>
                     </div>

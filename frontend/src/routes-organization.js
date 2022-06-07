@@ -1,4 +1,3 @@
-import Index from "views/Index.js";
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
 import CreateCredential from "views/issuer/CreateCredential";

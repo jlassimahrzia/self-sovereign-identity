@@ -1,9 +1,8 @@
-import Index from "views/Index.js";
-import CreateIdentity from "views/issuer/CreateIdentity.js";
+import Index from "views/didIssuer/Index";
+import CreateIdentity from "views/didIssuer/CreateIdentity";
+import CreateIssuer from "views/didIssuer/CreateIssuer";
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
-import CreateCredential from "views/issuer/CreateCredential";
-import CreateIssuer from "views/issuer/CreateIssuer";
 
 /** Auth Routes */
 import Log from "views/auth/Log"
@@ -29,7 +28,7 @@ var routes = [
   {
     path: "/createIssuer",
     name: "Issuer DID Request",
-    icon: "ni ni-air-baloon text-black",
+    icon: "ni ni-building text-black",
     component: CreateIssuer,
     layout: "/issuer",
   }, 

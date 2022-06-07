@@ -16,22 +16,21 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 const Register = () => {
 
-    const [pdfFile, setpdfFile] = useState('');
+    const [pdfFile, setpdfFile] = useState(null);
     const [PdfError, setPdfError] = useState(null);
     
-    const [photo, setPhoto] = useState();
+    const [image, setImage] = useState(null);
     const [FileError, setFileError] = useState(null); // For image error
     
     const [logoName, setlogoName] = useState('')
     const [docName, setdocName] = useState('')
 
-    const createImage = (photo) => {
-        let reader = new FileReader();
-        reader.onload = (e) => {
-            setPhoto(e.target.result)
-        };
-        reader.readAsDataURL(photo);
-    }
+    useEffect(() => {
+        setlogoName('')
+        setdocName('')
+    }, [logoName, docName])
+    
+
     const handleImage = (e) => {
         setFileError(null);
         let files = e.target.files || e.dataTransfer.files;
@@ -46,8 +45,9 @@ const Register = () => {
             setFileError('Very large Image - Max size = 2MB');
             return;
         }
-        setlogoName(files[0].name)
-        setPhoto(e.target.files[0]);
+        setImage(e.target.files[0]); 
+        if(e.target.files[0].name)
+            setlogoName(e.target.files[0].name)
     }
 
     const handleInputDocChange = (event) => {
@@ -95,9 +95,25 @@ const Register = () => {
             creationDate : ''
         },
         onSubmit: async (values, submitProps) => {
-           
-            const data = await RegisterService.sendIssuerRequest(values, pdfFile, photo)
-            swal("Your registration process is done!", "You will recieve an email if your request is accepted!", "success");
+            const formData = new FormData();
+            formData.append("files", image);
+            formData.append("files", pdfFile);
+            const done = await RegisterService.sendIssuerRequest(values, formData)
+            if(done){
+                swal("Your registration process is done!", "You will recieve an email if your request is accepted!", "success");
+                setImage(null)
+                setlogoName(null)
+                setpdfFile(null)
+                setdocName(null)
+                setFileError(null)
+                setPdfError(null)
+                submitProps.resetForm();
+            }
+            else{
+                swal("Registration failed!", "Try Again!", "error");
+                
+                submitProps.resetForm();
+            }
         },
         validationSchema
     })
@@ -109,7 +125,8 @@ const Register = () => {
 
                     <CardBody className="px-lg-5 py-lg-5">
                         <div className="text-center text-muted mb-4">
-                            <small>Sign up with credentials</small>
+                            <h3>Becoming an IdentityTN Issuer </h3>
+                            <p>Send your request to IdentityTN team to discuss your needs and the steps involved in becoming an issuer.</p>
                         </div>
                         <Form onSubmit={AddForm.handleSubmit}>
                             <FormGroup>
@@ -430,8 +447,8 @@ const Register = () => {
                                     Logo
                                 </Label>
                                 <CustomInput className="form-control-alternative" 
-                                label={logoName || "Upload logo"} type="file" name="photo" id="photo"
-                                onChange={(e) => setPhoto(e.target.files[0])}/>
+                                label={logoName || "Upload logo"} type="file" name="image" id="image"
+                                onChange={(e) => handleImage(e)}/>
                                 {FileError != null?
                                     <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
                                     <i className="ni ni-fat-remove" /> {FileError}
@@ -452,13 +469,8 @@ const Register = () => {
                                 </span></p> : null}
                                 
                             </FormGroup>
-                            <Button className="mt-4" type="submit"
-                                 style={{ background: "#d7363c", color: "white" }}
-                                >
-                                  Send request
-                                </Button>
-                            {/* <div className="text-center">
-                                { PdfError !== null  || FileError !== null || logoName ==='' || docName === ''?
+                            <div className="text-center">
+                                { PdfError !== null  || FileError !== null?
                                 <Button className="mt-4" type="submit"
                                    style={{ background: "#d7363c", color: "white" }}
                                    disabled
@@ -471,7 +483,7 @@ const Register = () => {
                                   Send request
                                 </Button>
                                 }
-                            </div> */}
+                            </div>
                         </Form>
                     </CardBody>
                 </Card>

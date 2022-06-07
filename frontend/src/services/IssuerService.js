@@ -19,10 +19,10 @@ class IssuerService {
     }
 
 
-    async createIssuer(name, category,domain, publickey, email,id, date, website, phone) {
+    async createIssuer(name,email, id) {
         let identifier
         let cid
-        await axios.post("http://localhost:8000/api/createIssuer", {name, category,domain, publickey, email ,id,date, website, phone})
+        await axios.post("http://localhost:8000/api/createIssuer", {name, email, id})
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid

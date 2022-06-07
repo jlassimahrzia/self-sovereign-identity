@@ -19,31 +19,7 @@ const web3 = new Web3('http://127.0.0.1:7545')
 let contract = new web3.eth.Contract(config.ABI_SCHEMA_REGISTRY_CONTRACT, config.RGISTRY_SCHEMA_CONTRACT_ADDRESS)
 
 
-export interface Attribute {
-    name: string,
-    type: string,
-    description: string,
-    format?: string
-}
-
-const data = {
-    "@context": ["https://www.w3.org/2018/credentials/v1"],
-    "id": "urn:did:123456",
-    "type": ["VerifiableCredential", "PersonalID"],
-    "issuer": "did:exemple:9999999",
-    "issuanceDate": "2021-11-01T00:00:00Z",
-    "credentialSubject": {
-        "id": "did:exemple:123",
-        "firstName": "Mahrzia",
-        "dateOfBirth": "1997-08-07"
-    },
-    "credentialSchema": {
-        "id": "https://exemple/personlId",
-        "type": "JsonSchemaValidator2018"
-    }
-}
-
-let createCredentialSchema = (title: string, description:string, attributes: object, required: Array<string>) => {
+const createCredentialSchema = (title: string, description:string, attributes: object, required: Array<string>)  : any => {
 
     /* 1- Get base Schema*/
     let baseschema = require("../config/vc.baseSchema.json")
@@ -75,13 +51,6 @@ let createCredentialSchema = (title: string, description:string, attributes: obj
             }  
         }
     }
-
-    /* const validate = ajv.compile(vc_baseschema)
-    const valid = validate(data)
-    if (!valid) console.log(validate.errors)
-    else {
-        console.log("Done");
-    } */
     return vc_baseschema;
 }
 

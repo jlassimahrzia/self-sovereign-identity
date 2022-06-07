@@ -117,3 +117,7 @@ div.d-flex > h4 > span.arrows > span > svg {
 .navbar-vertical.navbar-expand-md .navbar-nav .nav-link.active:before {
     border-left: 2px solid #d7363c !important;
 }
+
+.avatar {
+    background-color: transparent !important;
+}
