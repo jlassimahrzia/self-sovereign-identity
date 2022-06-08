@@ -1,12 +1,12 @@
 import React from 'react'
 import PageHeader from 'components/Headers/PageHeader'
-import { useState } from "react";
+//import { useState } from "react";
 // node.js library that concatenates classes (strings)
-import classnames from "classnames";
+//import classnames from "classnames";
 // javascipt plugin for creating charts
 import Chart from "chart.js";
 // react plugin used to create charts
-import { Line, Bar } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
     Card,
     CardHeader,
@@ -24,8 +24,8 @@ import {
   
  
 function IndexOrganization() {
-  const [activeNav, setActiveNav] = useState(1);
-  const [chartExample1Data, setChartExample1Data] = useState("data1");
+  /* const [activeNav, setActiveNav] = useState(1); */
+  /* const [chartExample1Data, setChartExample1Data] = useState("data1"); */
 
   if (window.Chart) {
     parseOptions(Chart, chartOptions());

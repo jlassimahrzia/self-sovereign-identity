@@ -1,13 +1,7 @@
 var express = require('express');
 var app = express();
-var router = express.Router()
+var router = express.Router();
 var config = require('../config/config.js');
-
-// JS JSON schema validator
-const AJV = require('ajv').default;
-const addFormats = require('ajv-formats').default;
-const ajv = new AJV();
-addFormats(ajv);
 
 // IPFS
 const ipfsClient = require('ipfs-http-client')
@@ -95,8 +89,12 @@ router.post('/api/resolveSchema', async (req : any , res : any) => {
 
 router.post('/api/schemas', async (req : any , res : any) => {
     let did = req.body.did
-    const schemas = await contract.methods.getDidToSchema(did).call();
-    res.json(schemas) 
+    try {
+        const schemas = await contract.methods.getDidToSchema(did).call();
+        res.status(201).json(schemas) 
+    } catch (error) {
+        res.status(500).json({error});
+    }   
 }) 
 
 module.exports = router;

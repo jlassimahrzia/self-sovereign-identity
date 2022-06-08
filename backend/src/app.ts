@@ -11,11 +11,12 @@ app.use(express.urlencoded({ extended: true }));
 
 
 app.use(require('./routes/did'));
+app.use(require('./routes/auth'));
 app.use(require('./routes/vc.schema'));
 app.use(require('./routes/vc'));
 app.use(require('./routes/issuer'));
 
-app.use(require('./routes/auth'));
+
 
 
 app.get('/', (req : any , res : any ) => {

@@ -7,11 +7,8 @@ var QRCode = require('qrcode')
 var config = require('../config/config.js');
 
 var express = require('express');
-var app = express();
 const router = express.Router()
 
-// JWT
-const didJWT = require('did-jwt')
 
 // IPFS
 const ipfsClient = require('ipfs-http-client')

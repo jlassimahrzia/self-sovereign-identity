@@ -29,7 +29,7 @@ function CreateIssuer() {
     const retrieveIssuerRequestsList = async () => {
         console.log("aaa")
         let data = await IssuerService.getIssuersList();
-        setIssuerRequestsList([... data])
+        setIssuerRequestsList([...data])
         console.log(data)
     }
 
@@ -171,7 +171,7 @@ function CreateIssuer() {
                                                 item.phone
                                             }</td>
                                             <td>{
-                                                <a href={item.website} style={{color: "#5e72e4"}} target="_blank"> {item.website}</a>
+                                                <a href={item.website} style={{color: "#5e72e4"}} target="_blank" rel="noreferrer"> {item.website}</a>
                                             }</td>
                                             <td style={{width : "200px", owhiteSpace : "normal"}}>
                                                 <ReactReadMoreReadLess

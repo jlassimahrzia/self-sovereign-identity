@@ -13,16 +13,13 @@ import AuthLayout from "layouts/Auth.js";
 
 import "assets/css/custom-styles.css";
 
-
-import Profile from "views/examples/Profile";
 import OrganizationLayout from "layouts/OrganizationLayout";
-import Home from "views/home/Home";
+import Profile from "views/profile/Profile"
 
 
 ReactDOM.render(
   <BrowserRouter>
     <Switch>
-    <Route path="/home" render={(props) => <Home {...props} />} />
       <Route path="/issuer" render={(props) => <AdminLayout {...props} />} />
       <Route path="/organization" render={(props) => <OrganizationLayout {...props} />} />
       <Route path="/profile" render={(props) => <Profile {...props} />} />

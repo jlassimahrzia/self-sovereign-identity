@@ -1,8 +1,6 @@
 import Index from "views/didIssuer/Index";
 import CreateIdentity from "views/didIssuer/CreateIdentity";
 import CreateIssuer from "views/didIssuer/CreateIssuer";
-import VC from "views/issuer/VC";
-import VcSchema from "views/issuer/VcSchema.js";
 
 /** Auth Routes */
 import Log from "views/auth/Log"

@@ -1,5 +1,5 @@
 import React from 'react'
-import{Form, FormGroup,Label,Input,Button,Col,Card,CardBody,InputGroup,InputGroupAddon,InputGroupText} from "reactstrap";
+import{Form, FormGroup,Input,Button,Col,Card,CardBody,InputGroup,InputGroupAddon,InputGroupText} from "reactstrap";
 import { useParams } from "react-router-dom";
 import jwt from 'jwt-decode' // import dependency
 import {useState} from 'react'

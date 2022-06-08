@@ -121,3 +121,15 @@ div.d-flex > h4 > span.arrows > span > svg {
 .avatar {
     background-color: transparent !important;
 }
+.avatar img {
+    border-radius: 0 !important;
+}
+
+.headingProp {
+    font-size: 17px;
+    font-weight: bold;
+    display: block; }
+.descriptionProp {
+    font-size: 14px;
+    color: #adb5bd; 
+}

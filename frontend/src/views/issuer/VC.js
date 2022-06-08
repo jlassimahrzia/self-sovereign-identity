@@ -1,18 +1,14 @@
 import React from 'react'
 import {
     Button,
-    FormGroup,
-    Form,
     Input,
-     Label
-  } from "reactstrap";
+} from "reactstrap";
 import {useState, useEffect} from 'react'
-import swal from 'sweetalert';
+
 
 import {
-    Table, Container, Modal,
-    Row, Col,
-   
+    Table, Container,
+    Row, Col,  
     Card, CardHeader, 
   } from "reactstrap";
   import PageHeader from "components/Headers/PageHeader.js"; 
@@ -21,21 +17,12 @@ import {
 
 function VC() {
     
-    const [did, setDid] = useState("")
-    const [id, setId] = useState("")
-
-    const [firstName, setFirstname] = useState("")
-    const [familyName, setFamilyname] = useState("")
-    const [dateOfBirth, setDateOfBirth] = useState("")
-    const [privateKey, setPrivateKey] = useState("")
-    const [signModal, setSignModal] = useState(false)
     const [status, setStatus] = useState(0);
 
 
     const [vcRequestsList, setvcRequestsList] = useState([]);
-    const [didModal, setDidModal] = useState(false);
     const retrieveVcRequestsList = async () => {
-      let a = sessionStorage.getItem("token")
+      //let a = sessionStorage.getItem("token")
       let didIssuer = (jwt(sessionStorage.getItem("token")) ).res[0].did
 
         let data = await VCService.getVCRequestList(didIssuer);
@@ -50,53 +37,6 @@ function VC() {
       useEffect(() => {
         console.log((jwt(sessionStorage.getItem("token")) ))
       }, [vcRequestsList])
-    const handleVC = async () => {
-        try {
-            const data = await VCService.createVC(id,did,familyName, firstName, dateOfBirth,privateKey)
-            
-            console.log(data)
-            swal("A new verifiable credential is issued!", "An email will be send to the user!",  "success");
-
-            CloseDidModal()
-            retrieveVcRequestsList()
-           
-          } catch (err) {
-            console.log("error");
-          }   
-    }
-
-    const OpenSignModal = () =>{ 
-      setSignModal(true)
-    }
-   
-    const ReturnDidModal=()=>{ 
-      setSignModal(false)
-    }
-
-      const OpenDidModal = (item) => {
-        console.log(item.did) 
-        console.log(item.id)
-        setDid(item.did)
-        setId(item.id)
-        setDidModal(true)
-       
-      };
-
-  const CloseDidModal = () => {
-    setDidModal(false)
-    setSignModal(false)
-  }
-
-  const createVCFailed= async (id) => {
-    const done = await VCService.createVCFailed(id)
-    if (done) {
-      console.log('success')
-    }
-  }
-
-  const SendFailed = (item) => {
-    createVCFailed(item.id)
-  }
 
   return (
     <div>
@@ -148,7 +88,7 @@ function VC() {
                     
                     <td>
                    
-                    <Button onClick={() => SendFailed(item)} id={item.id + "a"} 
+                    <Button id={item.id + "a"} 
                     disabled={item.state !== 0 ? true : false}>Decline Request</Button>
                     </td>
                   </tr>: ""})

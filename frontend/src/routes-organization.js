@@ -1,6 +1,6 @@
 import VC from "views/issuer/VC";
 import VcSchema from "views/issuer/VcSchema.js";
-import CreateCredential from "views/issuer/CreateCredential";
+import VcSchemaList from "views/issuer/VcSchemaList";
 import Profile from "views/profile/Profile"
 import IndexOrganization from "views/IndexOrganization";
 
@@ -15,16 +15,16 @@ var OrganizationRoutes = [
       },
       {
         path: "/vcSchema",
-        name: "Verifiable Credential Schema",
-        icon: "ni ni-credit-card text-black",
+        name: "Create Credential Schema",
+        icon: "ni ni-fat-add text-black",
         component: VcSchema,
         layout: "/organization",
       },
       {
-        path: "/ceateVc",
-        name: "Create Verifiable Credential",
-        icon: "ni ni-fat-add text-black",
-        component: CreateCredential,
+        path: "/vcSchemalist",
+        name: "Credentials Schema List",
+        icon: "ni ni-credit-card text-black",
+        component: VcSchemaList,
         layout: "/organization",
       },
       {
@@ -40,7 +40,7 @@ var OrganizationRoutes = [
         icon: "ni ni-single-02 text-black",
         component: Profile,
         layout: "/organization",
-      },
+      }
 ]
 
 export default OrganizationRoutes

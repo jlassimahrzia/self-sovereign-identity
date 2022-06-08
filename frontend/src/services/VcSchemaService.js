@@ -47,7 +47,6 @@ class VcSchemaService {
         let did = jwt(sessionStorage.getItem("token")).res[0].did
         await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
             tab = res.data
-            
         }).catch(error => {
             console.log(error)
         });
@@ -58,7 +57,7 @@ class VcSchemaService {
         let schema
         let did = jwt(sessionStorage.getItem("token")).res[0].did
         await axios.post("http://localhost:8000/api/resolveSchema", {did,name}).then(res => {
-            schema = res.data
+            schema = res.data.vcSchema
         }).catch(error => {
             console.log(error)
         });
