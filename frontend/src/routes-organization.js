@@ -36,8 +36,8 @@ var OrganizationRoutes = [
       }, 
       {
         path: "/profile",
-        name: "User Profile",
-        icon: "ni ni-single-02 text-black",
+        name: "Settings",
+        icon: "ni ni-settings-gear-65 text-black",
         component: Profile,
         layout: "/organization",
       }

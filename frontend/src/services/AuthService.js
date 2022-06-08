@@ -47,6 +47,18 @@ class AuthService {
         return { x,done };
     }
 
+    async checkPrivatekey(did,privateKey){ 
+        let done 
+        await axios.post("http://localhost:8000/api/checkPrivateKey",{did,privateKey})
+        .then(res => {
+            done=res.data.done
+        })
+        .catch(error => {
+            console.log(error)
+        });   
+        return done;
+    }
+
     
 }
 

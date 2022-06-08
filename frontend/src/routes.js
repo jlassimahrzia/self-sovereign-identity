@@ -1,11 +1,13 @@
+/** Did Issuer routes */
 import Index from "views/didIssuer/Index";
 import CreateIdentity from "views/didIssuer/CreateIdentity";
 import CreateIssuer from "views/didIssuer/CreateIssuer";
 
 /** Auth Routes */
-import Log from "views/auth/Log"
+import Login from "views/auth/Login"
 import Register from "views/auth/Register";
 import Password from "views/auth/Password";
+
 
 var routes = [
   {
@@ -32,7 +34,7 @@ var routes = [
   }, 
   {
     path: "/login",
-    component: Log,
+    component: Login,
     layout: "/auth",
   },
   {
@@ -40,7 +42,6 @@ var routes = [
     component: Register,
     layout: "/auth",
   },
-
   {
     path: "/password/:id",
     component: Password,

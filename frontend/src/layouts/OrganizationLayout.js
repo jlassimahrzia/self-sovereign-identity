@@ -24,14 +24,15 @@ const OrganizationLayout = (props) => {
   const getRoutes = (OrganizationRoutes) => {
     return OrganizationRoutes.map((prop, key) => {
       if (prop.layout === "/organization") {
-        return (
-          <Route
-            exact
-            path={prop.layout + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
+          console.log(prop);
+          return (
+            <Route
+              exact
+              path={prop.layout + prop.path}
+              component={prop.component}
+              key={key}
+            />
+          );
       } else {
         return null;
       }

@@ -18,17 +18,19 @@ const OrganizationNavbar = (props) => {
     const history = useHistory();
     let token = jwt(sessionStorage.getItem("token"))
     const logOut = () => { 
-      sessionStorage.removeItem("token")
+      sessionStorage.clear()
       history.push('/');
     }
     const profile = () => {
       history.push('/organization/profile')
     }
+    console.log(props.location);
     return (
         <>
             <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
                 <Container fluid>
-                    <Link className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block">
+                    <Link className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
+                    to={props.location.pathname}>
                         {
                         props.brandText
                     } </Link>

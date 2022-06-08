@@ -1,15 +1,22 @@
+
+import { computePublicKey } from '@ethersproject/signing-key';
 var config = require('../config/config.js');
 var express = require('express');
-var app = express();
 var router = express.Router();
 const jwt = require("jsonwebtoken");
-var mysql = require('mysql');
 const bcrypt = require("bcrypt");
-
 
 // MySQL
 const db = require("../config/db.config.js");
 
+// IPFS
+const ipfsClient = require('ipfs-http-client')
+const ipfs = ipfsClient.create('http://127.0.0.1:5001')
+
+// Contract
+const Web3 = require('web3')
+const web3 = new Web3('http://127.0.0.1:7545')  
+let contract = new web3.eth.Contract(config.ABI_ISSUER_REGISTRY_CONTRACT, config.ISSUER_REGISTRY_CONTRACT_ADDRESS)
 
 // send New password to db
 const sendAuthCreds = (data : any, data2 : any) : any => {
@@ -63,6 +70,10 @@ const login = (data : any, resultat : any) : any => {
                     // console.log(token);
                     resultat.status(201).json({token});
                 }
+                else {
+                    resultat.status(404).json("err")
+                    console.log("404")
+                }
             })
 
         } else {
@@ -101,6 +112,10 @@ const loginAdmin = (data : any, resultat : any) : any => {
                   // console.log(token);
                   resultat.status(201).json({token});
               }
+              else {
+                resultat.status(404).json("err")
+                console.log("404")
+            }
           })
 
       } else {
@@ -112,9 +127,19 @@ const loginAdmin = (data : any, resultat : any) : any => {
 
 }
 
+const resolve = async (ipfsHash: String)  : Promise<any> => {
+    let asyncitr = ipfs.cat(ipfsHash)
+    let data 
+    for await (const itr of asyncitr) {
+        data = Buffer.from(itr).toString()
+    } 
+    return JSON.parse(data.toString());
+} 
+
 /**
  *  Routes
  */
+
 
 router.post('/api/login', async (req : any, res : any) => {
     let _request = {
@@ -124,7 +149,33 @@ router.post('/api/login', async (req : any, res : any) => {
     login(_request, res)
 })
 
-router.post('/api/loginAdmin', async (req : any, res : any) => {
+router.post('/api/checkPrivateKey', async (req : any, res : any) => {
+    let privateKey = req.body.privateKey
+    let did = req.body.did
+    let publicKey;
+    let done;
+    try{
+        publicKey = computePublicKey(privateKey, true)
+    }catch(error){
+        done = false
+    }
+    let ipfshash;
+    let ddo ;
+    try {
+        ipfshash = await contract.methods.getDidToHash(did).call();
+        ddo = await resolve(ipfshash)
+    } catch (error) {
+        done = false
+    }
+    if(ddo.publicKey === publicKey){
+        done = true
+    }else{
+        done = false
+    }
+    res.json({done})
+})
+
+router.post('/api/loginAdmin', (req : any, res : any) => {
   let _request = {
       did: req.body.email,
       password: req.body.password
