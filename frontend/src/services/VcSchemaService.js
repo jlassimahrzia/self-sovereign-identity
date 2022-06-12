@@ -3,35 +3,6 @@ import jwt from 'jwt-decode'
 
 class VcSchemaService {
 
-    async resolve(did) {
-        let ddo = {}
-        await axios.post("http://localhost:8000/api/resolve", { did })
-            .then(res => {
-                ddo = res.data.ddo
-                console.log(res)
-            })
-            .catch(error => {
-                console.log(error)
-            });
-        return ddo
-    }
-
-    async issueVC(formData,schemaName,privateKey,holder_pubKey){ 
-        console.log(formData)
-        let did = jwt(sessionStorage.getItem("token")).res[0].did
-        let done = false
-        await axios.post("http://localhost:8000/api/issueVC",{formData,schemaName,did,privateKey,holder_pubKey})
-        .then(res=>{
-            done=true 
-            console.log(done)
-            
-        }).catch(error=>{ 
-            console.log(error)
-        })
-     
-
-    }
-
     async createVcSchema(data) {
         let did = jwt(sessionStorage.getItem("token")).res[0].did
         console.log("did",did);

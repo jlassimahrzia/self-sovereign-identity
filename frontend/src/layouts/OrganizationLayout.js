@@ -24,7 +24,6 @@ const OrganizationLayout = (props) => {
   const getRoutes = (OrganizationRoutes) => {
     return OrganizationRoutes.map((prop, key) => {
       if (prop.layout === "/organization") {
-          console.log(prop);
           return (
             <Route
               exact

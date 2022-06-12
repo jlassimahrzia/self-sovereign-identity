@@ -24,7 +24,7 @@ const OrganizationNavbar = (props) => {
     const profile = () => {
       history.push('/organization/profile')
     }
-    console.log(props.location);
+
     return (
         <>
             <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">

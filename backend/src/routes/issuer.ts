@@ -361,17 +361,16 @@ router.post('/api/createIssuerFailed', async (req: any, res: any) => {
 // Email function when success 
 function emailSenderFunction(target: String, message: String,numero: String,identifier:String,doc:any) {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        host: config.MAILTRAP_HOST,
+        port: config.MAILTRAP_PORT,
         auth: {
-            user: 'did.issuance@gmail.com',
-            pass: 'talan2022'
+            user: config.MAILTRAP_USER ,
+            pass: config.MAILTRAP_PASS
         }
     });
+   
     var mailOptions = {
-        from: "did.issuance@gmail.com",
+        from: config.MAILTRAP_FROM_ADDRESS,
         to: target,
         subject: "DID Issuance",
         attachDataUrls: true,
@@ -395,17 +394,16 @@ function emailSenderFunction(target: String, message: String,numero: String,iden
 // Email function when failure
 function emailSenderFailure(target: String) {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        host: config.MAILTRAP_HOST,
+        port: config.MAILTRAP_PORT,
         auth: {
-            user: 'did.issuance@gmail.com',
-            pass: 'talan2022'
+            user: config.MAILTRAP_USER ,
+            pass: config.MAILTRAP_PASS
         }
     });
+   
     var mailOptions = {
-        from: "did.issuance@gmail.com",
+        from: config.MAILTRAP_FROM_ADDRESS,
         to: target,
         subject: "DID Issuance Request Declined",
         text: "DID Issuance Request Declined",

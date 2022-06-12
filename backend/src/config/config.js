@@ -16,5 +16,11 @@ module.exports = {
     HOST: "localhost",
     USER: "root",
     PASSWORD: "",
-    DB: "ssi"
+    DB: "ssi",
+
+    MAILTRAP_USER : "331a15d20b66f4",
+    MAILTRAP_PASS : "4efe60cdf7001e",
+    MAILTRAP_HOST : "smtp.mailtrap.io",
+    MAILTRAP_PORT : 587,
+    MAILTRAP_FROM_ADDRESS : "identityTN@example.com"
 };

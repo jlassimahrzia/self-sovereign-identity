@@ -57,7 +57,6 @@ function VcSchemaList() {
     useEffect(() => {
       retrieveSchemasList().then((res) => {
         setSchemasList(res);
-        //console.log("schemasList", schemasList);
       });
     
     }, [])

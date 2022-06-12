@@ -25,7 +25,7 @@ const CreateIdentity = () => {
   }, [])
 
   useEffect(() => {
-    retrieveDidRequestsList();
+    //retrieveDidRequestsList();
   }, [didRequestsList])
 
   const createIdentity1 = async (publickey, email, id) => {

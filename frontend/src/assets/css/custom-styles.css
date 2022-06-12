@@ -126,10 +126,13 @@ div.d-flex > h4 > span.arrows > span > svg {
 }
 
 .headingProp {
-    font-size: 17px;
-    font-weight: bold;
-    display: block; }
-.descriptionProp {
     font-size: 14px;
-    color: #adb5bd; 
+    font-weight: bold;
+    display: block; 
+    text-transform: capitalize;
+    line-height: 30px;
+}
+.descriptionProp {
+    font-size: 13px;
+    color: #ADB5BD; 
 }

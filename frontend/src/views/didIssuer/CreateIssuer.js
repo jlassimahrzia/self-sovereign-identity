@@ -38,7 +38,7 @@ function CreateIssuer() {
 
     }, [])
     useEffect(() => {
-        retrieveIssuerRequestsList();
+       // retrieveIssuerRequestsList();
     }, [IssuerRequestsList])
 
     const createIssuer = async (name,email, id) => {

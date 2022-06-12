@@ -66,16 +66,6 @@ const getVCRequestList = (data : any) : any => {
     });
 }
 
-// Update status after creating VC
-
-const updateStatus = (data : any) : any => {
-    let ID = data
-    console.log(ID)
-    let query = "Update vcrequest SET state='1' where did_holder =" + "'" + ID + "'"
-    return new Promise(() => {
-        db.query(query, [ID])
-    })
-}
 
 
 const updateStatusDeclined = (data : any) : any => {
@@ -130,26 +120,42 @@ const data = {
 }
 */
 
+// Update status after creating VC
+
+const updateStatus = (data : any) : any => {
+    let query = "UPDATE vcrequest SET state='1' WHERE did_holder=? AND vc_name=? AND state=?"
+    return new Promise((resolve, reject) => {
+        db.query( query, [data.did_holder, data.vc_name, data.state], (err: any, res: any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+
 router.post('/api/issueVC', async (req : any, res : any) => {
     let {formData} = req.body.formData
-    let didHolder = formData.id
-    let schemaName = req.body.schemaName
+    //let didHolder = formData.id
+    let request = req.body.item
     let did = req.body.did
     let privateKey = (req.body.privateKey).substr(2)
-    let holder_pubKey = (req.body.holder_pubKey).substr(2)
+    let ddo = req.body.ddo
    
 
     let VerifiableCredential = {
         '@context': ['https://www.w3.org/2018/credentials/v1'],
         id: 'credential/' + result,
         type: [
-            "VerifiableCredential", schemaName
+            "VerifiableCredential", request.vc_name
         ],
         issuer: did,
         issuanceDate: (new Date(Date.now())).toISOString(),
         credentialSubject: {},
         credentialSchema: {
-            "id": schemaName,
+            "id": request.vc_name,
             "type": "JsonSchemaValidator2018"
         },
         issuerProof: {}
@@ -157,28 +163,17 @@ router.post('/api/issueVC', async (req : any, res : any) => {
     let k = {}
 
     Object.keys(formData).map(function (key, index) {
-        //if (index !== 0) {
             console.log(key, "****", formData[key], index)
-
-            //const hash = EthereumEncryption.hash(formData[key]);
-            /*const signature = EthereumEncryption.signHash(privateKey, // privateKey of issuer
-            hash // hash
-            );*/
-            /* const k1 = {
-                "value": formData[key],
-                "proof": signature
-            } */
             const k1 = formData[key]
             k = {
                 ... k,
                 [key]: k1
             }
-        //}
     });
     
     Object.assign(VerifiableCredential.credentialSubject, k)
 
-    console.log("VerifiableCredential : ",VerifiableCredential);
+    //console.log("VerifiableCredential : ",VerifiableCredential);
     
 
     const hashVC = EthereumEncryption.hash(JSON.stringify(VerifiableCredential));
@@ -187,15 +182,7 @@ router.post('/api/issueVC', async (req : any, res : any) => {
         hashVC // hash
     );
     
-    console.log("signatureVC by Issuer: ",signatureVC);
-
-    // const valid = EthereumEncryption.verifyHashSignature(
-    //     "035a0020899a5059ce2a69a51d32c9e3992a210935f25b8529af9ca11acdc3d350", // publicKey
-    //     hashVC, // hash
-    //     signatureVC // signature
-    // );
-    
-    // console.log(valid)
+    //console.log("signatureVC by Issuer: ",signatureVC);
  
     VerifiableCredential.issuerProof = {
         type : "sha3_256",
@@ -204,36 +191,14 @@ router.post('/api/issueVC', async (req : any, res : any) => {
         proofValue : signatureVC
     }
 
-    console.log("VerifiableCredential with proof : ",VerifiableCredential);
-
-    /*     
-        const token = jwt.sign(VerifiableCredential, privateKey,
-        // private key of issuer
-        {expiresIn: "1h"})
-    */
+    //console.log("VerifiableCredential with proof : ",VerifiableCredential);
 
     const encrypted = EthereumEncryption.encryptWithPublicKey(
-        holder_pubKey, // publicKey of holder
+        (ddo.publicKey).substr(2), // publicKey of holder
         JSON.stringify(VerifiableCredential) // data
     );
 
-
-    console.log("encrypted : ", encrypted)
-
-    
-    //res.json({formData})
-
-    /* let message = EthereumEncryption.decryptWithPrivateKey(
-        "0x317dd1db15e0bf7eee38b212568a85c95023965cbd43c54a7528ca7523d5854e", // privateKey
-        encrypted
-    );
-    console.log("message", message) */
-    const status = updateStatus(didHolder)
-
-    //const value = JSON.stringify(VerifiableCredential)
-
-    //console.log(token)
-    // console.log(JSON.parse(value).vc.credentialSubject.name)
+    const status = updateStatus(request)
 
     QRCode.toDataURL(encrypted, {
         type: 'terminal',
@@ -242,8 +207,9 @@ router.post('/api/issueVC', async (req : any, res : any) => {
     }, function (err : any, url : any) {
         if (err) 
             return console.log("error occured", err)
-        emailSenderFunction('jlassimahrzia111@gmail.com', url);
+        emailSenderFunction(ddo.email, url);
     }) 
+    res.json({done : true})
 })
 
 /** Verify VC sTART*/
@@ -377,30 +343,29 @@ router.post('/api/signVC', async (req : any, res : any) => {
 
 
 /** Sign Vc end */
-router.post('/api/createVCFailed ', async (req: any, res: any) => {
- let id = req.body.id
-    emailSenderFailure('jlassimahrzia111@gmail.com')
-    const status = updateStatusDeclined(id)
-    res.json({status})
+router.post('/api/createVCFailed', async (req: any, res: any) => {
+    let id = req.body.id
+    let email = req.body.email
+    emailSenderFailure(email)
+    updateStatusDeclined(id)
+    res.json({done : true})
 })
 
 function emailSenderFunction(target : String, message : String) {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        host: config.MAILTRAP_HOST,
+        port: config.MAILTRAP_PORT,
         auth: {
-            user: 'did.issuance@gmail.com',
-            pass: 'talan2022'
+            user: config.MAILTRAP_USER ,
+            pass: config.MAILTRAP_PASS
         }
     });
+   
     var mailOptions = {
-        from: "did.issuance@gmail.com",
-        to: "jlassimahrzia111@gmail.com",
+        from: config.MAILTRAP_FROM_ADDRESS,
+        to: target,
         subject: "VC Issuance",
         attachDataUrls: true,
-
         html: "<h4>Scan the QR code to get your Verifiable credentials. </h4><br><img src=" + message + ">"
     };
     transporter.sendMail(mailOptions, function (error : String) {
@@ -414,17 +379,16 @@ function emailSenderFunction(target : String, message : String) {
 // Email function when failure
 function emailSenderFailure(target : String) {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false,
-        requireTLS: true,
+        host: config.MAILTRAP_HOST,
+        port: config.MAILTRAP_PORT,
         auth: {
-            user: 'did.issuance@gmail.com',
-            pass: 'talan2022'
+            user: config.MAILTRAP_USER ,
+            pass: config.MAILTRAP_PASS
         }
     });
+   
     var mailOptions = {
-        from: "did.issuance@gmail.com",
+        from: config.MAILTRAP_FROM_ADDRESS,
         to: target,
         subject: "VC Issuance Request Declined",
         text: "VC Issuance Request Declined",
