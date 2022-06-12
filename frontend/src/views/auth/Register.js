@@ -69,6 +69,7 @@ const Register = () => {
     }
 
     const validationSchema = Yup.object({
+        type : Yup.string().required(),
         name : Yup.string().required(),
         email : Yup.string().email().required(),
         category :  Yup.string().required(),
@@ -83,6 +84,7 @@ const Register = () => {
 
     const AddForm = useFormik({
         initialValues: {
+            type : "issuer",
             name : '',
             email : '',
             category : '',
@@ -125,10 +127,27 @@ const Register = () => {
 
                     <CardBody className="px-lg-5 py-lg-5">
                         <div className="text-center text-muted mb-4">
-                            <h3>Becoming an IdentityTN Issuer </h3>
-                            <p>Send your request to IdentityTN team to discuss your needs and the steps involved in becoming an issuer.</p>
+                            <h3>Becoming an IdentityTN Issuer OR Verifier </h3>
+                            <p>Send your request to IdentityTN team to discuss your needs and the steps involved in becoming an issuer or verifier.</p>
                         </div>
                         <Form onSubmit={AddForm.handleSubmit}>
+                            <FormGroup>
+                                <Label for="category">
+                                    Type
+                                </Label>
+                                <Input type="select"
+                                name="type" id="type"
+                                {...AddForm.getFieldProps('type')}
+                                >
+                                    <option hidden>Select ...</option>
+                                    <option value="issuer">Issuer</option>
+                                    <option value="verifier">Verifier</option>
+                                </Input>
+                                {AddForm.errors.type && AddForm.touched.type ?
+                                <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
+                                    <i className="ni ni-fat-remove" /> {AddForm.errors.type}
+                                </span></p> : null}
+                            </FormGroup>
                             <FormGroup>
                                 <Label for="name">
                                     Name
@@ -155,7 +174,7 @@ const Register = () => {
                                     <i className="ni ni-fat-remove" /> {AddForm.errors.email}
                                 </span></p> : null}
                             </FormGroup>
-                            <FormGroup>
+                            {AddForm.values.type === "issuer" ? <FormGroup>
                                 <Label for="category">
                                     Organization Category
                                 </Label>
@@ -177,8 +196,19 @@ const Register = () => {
                                 <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
                                     <i className="ni ni-fat-remove" /> {AddForm.errors.category}
                                 </span></p> : null}
-                            </FormGroup>
-
+                            </FormGroup> :
+                            <FormGroup>
+                                <Label for="category">
+                                    Organization Category
+                                </Label>
+                                <Input type="text"
+                                name="category" id="category" {...AddForm.getFieldProps('category')}/>
+                                {AddForm.errors.category && AddForm.touched.category ?
+                                <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
+                                    <i className="ni ni-fat-remove" /> {AddForm.errors.category}
+                                </span></p> : null}
+                            </FormGroup>}
+                            {AddForm.values.type === "issuer" ?
                             <FormGroup>
                                 <Label for="domain">
                                     Organization Domain
@@ -314,7 +344,19 @@ const Register = () => {
                                 <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
                                     <i className="ni ni-fat-remove" /> {AddForm.errors.domain}
                                 </span></p> : null}
+                            </FormGroup>:
+                             <FormGroup>
+                             <Label for="domain">
+                                 Organization Domain
+                             </Label>
+                             <Input type="text" name="domain" id="domain"
+                             {...AddForm.getFieldProps('domain')}/>
+                                {AddForm.errors.domain && AddForm.touched.domain ?
+                                <p className="mt-3 mb-0 text-muted text-sm"><span className="text-danger mr-2">
+                                    <i className="ni ni-fat-remove" /> {AddForm.errors.domain}
+                                </span></p> : null}
                             </FormGroup>
+                            }
 
                             <FormGroup>
                                 <Label for="exampleSelect">

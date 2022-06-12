@@ -24,7 +24,6 @@ function VC() {
     const [vcModal, setVcModal] = useState(false)
     const [schema, setSchema] = useState({});
     const [formData, setFormData] = useState(null)
-    const [schemaName, setschemaName] = useState("")
     const [vcRequestsList, setvcRequestsList] = useState([]);
     const [item, setitem] = useState({})
 
@@ -48,7 +47,6 @@ function VC() {
         setitem(item)
         let data = await VcSchemaService.resolveSchema(item.vc_name)
         data.properties.credentialSubject.properties.id.default = item.did_holder
-        setschemaName(item.vc_name)
         setSchema(data.properties.credentialSubject)
         setVcModal(true)
     }

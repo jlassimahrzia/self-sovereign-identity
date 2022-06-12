@@ -15,7 +15,7 @@ import "assets/css/custom-styles.css";
 
 import OrganizationLayout from "layouts/OrganizationLayout";
 import Profile from "views/profile/Profile"
-
+import VerifierLayout from "layouts/VerifierLayout"
 
 ReactDOM.render(
   <BrowserRouter>
@@ -23,6 +23,7 @@ ReactDOM.render(
       <Route path="/issuer" render={(props) => <AdminLayout {...props} />} />
       <Route path="/organization" render={(props) => <OrganizationLayout {...props} />} />
       <Route path="/profile" render={(props) => <Profile {...props} />} />
+      <Route path="/verifier" render={(props) => <VerifierLayout {...props} />} />
       <Route path="/auth" render={(props) => <AuthLayout {...props} />} />
       <Redirect from="/" to="/auth/login" />
     </Switch>

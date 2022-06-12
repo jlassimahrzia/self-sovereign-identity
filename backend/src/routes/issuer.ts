@@ -201,7 +201,7 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
 /**
  *  2- Request DID from did issuer
  */
- const sendIssuerRequest = (data : any) : any => {
+const sendIssuerRequest = (data : any) : any => {
 
     let query = "INSERT INTO issuers (name, description, email, location, phone, website, logo, file, category, domain, governorate, dateCreation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
      
@@ -214,7 +214,22 @@ router.get('/api/createKeyPair', (req : any , res : any) => {
              resolve(res.insertId);
          });
      });
- }
+}
+
+const sendVerifierRequest = (data : any) : any => {
+
+    let query = "INSERT INTO verifiers (name, description, email, location, phone, website, logo, file, category, domain, governorate, dateCreation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+     
+     return new Promise((resolve, reject) => {
+         db.query( query, [data.name, data.description, data.email, data.location, data.phone, data.url, data.logo, data.file, data.category, data.domain, data.governorate, data.creationDate] , (err : any, res : any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+             }
+             resolve(res.insertId);
+         });
+     });
+}
 
 router.post('/api/uploadFiles', upload.array('files') , (req:any , res : any) => {
 
@@ -238,7 +253,13 @@ router.post('/api/IssuerRequest', async (req:any , res : any) => {
         file : req.body.file
     }
     
-    const id = await sendIssuerRequest(request)
+    let id
+    if(req.body.type == "issuer"){
+        id = await sendIssuerRequest(request)
+    }
+    else if ( req.body.type == "verifier"){
+        id = await sendVerifierRequest(request)
+    }
     
     res.json({id}) 
     
@@ -313,9 +334,10 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
         result += characters.charAt(Math.floor(Math.random() *
         charactersLength));
     }
+    let type = "issuer"
     const token = jwt.sign(
        
-     { identifier,result,},'d8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
+     { identifier,result,type},'d8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
        {
          expiresIn: "1h",
        }

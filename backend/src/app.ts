@@ -15,8 +15,7 @@ app.use(require('./routes/auth'));
 app.use(require('./routes/vc.schema'));
 app.use(require('./routes/vc'));
 app.use(require('./routes/issuer'));
-
-
+app.use(require('./routes/verifier'));
 
 
 app.get('/', (req : any , res : any ) => {

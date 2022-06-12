@@ -14,11 +14,41 @@ class AuthService {
         return { done };
          
     }
-
+    async sendAuthCredsVerifier(password,did){
+        let done = false
+        await axios.post("http://localhost:8000/api/sendAuthCredsVerifier", {password,did })
+            .then(res => {
+                done = true
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        
+        return { done };
+         
+    }
+    
     async login(did,password){ 
         let done = false
         let x;
         await axios.post("http://localhost:8000/api/login",{did,password})
+        .then(res => {
+            done = true
+            x=res.data.token
+        })
+        .catch(error => {
+            console.log(error)
+            x=error
+        });
+    
+        return { x,done };
+    }
+
+    async loginVerifier(did,password){ 
+        console.log("loginVerifier");
+        let done = false
+        let x;
+        await axios.post("http://localhost:8000/api/loginVerifier",{did,password})
         .then(res => {
             done = true
             x=res.data.token
@@ -50,6 +80,18 @@ class AuthService {
     async checkPrivatekey(did,privateKey){ 
         let done 
         await axios.post("http://localhost:8000/api/checkPrivateKey",{did,privateKey})
+        .then(res => {
+            done=res.data.done
+        })
+        .catch(error => {
+            console.log(error)
+        });   
+        return done;
+    }
+
+    async checkPrivatekeyVerifier(did,privateKey){ 
+        let done 
+        await axios.post("http://localhost:8000/api/checkPrivateKeyVerifier",{did,privateKey})
         .then(res => {
             done=res.data.done
         })

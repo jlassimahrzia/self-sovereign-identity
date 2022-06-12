@@ -19,6 +19,7 @@ function Password() {
     const [num, setNum] = useState("")
     const [password, setPassword] = useState("")
     const [newpassword, setNewpassword] = useState("")
+    const [type, setType] = useState("")
 
   const saveFile = (e) => {
     if(e===jwt(token.id).result){
@@ -26,7 +27,7 @@ function Password() {
     }
    setNum(e);
    setDid(jwt(token.id).identifier)
-   
+   setType(jwt(token.id).type)
    console.log(e,num,ok)
   };
 
@@ -51,8 +52,14 @@ function Password() {
   };
 
   const sendAuthCreds = async()=>{ 
-    try{ 
-      const data = await AuthService.sendAuthCreds(password,did)
+    try{
+      let data  
+      if(type === "issuer"){
+        data = await AuthService.sendAuthCreds(password,did)
+      }
+      else if(type === "verifier"){
+        data = await AuthService.sendAuthCredsVerifier(password,did)
+      }
       console.log(data)
       history.push('/auth/login'); 
     }catch{ 
