@@ -19,8 +19,9 @@ let schemaContract = new web3.eth.Contract(config.ABI_SCHEMA_REGISTRY_CONTRACT, 
 // JS JSON schema validator
 const AJV = require('ajv').default;
 const addFormats = require('ajv-formats').default;
-const ajv = new AJV();
+const ajv = new AJV({strict: false});
 addFormats(ajv);
+
 
 // IPFS
 const ipfsClient = require('ipfs-http-client')

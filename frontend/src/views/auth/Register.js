@@ -6,7 +6,7 @@ import {
     Form,
     Input,
     Label,
-    Col, CustomInput
+    Col, CustomInput, CardHeader
 } from "reactstrap";
 import React from 'react'
 import {useState, useEffect} from 'react'
@@ -123,13 +123,14 @@ const Register = () => {
     return (
         <>
             <Col lg="6" md="8">
-                <Card className="bg-secondary shadow border-0">
-
-                    <CardBody className="px-lg-5 py-lg-5">
+                <Card className="shadow border-0">
+                    <CardHeader className="bg-secondary">
                         <div className="text-center text-muted mb-4">
                             <h3>Becoming an IdentityTN Issuer OR Verifier </h3>
                             <p>Send your request to IdentityTN team to discuss your needs and the steps involved in becoming an issuer or verifier.</p>
                         </div>
+                    </CardHeader>
+                    <CardBody className="px-lg-5 py-lg-5">
                         <Form onSubmit={AddForm.handleSubmit}>
                             <FormGroup>
                                 <Label for="category">

@@ -1,0 +1,152 @@
+{
+    "title": "Verifiable Credential Name",
+    "issuer": "issuer DID",
+    "description": "The Credential Schema is a document that is used to guarantee the structure of Verifiable Credential.",
+    "type": "object",
+    "properties": {
+        "@context": {
+            "description": "Defines semantic context of the Verifiable Credential",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+        },
+        "id": {
+            "description": "Defines unique identifier of the Verifiable Credential Exemple : did:exemple:abcdefghi;id=17de181feb67447da4e78259d92d0240;version=1.0",
+            "type": "string"
+        },
+        "type": {
+          "description": "Defines the Verifiable Credential type",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "issuer": {
+          "description": "Defines the issuer of the Verifiable Credential",
+          "type": "string",
+          "format": "uri"
+        },
+        "issuanceDate": {
+          "description": "Defines the date and time, when the Verifiable Credential becomes valid",
+          "type": "string",
+          "format": "date-time"
+        },
+        "credentialSubject": {
+            "description": "Defines information about the subject that is described by the Verifiable Credential",
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "Defines the DID of the subject that is described by the Verifiable Credential",
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": [
+              "id"
+            ]
+        },
+        "credentialSchema": {
+            "description": "(to check credential schema compatibility) Contains information about the credential schema (template) on which the Verifiable Authorisation is based",
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "References the credential schema (template) stored on the (relevant) Schemas Registry (SR) on which the Verifiable Authorisation is based",
+                "type": "string"
+              },
+              "type": {
+                "description": "Defines credential schema type",
+                "type": "string",
+                "enum": ["JsonSchemaValidator2018"]
+              }
+            },
+            "required": ["id", "type"]
+        },
+        "issuerProof": {
+            "description": "Contains information about the Issuer proof",
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "Defines the proof type",
+                "type": "string"
+              },
+              "proofPurpose": {
+                "description": "Defines the purpose of the proof",
+                "type": "string"
+              },
+              "created": {
+                "description": "Defines the date and time, when the proof has been created",
+                "type": "string",
+                "format": "date-time"
+              },
+              "verificationMethod": {
+                "description": "Contains information about the verification method / proof mechanisms",
+                "type": "string"
+              },
+              "hash": {
+                "description": "Defines the hash of VC",
+                "type": "string"
+              },
+              "proofValue": {
+                "description": "Defines the proof value in JWS format",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "created",
+              "hash",
+              "proofValue"
+            ]
+        },
+        "holderProof": {
+          "description": "Contains information about the holder proof",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Defines the proof type",
+              "type": "string"
+            },
+            "proofPurpose": {
+              "description": "Defines the purpose of the proof",
+              "type": "string"
+            },
+            "created": {
+              "description": "Defines the date and time, when the proof has been created",
+              "type": "string",
+              "format": "date-time"
+            },
+            "verificationMethod": {
+              "description": "Contains information about the verification method / proof mechanisms",
+              "type": "string"
+            },
+            "hash": {
+              "description": "Defines the hash of VC",
+              "type": "string"
+            },
+            "proofValue": {
+              "description": "Defines the proof value in JWS format",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "created",
+            "hash",
+            "proofValue",
+            "holderProof"
+          ]
+        }
+    },
+    "required": [
+        "@context",
+        "id",
+        "type",
+        "issuer",
+        "credentialSubject",
+        "credentialSchema",
+        "issuerProof",
+        "holderProof"
+    ]
+}

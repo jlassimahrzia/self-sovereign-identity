@@ -180,7 +180,7 @@ const Login = () => {
     return (
         <>
             <Col lg="5" md="7">
-                <Card className=" shadow border-0"
+                <Card className="shadow border-0"
                     style={
                         {borderColor: "#d7363c"}
                 }>

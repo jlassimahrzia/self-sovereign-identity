@@ -2,6 +2,7 @@ const registryContract = require("../../../contracts/build/contracts/Registry.js
 const schemaRegistryContract = require("../../../contracts/build/contracts/SchemasRegistry.json");
 const issuerRegistry = require ("../../../contracts/build/contracts/IssuerRegistry.json")
 const verifierRegistry = require ("../../../contracts/build/contracts/VerifierRegistry.json")
+const vpSchemaRegistry = require ("../../../contracts/build/contracts/VpSchemaRegistry.json")
 
 module.exports = {
     PORT: 8000,
@@ -16,6 +17,9 @@ module.exports = {
 
     ABI_VERIFIER_REGISTRY_CONTRACT: verifierRegistry.abi,
     RGISTRY_VERIFIER_CONTRACT_ADDRESS : verifierRegistry.networks[5777].address,
+
+    ABI_VP_SCHEMA_REGISTRY_CONTRACT: vpSchemaRegistry.abi,
+    VP_SCHEMA_VERIFIER_CONTRACT_ADDRESS : vpSchemaRegistry.networks[5777].address,
     
     HOST: "localhost",
     USER: "root",

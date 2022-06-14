@@ -1,0 +1,130 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "identityTN Verifiable Presentation",
+    "description": "Schema of an identityTN Verifiable Presentation",
+    "type": "object",
+    "properties": {
+      "@context": {
+        "description": "Defines semantic context of the Verifiable Presentation",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "type": {
+        "description": "Defines the Verifiable Presentation type",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "holder": {
+        "description": "Defines unique identifier of the party who shares the Verifiable Presentation",
+        "type": "string"
+      },
+      "verifier": {
+        "description": "Defines the verifier of the Verifiable Presentation",
+        "type": "string",
+        "format": "uri"
+      },
+      "issuanceDate": {
+        "description": "Defines the date and time, when the Verifiable Presentation becomes valid",
+        "type": "string",
+        "format": "date-time"
+      },
+      "expirationDate": {
+        "description": "Defines the date and time, when the Verifiable Presentation expires",
+        "type": "string",
+        "format": "date-time"
+      },
+      "verifiableCredential": {
+        "description": "Contains the personal information intended to be shared",
+        "type": "array",
+        "items": [{}],
+        "additionalItems": false
+      },
+      "verifierProof": {
+        "description": "Contains information about the Issuer proof",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Defines the proof type",
+            "type": "string"
+          },
+          "proofPurpose": {
+            "description": "Defines the purpose of the proof",
+            "type": "string"
+          },
+          "created": {
+            "description": "Defines the date and time, when the proof has been created",
+            "type": "string",
+            "format": "date-time"
+          },
+          "verificationMethod": {
+            "description": "Contains information about the verification method / proof mechanisms",
+            "type": "string"
+          },
+          "hash": {
+            "description": "Defines the hash of VC",
+            "type": "string"
+          },
+          "proofValue": {
+            "description": "Defines the proof value in JWS format",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "created",
+          "hash",
+          "proofValue"
+        ]
+      },
+      "holderProof": {
+        "description": "Contains information about the holder proof",
+        "type": "object",
+        "properties": {
+            "type": {
+            "description": "Defines the proof type",
+            "type": "string"
+            },
+            "proofPurpose": {
+            "description": "Defines the purpose of the proof",
+            "type": "string"
+            },
+            "created": {
+            "description": "Defines the date and time, when the proof has been created",
+            "type": "string",
+            "format": "date-time"
+            },
+            "verificationMethod": {
+            "description": "Contains information about the verification method / proof mechanisms",
+            "type": "string"
+            },
+            "hash": {
+            "description": "Defines the hash of VC",
+            "type": "string"
+            },
+            "proofValue": {
+            "description": "Defines the proof value in JWS format",
+            "type": "string"
+            }
+        },
+        "required": [
+            "type",
+            "created",
+            "hash",
+            "proofValue"
+        ]
+      }
+    },
+    "required": [
+      "@context",
+      "type",
+      "verifier",
+      "issuanceDate",
+      "verifiableCredential",
+      "verifierProof"
+    ]
+}

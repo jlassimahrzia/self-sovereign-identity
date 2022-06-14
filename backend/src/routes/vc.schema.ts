@@ -4,12 +4,12 @@ var router = express.Router();
 var config = require('../config/config.js');
 
 // IPFS
-const ipfsClient = require('ipfs-http-client')
-const ipfs = ipfsClient.create('http://127.0.0.1:5001')
+var ipfsClient = require('ipfs-http-client')
+var ipfs = ipfsClient.create('http://127.0.0.1:5001')
 
 // Contract
-const Web3 = require('web3')
-const web3 = new Web3('http://127.0.0.1:7545')  
+let Web3 = require('web3')
+let web3 = new Web3('http://127.0.0.1:7545')  
 let contract = new web3.eth.Contract(config.ABI_SCHEMA_REGISTRY_CONTRACT, config.RGISTRY_SCHEMA_CONTRACT_ADDRESS)
 
 
