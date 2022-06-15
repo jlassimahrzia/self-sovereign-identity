@@ -31,7 +31,7 @@ function VC() {
 
         let didIssuer = (jwt(sessionStorage.getItem("token"))).res[0].did
         let data = await VCService.getVCRequestList(didIssuer);
-        setvcRequestsList([... data])
+        setvcRequestsList([...data])
     }
 
     useEffect(() => {

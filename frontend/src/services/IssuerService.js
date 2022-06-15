@@ -74,7 +74,17 @@ class IssuerService {
         return ddo
     }
 
-
+    async getIssuers(){
+        let list = []
+        await axios.get("http://localhost:8000/api/issuersList")
+            .then(res => {
+                list = res.data.list
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return list;
+    }
 
 }
 

@@ -1,5 +1,6 @@
 
 import IndexVerifier from "views/verifier/index";
+import VpSchema from "views/verifier/vpSchema"
 
 var VerifierRoutes = [
  
@@ -8,6 +9,13 @@ var VerifierRoutes = [
     name: "Home",
     icon: "ni ni-tag text-black",
     component: IndexVerifier,
+    layout: "/verifier",
+  },
+  {
+    path: "/vpSchema",
+    name: "Verification Templates",
+    icon: "ni ni-paper-diploma text-black",
+    component: VpSchema,
     layout: "/verifier",
   },
 ];

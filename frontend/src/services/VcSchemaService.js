@@ -36,5 +36,14 @@ class VcSchemaService {
         return schema;
     }
 
+    async getSchemasByIssuer(did) {
+        let tab
+        await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
+            tab = res.data
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
 }
 export default new VcSchemaService();

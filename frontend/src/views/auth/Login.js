@@ -346,7 +346,7 @@ const Login = () => {
                                             <i className="ni ni-email-83"/>
                                         </InputGroupText>
                                     </InputGroupAddon>
-                                    <Input placeholder="Did" type="did" name="did" id="did" {...LoginVerifierForm.getFieldProps('did')}/>
+                                    <Input placeholder="Did" type="text" name="did" id="did" {...LoginVerifierForm.getFieldProps('did')}/>
                                 </InputGroup>
                                 {
                                 LoginVerifierForm.errors.did && LoginVerifierForm.touched.did ? <p className="mt-3 mb-0 text-muted text-sm">
@@ -363,7 +363,8 @@ const Login = () => {
                                             <i className="ni ni-lock-circle-open"/>
                                         </InputGroupText>
                                     </InputGroupAddon>
-                                    <Input placeholder="Password" type="password" name="password" id="password" {...LoginVerifierForm.getFieldProps('password')}/>
+                                    <Input placeholder="Password" type="password" name="password" 
+                                    id="password" {...LoginVerifierForm.getFieldProps('password')}/>
                                 </InputGroup>
                                 {
                                 LoginVerifierForm.errors.password && LoginVerifierForm.touched.password ? <p className="mt-3 mb-0 text-muted text-sm">

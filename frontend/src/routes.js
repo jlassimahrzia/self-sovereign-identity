@@ -9,9 +9,6 @@ import Login from "views/auth/Login"
 import Register from "views/auth/Register";
 import Password from "views/auth/Password";
 
-/** Verifier Routes */
-import IndexVerifier from "views/verifier/index";
-
 var routes = [
   {
     path: "/index",
@@ -55,14 +52,7 @@ var routes = [
     path: "/password/:id",
     component: Password,
     layout: "/auth",
-  },
-  {
-    path: "/index",
-    name: "Home",
-    icon: "ni ni-tag text-black",
-    component: IndexVerifier,
-    layout: "/verifier",
-  },
+  }
 ];
 export default routes;
 

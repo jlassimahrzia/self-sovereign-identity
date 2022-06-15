@@ -94,6 +94,19 @@ const UpdateIssuer = (data : any,data2:any, data3:any,data4:any) : any => {
  */
 
 const getIssuersList = () : any => {
+    let query = "SELECT * FROM issuers where state='1'"
+    return new Promise((resolve, reject) => {
+        db.query(query, (err: any, res: any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+const getIssuerRequestList = () : any => {
     let query = "SELECT * FROM issuers"
     return new Promise((resolve, reject) => {
         db.query(query, (err: any, res: any) => {
@@ -266,7 +279,7 @@ router.post('/api/IssuerRequest', async (req:any , res : any) => {
 })
 
 router.get('/api/IssuerRequestList', async (req : any , res : any) => {
-    const list = await getIssuersList()
+    const list = await getIssuerRequestList()
     res.json({list})
 })
 
@@ -470,6 +483,8 @@ router.get('/api/pdf/:path', (req : any , res : any) => {
     let path = req.params.path
     res.sendFile(`C:/Users/ASUS/OneDrive/Bureau/PFE_SSI/backend/public/${path}`);
 });
+
+
 
 module.exports = router;
 
