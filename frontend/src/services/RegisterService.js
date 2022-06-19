@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { environment } from 'environment/env';
 
 class RegisterService {
 
@@ -7,7 +8,7 @@ class RegisterService {
         let logo 
         let file 
 
-        await axios.post("http://localhost:8000/api/uploadFiles"
+        await axios.post(`${environment.SERVER_API_URL}/uploadFiles`
         , files , 
         {headers:{"Content-Type": "application/x-www-form-urlencoded" }})
         .then(res => {
@@ -20,7 +21,7 @@ class RegisterService {
 
         data = {...data, logo : logo, file: file}
 
-        await axios.post("http://localhost:8000/api/IssuerRequest", data)
+        await axios.post(`${environment.SERVER_API_URL}/IssuerRequest`, data)
         .then(res => {
             done = true
             console.log(done)

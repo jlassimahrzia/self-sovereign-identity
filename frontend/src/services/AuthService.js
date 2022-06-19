@@ -1,9 +1,11 @@
 import axios from 'axios'
+import { environment } from 'environment/env';
+
 class AuthService {
     
     async sendAuthCreds(password,did){
         let done = false
-        await axios.post("http://localhost:8000/api/sendAuthCreds", {password,did })
+        await axios.post(`${environment.SERVER_API_URL}/sendAuthCreds`, {password,did })
             .then(res => {
                 done = true
             })
@@ -16,7 +18,7 @@ class AuthService {
     }
     async sendAuthCredsVerifier(password,did){
         let done = false
-        await axios.post("http://localhost:8000/api/sendAuthCredsVerifier", {password,did })
+        await axios.post(`${environment.SERVER_API_URL}/sendAuthCredsVerifier`, {password,did })
             .then(res => {
                 done = true
             })
@@ -31,7 +33,7 @@ class AuthService {
     async login(did,password){ 
         let done = false
         let x;
-        await axios.post("http://localhost:8000/api/login",{did,password})
+        await axios.post(`${environment.SERVER_API_URL}/login`,{did,password})
         .then(res => {
             done = true
             x=res.data.token
@@ -45,10 +47,10 @@ class AuthService {
     }
 
     async loginVerifier(did,password){ 
-        console.log("loginVerifier");
+        console.log(`loginVerifier`);
         let done = false
         let x;
-        await axios.post("http://localhost:8000/api/loginVerifier",{did,password})
+        await axios.post(`${environment.SERVER_API_URL}/loginVerifier`,{did,password})
         .then(res => {
             done = true
             x=res.data.token
@@ -64,7 +66,7 @@ class AuthService {
     async loginAdmin(email,password){ 
         let done = false
         let x;
-        await axios.post("http://localhost:8000/api/loginAdmin",{email,password})
+        await axios.post(`${environment.SERVER_API_URL}/loginAdmin`,{email,password})
         .then(res => {
             done = true
             x=res.data.token
@@ -79,7 +81,7 @@ class AuthService {
 
     async checkPrivatekey(did,privateKey){ 
         let done 
-        await axios.post("http://localhost:8000/api/checkPrivateKey",{did,privateKey})
+        await axios.post(`${environment.SERVER_API_URL}/checkPrivateKey`,{did,privateKey})
         .then(res => {
             done=res.data.done
         })
@@ -91,7 +93,7 @@ class AuthService {
 
     async checkPrivatekeyVerifier(did,privateKey){ 
         let done 
-        await axios.post("http://localhost:8000/api/checkPrivateKeyVerifier",{did,privateKey})
+        await axios.post(`${environment.SERVER_API_URL}/checkPrivateKeyVerifier`,{did,privateKey})
         .then(res => {
             done=res.data.done
         })

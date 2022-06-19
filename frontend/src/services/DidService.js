@@ -1,10 +1,11 @@
 import axios from 'axios'
+import { environment } from 'environment/env';
 
 class DidService {
 
     async getdidRequestList() {
         let tab = []
-        await axios.get("http://localhost:8000/api/didRequestList")
+        await axios.get(`${environment.SERVER_API_URL}/didRequestList`)
             .then(res => {
                 tab = res.data.list
             })
@@ -17,7 +18,7 @@ class DidService {
     async createIdentity(publickey, email, id) {
         let identifier
         let cid
-        await axios.post("http://localhost:8000/api/createIdentity", { publickey, email, id })
+        await axios.post(`${environment.SERVER_API_URL}/createIdentity`, { publickey, email, id })
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid
@@ -25,13 +26,13 @@ class DidService {
             .catch(error => {
                 console.log(error)
             });
-        console.log("identifier", identifier)
+        
         return { identifier, cid };
     }
 
     async createIdentityFailed(email, id) {
         let done = false
-        await axios.post("http://localhost:8000/api/createIdentityFailed", { email, id })
+        await axios.post(`${environment.SERVER_API_URL}/createIdentityFailed`, { email, id })
             .then(res => {
                 done = true
                 console.log(res)
@@ -46,7 +47,7 @@ class DidService {
 
     async mappingDidToHash(cid, did) {
         let done = false
-        await axios.post("http://localhost:8000/api/mappingDidToHash", { cid, did })
+        await axios.post(`${environment.SERVER_API_URL}/mappingDidToHash`, { cid, did })
             .then(res => {
                 done = true
                 console.log(res)
@@ -59,7 +60,7 @@ class DidService {
 
     async resolve(did) {
         let ddo = {}
-        await axios.post("http://localhost:8000/api/resolve", { did })
+        await axios.post(`${environment.SERVER_API_URL}/resolve`, { did })
             .then(res => {
                 ddo = res.data.ddo
                 console.log(res)

@@ -1,11 +1,12 @@
 import axios from 'axios'
+import { environment } from 'environment/env';
 
 class IssuerService { 
 
    
     async getIssuersList() {
         let tab = []
-        await axios.get("http://localhost:8000/api/IssuerRequestList")
+        await axios.get(`${environment.SERVER_API_URL}/IssuerRequestList`)
      
             .then(res => {
                 console.log(res)
@@ -22,7 +23,7 @@ class IssuerService {
     async createIssuer(name,email, id) {
         let identifier
         let cid
-        await axios.post("http://localhost:8000/api/createIssuer", {name, email, id})
+        await axios.post(`${environment.SERVER_API_URL}/createIssuer`, {name, email, id})
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid
@@ -30,13 +31,13 @@ class IssuerService {
             .catch(error => {
                 console.log(error)
             });
-        console.log("identifier", identifier)
+        
         return { identifier, cid };
     }
 
     async createIssuerFailed(email, id) {
         let done = false
-        await axios.post("http://localhost:8000/api/createIssuerFailed", { email, id })
+        await axios.post(`${environment.SERVER_API_URL}/createIssuerFailed`, { email, id })
             .then(res => {
                 done = true
                 console.log(res)
@@ -50,7 +51,7 @@ class IssuerService {
 
     async mappingDidToHash(cid, did) {
         let done = false
-        await axios.post("http://localhost:8000/api/mappingDidToHashIssuer", { cid, did })
+        await axios.post(`${environment.SERVER_API_URL}/mappingDidToHashIssuer`, { cid, did })
             .then(res => {
                 done = true
                 console.log(res)
@@ -63,7 +64,7 @@ class IssuerService {
 
     async resolve(did) {
         let ddo = {}
-        await axios.post("http://localhost:8000/api/resolveIssuer", { did })
+        await axios.post(`${environment.SERVER_API_URL}/resolveIssuer`, { did })
             .then(res => {
                 ddo = res.data.ddo
                 console.log(res)
@@ -76,7 +77,7 @@ class IssuerService {
 
     async getIssuers(){
         let list = []
-        await axios.get("http://localhost:8000/api/issuersList")
+        await axios.get(`${environment.SERVER_API_URL}/issuersList`)
             .then(res => {
                 list = res.data.list
             })

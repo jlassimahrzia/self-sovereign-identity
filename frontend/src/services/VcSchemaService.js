@@ -1,12 +1,12 @@
 import axios from 'axios' 
 import jwt from 'jwt-decode' 
+import { environment } from 'environment/env';
 
 class VcSchemaService {
 
     async createVcSchema(data) {
         let did = jwt(sessionStorage.getItem("token")).res[0].did
-        console.log("did",did);
-        await axios.post("http://localhost:8000/api/createCredentialSchema", {data, did}).then(res => {
+        await axios.post(`${environment.SERVER_API_URL}/createCredentialSchema`, {data, did}).then(res => {
             console.log("res", res.data)
         }).catch(error => {
             console.log(error)
@@ -16,7 +16,7 @@ class VcSchemaService {
     async getSchemas() {
         let tab
         let did = jwt(sessionStorage.getItem("token")).res[0].did
-        await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
+        await axios.post(`${environment.SERVER_API_URL}/schemas`, {did}).then(res => {
             tab = res.data
         }).catch(error => {
             console.log(error)
@@ -27,7 +27,7 @@ class VcSchemaService {
     async resolveSchema(name) {
         let schema
         let did = jwt(sessionStorage.getItem("token")).res[0].did
-        await axios.post("http://localhost:8000/api/resolveSchema", {did,name}).then(res => {
+        await axios.post(`${environment.SERVER_API_URL}/resolveSchema`, {did,name}).then(res => {
             schema = res.data.vcSchema
         }).catch(error => {
             console.log(error)
@@ -38,7 +38,7 @@ class VcSchemaService {
 
     async getSchemasByIssuer(did) {
         let tab
-        await axios.post("http://localhost:8000/api/schemas", {did}).then(res => {
+        await axios.post(`${environment.SERVER_API_URL}/schemas`, {did}).then(res => {
             tab = res.data
         }).catch(error => {
             console.log(error)
@@ -48,7 +48,7 @@ class VcSchemaService {
 
     async resolveSchemaByNameAndIssuer(did, name) {
         let schema
-        await axios.post("http://localhost:8000/api/resolveSchema", {did,name}).then(res => {
+        await axios.post(`${environment.SERVER_API_URL}/resolveSchema`, {did,name}).then(res => {
             schema = res.data.vcSchema
         }).catch(error => {
             console.log(error)
