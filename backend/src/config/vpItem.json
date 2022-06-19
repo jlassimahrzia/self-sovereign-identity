@@ -42,10 +42,7 @@
                 "type": "string",
                 "format": "uri"
               }
-            },
-            "required": [
-              "id"
-            ]
+            }
         },
         "credentialSchema": {
             "description": "(to check credential schema compatibility) Contains information about the credential schema (template) on which the Verifiable Authorisation is based",

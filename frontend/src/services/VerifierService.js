@@ -1,4 +1,5 @@
 import axios from 'axios'
+import jwt from 'jwt-decode' 
 
 class VerifierService { 
  
@@ -68,6 +69,42 @@ class VerifierService {
                 console.log(error)
             });
         return ddo
+    }
+
+    async createVerificationSchema(data){
+        let done = false
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
+        await axios.post("http://localhost:8000/api/createVpSchema", { did , data })
+            .then(res => {
+                done = res.data.done
+                console.log(res.data.vpSchema)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return done
+    }
+
+    async verificationTemplatesList(data){
+        let tab
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
+        await axios.post("http://localhost:8000/api/verificationTemplates", {did}).then(res => {
+            tab = res.data
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
+
+    async resolveVerificationTemplate(name) {
+        let schema
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
+        await axios.post("http://localhost:8000/api/resolveVerificationTemplates", {did,name}).then(res => {
+            schema = res.data.vcSchema
+        }).catch(error => {
+            console.log(error)
+        });
+        return schema;
     }
 }
 
