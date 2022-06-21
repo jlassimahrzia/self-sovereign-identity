@@ -478,7 +478,7 @@ const VpSchema = (props) => {
                                     <div style={{margin : "20px", marginTop : "0px"}}>
                                         {  item.properties.credentialSubject.properties ? 
                                             ( Object.entries(item.properties.credentialSubject.properties).map((element, index) => {
-                                                console.log(element);
+                                               
                                             return ( 
                                                 <Row>
                                                 <div>

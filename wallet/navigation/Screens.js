@@ -17,6 +17,7 @@ import Profile from "../screens/Profile";
 import Settings from "../screens/Settings";
 import QrCode from "../screens/QrCode";
 import Register from "../screens/Register";
+import Verifiers from "../screens/Verifiers";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -25,6 +26,7 @@ import Search from "../screens/Search";
 
 import SqliteService from "../services/SqliteService"
 import CredSearch from "../components/CredSearch";
+import VerifierServices from "../screens/VerifierServices";
 
 const { width } = Dimensions.get("screen");
 
@@ -113,6 +115,59 @@ function OrganisationsStack(props) {
           cardStyle: { backgroundColor: "#F8F9FE" }
         }}
       />
+    </Stack.Navigator>
+  );
+}
+
+function VerifiersStack(props) {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
+      <Stack.Screen
+        name="Verifiers"
+        component={Verifiers}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Verifiers"
+              search
+              tabs={category}
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" },
+        }}
+      />
+      <Stack.Screen
+        name="Services"
+        component={VerifierServices}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Services"
+              back
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
+        }}
+      />
+      {/* <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header title="Search" back navigation={navigation} scene={scene} />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
+        }}
+      /> */}
     </Stack.Navigator>
   );
 }
@@ -340,6 +395,7 @@ function AppStack(props) {
       <Drawer.Screen name="Profile" component={ProfileStack} />
       { did ? <Drawer.Screen name="Credentials" component={CredentialsStack} /> : null }
       { did ? <Drawer.Screen name="Organisations" component={OrganisationsStack} /> : null }
+      { did ? <Drawer.Screen name="Verifiers" component={VerifiersStack} /> : null }
       <Drawer.Screen name="Settings" component={SettingsStack} />
     </Drawer.Navigator>
   );

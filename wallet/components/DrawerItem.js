@@ -36,6 +36,11 @@ function DrawerItem({ title,focused,navigation }) {
           <AntDesign name="link" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
+      case "Verifiers":
+        return (
+          <AntDesign name="appstore-o" size={20}
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
       case "Settings":
         return (
           <AntDesign name="setting" size={20} 
