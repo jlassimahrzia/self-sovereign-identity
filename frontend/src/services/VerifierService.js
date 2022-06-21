@@ -107,6 +107,16 @@ class VerifierService {
         });
         return schema;
     }
+
+    async getServicesRequestList(didVerifier) {
+        let tab = []
+        await axios.post(`${environment.SERVER_API_URL}/servicesRequestList`, {didVerifier}).then(res => {
+            tab = res.data.list
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
 }
 
 export default new VerifierService();

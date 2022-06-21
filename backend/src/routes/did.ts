@@ -35,6 +35,8 @@ export interface DidDocument {
     id: string
     publicKey: string
     email: string
+    firstname : string
+    lastname : string
     updated?: string
     created?: string
 }
@@ -100,13 +102,15 @@ const generateDID = (publicKey: string): string => {
  * 5- Create an Identity Document containing the Public Key
  */
 
-const createDDO = (identifier: string, publicKey: string, email: string): DidDocument => {
+const createDDO = (identifier: string, publicKey: string, email: string, firstname: string, lastname: string): DidDocument => {
     return {
         '@context': 'https://w3id.org/did/v1',
         '@type': 'Citizen',
         id: identifier,
         publicKey: publicKey,
         email: email,
+        firstname : firstname,
+        lastname : lastname,
         created: (new Date(Date.now())).toISOString()
     } //YYYY-MM-DDTHH:mm:ss.sssZ
 };
@@ -211,11 +215,13 @@ router.post('/api/createIdentity', async (req : any , res : any) => {
     let publickey = req.body.publickey
     let email = req.body.email
     let id = req.body.id
+    let firstname = req.body.firstname
+    let lastname = req.body.lastname
 
     // 1- generateDID
     const identifier = generateDID(publickey)
     // 2- Generate did doc
-    const ddo = createDDO(identifier, publickey, email)
+    const ddo = createDDO(identifier, publickey, email, firstname, lastname)
     // 3- add did doc to ipfs and get the cid
     const cid = await pushDDO_ipfs(ddo)
     // 4- Generate QR code and send Email

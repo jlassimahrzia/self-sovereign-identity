@@ -36,7 +36,6 @@ function VerifierServices({ route, navigation }) {
     const [verificationTemplates, setVerificationTemplates] = useState([]);
     const [schema, setSchema] = useState({});
     const [did, setDid] = useState(null)
-    const [credential, setCredential] = useState({})
     const [issuers, setIssuers] = useState([])
 
     const retrieveIssuersList = async () => {
@@ -102,8 +101,8 @@ function VerifierServices({ route, navigation }) {
   
 
     const sendRequest = async () => {
-        let id = await IssuerService.sendVcRequest(did , org.did, credential.name)
-        if(id){
+        let done = await VerifierService.sendVerificationRequest(did , verifier.did, schema.title)
+        if(done){
             Toast.show({
                 type: 'success',
                 text1: 'Info',
@@ -142,7 +141,7 @@ function VerifierServices({ route, navigation }) {
                     <Block card shadow style={styles.product}>
                         <Block row style={styles.productDescription}>
                             <Block style={{width: width*0.15}}>
-                                <Feather name="credit-card" size={24} color={argonTheme.COLORS.PRIMARY} 
+                            <AntDesign name="slack" size={24} color={argonTheme.COLORS.PRIMARY} 
                                 style={{marginTop: 6, marginBottom: 6}} />
                             </Block>
                             <Block style={{width: width*0.60, marginTop: 6, marginBottom: 6}}>

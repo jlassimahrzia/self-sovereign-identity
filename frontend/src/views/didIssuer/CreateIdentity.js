@@ -28,8 +28,8 @@ const CreateIdentity = () => {
     //retrieveDidRequestsList();
   }, [didRequestsList])
 
-  const createIdentity1 = async (publickey, email, id) => {
-    const data = await DidService.createIdentity(publickey, email, id)
+  const createIdentity1 = async (publickey, email, id, firstname, lastname) => {
+    const data = await DidService.createIdentity(publickey, email, id, firstname, lastname)
     if (data) {
       await DidService.mappingDidToHash(data.cid.path, data.identifier)      
       const ddo = await DidService.resolve(data.identifier)
@@ -43,7 +43,7 @@ const CreateIdentity = () => {
   }
 
   const createIdentity2 = (item) => {
-    createIdentity1(item.publickey, item.email, item.id)
+    createIdentity1(item.publickey, item.email, item.id, item.firstname, item.lastname)
 
   };
 

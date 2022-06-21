@@ -15,10 +15,10 @@ class DidService {
         return tab;
     }
 
-    async createIdentity(publickey, email, id) {
+    async createIdentity(publickey, email, id, firstname, lastname) {
         let identifier
         let cid
-        await axios.post(`${environment.SERVER_API_URL}/createIdentity`, { publickey, email, id })
+        await axios.post(`${environment.SERVER_API_URL}/createIdentity`, { publickey, email, id , firstname, lastname})
             .then(res => {
                 identifier = res.data.identifier
                 cid = res.data.cid

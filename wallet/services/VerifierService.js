@@ -34,5 +34,16 @@ class VerifierService {
         });
         return schema;
     }
+
+    async sendVerificationRequest(did_holder, did_verifier, verification_name) {
+        let done =false
+        await axios.post(`${environment.SERVER_API_URL}/verificationRequest`, 
+        {did_holder,did_verifier,verification_name}).then(res => {
+            done =res.data.done
+        }).catch(error => {
+            console.log(error)
+        });
+        return done;
+    }
 }
 export default new VerifierService();

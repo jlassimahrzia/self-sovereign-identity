@@ -42,6 +42,41 @@ export interface DidDocument {
     created?: string
 }
 
+const sendVerificationRequest = (data : any) : any => {
+    let did_holder = data.did_holder
+    let did_verifier = data.did_verifier
+    let verification_name = data.verification_name
+
+    let query = "INSERT INTO servicesrequests (did_holder, did_verifier, verification_request_name) VALUES (?,?,?);"
+
+    return new Promise((resolve, reject) => {
+        db.query(query, [
+            did_holder, did_verifier, verification_name
+        ], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res.insertId);
+        });
+    });
+
+}
+
+const getServicesRequestList = (didVerifier : any) : any => {
+    
+    let query = "SELECT * FROM servicesrequests WHERE did_verifier= '" + didVerifier + "'"
+    return new Promise((resolve, reject) => {
+        db.query(query, [didVerifier], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
 const getVerifierList = () : any => {
     let query = "SELECT * FROM verifiers"
     return new Promise((resolve, reject) => {
@@ -280,5 +315,22 @@ router.post('/api/createVerifierFailed', async (req: any, res: any) => {
     res.json({ status })
 })
 
+router.post('/api/verificationRequest', async (req : any, res : any) => {
+    let _request = {
+        did_holder: req.body.did_holder,
+        did_verifier: req.body.did_verifier,
+        verification_name: req.body.verification_name
+    }
+    const id = await sendVerificationRequest(_request)
+    if(id){
+        res.json({done : true})
+    }
+})
+
+router.post('/api/servicesRequestList', async (req : any, res : any) => {
+    let didVerifier = req.body.didVerifier
+    const list = await getServicesRequestList(didVerifier)
+    res.json({list})
+})
 
 module.exports = router;
