@@ -45,5 +45,18 @@ class VerifierService {
         });
         return done;
     }
+
+    async verifyVerificationTemplate(encrypted, privateKey){
+        let test = {}
+        await axios.post(`${environment.SERVER_API_URL}/verifyVerificationRequest`,{encrypted, privateKey})
+            .then(res => {
+                test = res.data.result
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
 }
 export default new VerifierService();

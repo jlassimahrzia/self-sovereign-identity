@@ -11,22 +11,14 @@ import {
     Modal
 } from "reactstrap";
 import PageHeader from "components/Headers/PageHeader.js";
-import VCService from 'services/VCService';
 import VerifierService from 'services/VerifierService';
-import jwt from 'jwt-decode'
-import Form from "@rjsf/bootstrap-4";
-import VcSchemaService from 'services/VcSchemaService';
-import DidService from 'services/DidService';
 import swal from 'sweetalert';
+import jwt from 'jwt-decode'
 
 function ServicesRequest() {
 
     const [status, setStatus] = useState(0);
-    const [vcModal, setVcModal] = useState(false)
-    const [schema, setSchema] = useState({});
-    const [formData, setFormData] = useState(null)
     const [servicesRequestsList, setServicesRequestsList] = useState([]);
-    const [item, setitem] = useState({})
 
     const retrieveServicesRequestsList = async () => {
         let didVerifier = (jwt(sessionStorage.getItem("token"))).res[0].did
@@ -42,53 +34,13 @@ function ServicesRequest() {
 
     }, [servicesRequestsList])
 
-
-    const openVcModal = async (item) => {
-        setitem(item)
-        let data = await VcSchemaService.resolveSchema(item.vc_name)
-        data.properties.credentialSubject.properties.id.default = item.did_holder
-        setSchema(data.properties.credentialSubject)
-        setVcModal(true)
-    }
-
-    const ClosevcModal = () => {
-        setVcModal(false)
-    }
-
-    const handleVC = async ({formData}) => {
-        try {
-            let ddo = await DidService.resolve(formData.id)
-            //let holder_pubKey = ddo.publicKey
-            let privateKey = sessionStorage.getItem("privateKey")
-            console.log(formData);
-            let done = await VCService.issueVC({
-                formData
-            }, item, privateKey, ddo);
-            console.log("done", done);
-            if (done) {
-                ClosevcModal(false)
-                swal("A new verifiable credential is issued!", "An email will be sent to the holder!", "success");
-            } else {
-                swal("Something went wrong!", "try again!", "error");
-            }
-        } catch (err) {
-            console.log(err)
-            swal("Something went wrong!", "try again!", "error");
+    const sendVerificationRequest = async (request) => {
+        let done = VerifierService.sendVerificationRequest(request)
+        if (done) {
+            swal("Verification request sended successfully", "", "success");
         }
-    }
-
-    const declineRequest = async(item) => {
-        try {
-            let ddo = await DidService.resolve(item.did_holder)
-            let done = await VCService.createVCFailed(item.id,ddo.email)
-            if (done) {
-                swal("Credential request declined!", "An email will be sent to the holder!", "success");
-            } else {
-                swal("Something went wrong!", "try again!", "error");
-            }
-        } catch (error) {
-            console.log(error)
-            swal("Something went wrong!", "try again!", "error");
+        else{
+            swal("Something went wrong try again!", "", "error");
         }
     }
 
@@ -103,7 +55,7 @@ function ServicesRequest() {
                             <CardHeader className="border-0">
                                 <Row className="align-items-center">
                                     <Col xs="8">
-                                        <h3 className="mb-0">Verifiable Credentials Request</h3>
+                                        <h3 className="mb-0">Services Request</h3>
                                     </Col>
                                     <Col xs="4">
                                         <Input type="select" id="exampleSelect" name="select"
@@ -149,7 +101,7 @@ function ServicesRequest() {
                                                 item.state === 0 ? <Badge color="warning">Pending</Badge> : item.state === 1 ? <Badge color="success">Issued</Badge> : <Badge color="danger">Declined</Badge>
                                             }</td>
                                             <td>
-                                                <Button style={
+                                               {/*  <Button style={
                                                         {
                                                             background: "#d7363c",
                                                             color: "white"
@@ -157,18 +109,18 @@ function ServicesRequest() {
                                                     }
                                                     disabled={
                                                         item.state !== 0 ? true : false
-                                                }>Holder details</Button>
+                                                }>Holder details</Button> */}
                                                 <Button color="success"
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                     }
                                                     onClick={
-                                                        () => openVcModal(item)
+                                                        () => sendVerificationRequest(item)
                                                 }>Send Verification Request</Button>
-                                                <Button color="secondary" onClick={()=>declineRequest(item)}
+                                                {/* <Button color="secondary" onClick={()=>declineRequest(item)}
                                                     disabled={
                                                         item.state !== 0 ? true : false
-                                                }>Decline Request</Button>
+                                                }>Decline Request</Button> */}
                                             </td>
                                         </tr> : ""
                                     })
@@ -176,27 +128,6 @@ function ServicesRequest() {
                             </Table>
                         </Card>
                     </div>
-                    <Modal className="modal-dialog-centered" size='lg'
-                        isOpen={vcModal}
-                        toggle={ClosevcModal}>
-                        <div className="modal-header">
-                            <h4 className="modal-title" id="modal-title-default">
-                                Fill in the VC informations
-                            </h4>
-                            <button aria-label="Close" className="close" data-dismiss="modal" type="button"
-                                onClick={ClosevcModal}>
-                                <span aria-hidden={true}>×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <Form schema={schema}
-                                onSubmit={handleVC}
-                                formData={formData}
-                                onChange={
-                                    e => setFormData(e.formData)
-                                }/>
-                        </div>
-                    </Modal>
                 </Row>
 
             </Container>

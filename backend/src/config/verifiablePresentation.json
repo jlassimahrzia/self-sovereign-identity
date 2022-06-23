@@ -44,6 +44,22 @@
         "items": [{}],
         "additionalItems": false
       },
+      "vpSchema": {
+        "description": "(to check vp schema compatibility) Contains information about the vp schema (template) on which the Verifiable Authorisation is based",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "References the vp schema (template) stored on the (relevant) vp schema Registry (SR) on which the Verifiable Authorisation is based",
+            "type": "string"
+          },
+          "type": {
+            "description": "Defines vp schema type",
+            "type": "string",
+            "enum": ["JsonSchemaValidator2018"]
+          }
+        },
+        "required": ["id", "type"]
+      }, 
       "verifierProof": {
         "description": "Contains information about the Issuer proof",
         "type": "object",
@@ -125,6 +141,7 @@
       "verifier",
       "issuanceDate",
       "verifiableCredential",
+      "vpSchema",
       "verifierProof"
     ]
 }

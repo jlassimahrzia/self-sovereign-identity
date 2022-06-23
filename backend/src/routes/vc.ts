@@ -201,7 +201,9 @@ router.post('/api/issueVC', async (req : any, res : any) => {
 
     const status = updateStatus(request)
 
-    QRCode.toDataURL(encrypted, {
+    let qrcodeData = {encrypted, type : "vc"}
+
+    QRCode.toDataURL(JSON.stringify(qrcodeData), {
         type: 'terminal',
         width: '500',
         errorCorrectionLevel: 'M'

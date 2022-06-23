@@ -22,7 +22,7 @@ var VerifierRoutes = [
   {
     path: "/servicesRequest",
     name: "Services Requests",
-    icon: "ni ni-paper-diploma text-black",
+    icon: "ni ni-app text-black",
     component: ServicesRequest,
     layout: "/verifier",
   },

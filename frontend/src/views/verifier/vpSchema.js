@@ -78,7 +78,7 @@ const VpSchema = (props) => {
 
     const retrieveVerificationTemplates = async () => {
         let data = await VerifierService.verificationTemplatesList()
-        if(data.length > 0){
+        if(data && data.length > 0){
           let finalRes = [];
           data.forEach(schemaRes => {
               let name = schemaRes[0];
@@ -99,7 +99,7 @@ const VpSchema = (props) => {
     const retrieveSchemasList = async (did) => {
         try {
             let data = await VcSchemaService.getSchemasByIssuer(did)
-            if(data.length > 0){
+            if(data && data.length > 0){
                 let finalRes = [];
                 data.forEach(schemaRes => {
                     let name = schemaRes[0];
@@ -147,6 +147,10 @@ const VpSchema = (props) => {
         retrieveIssuersList();
     }, [])
 
+    useEffect(() => {
+      
+    }, [verificationTemplatesList])
+    
     const initialValues = {
         title: '',
         description: '',
@@ -252,8 +256,7 @@ const VpSchema = (props) => {
                                         <th scope="col">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>{
-                                    verificationTemplatesList.map((listValue, index) => {
+                                <tbody>{verificationTemplatesList.length > 0 && verificationTemplatesList.map((listValue, index) => {
                                         return (
                                             <tr key={index}>
                                               <td>{index + 1}</td>
@@ -361,7 +364,7 @@ const VpSchema = (props) => {
                                                                 : null}
                                                             </div>
                                                             <div className="form-group col-6">
-                                                                <label>Claims</label>
+                                                                <label>Credential</label>
                                                                 <Field name={`credentiels.${i}.credential`}>
                                                                     {({ field }) => (
                                                                        <AsyncSelect
@@ -398,7 +401,7 @@ const VpSchema = (props) => {
                                                         </div>
                                                         <div className="form-row">
                                                             <div className="form-group  col-12" >
-                                                            <label>Credential</label>
+                                                            <label>Claims</label>
                                                                 <Field name={`credentiels.${i}.claims`}>
                                                                     {({ field }) => (
                                                                        <AsyncSelect

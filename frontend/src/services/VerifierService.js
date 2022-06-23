@@ -117,6 +117,17 @@ class VerifierService {
         });
         return tab;
     }
+
+    async sendVerificationRequest(request){
+        let privateKey = sessionStorage.getItem("privateKey")
+        let done = false
+        await axios.post(`${environment.SERVER_API_URL}/sendVerificationRequest`, {request, privateKey}).then(res => {
+            done = res.data.done
+        }).catch(error => {
+            console.log(error)
+        });
+        return done;
+    }
 }
 
 export default new VerifierService();
