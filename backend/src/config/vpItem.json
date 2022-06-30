@@ -131,8 +131,7 @@
             "type",
             "created",
             "hash",
-            "proofValue",
-            "holderProof"
+            "proofValue"
           ]
         }
     },

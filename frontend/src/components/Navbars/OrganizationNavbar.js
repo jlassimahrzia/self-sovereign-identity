@@ -57,10 +57,10 @@ const OrganizationNavbar = (props) => {
                                 </DropdownItem>
                                 <DropdownItem divider/>
 
-                                <DropdownItem onClick={profile}>
+                                {/* <DropdownItem onClick={profile}>
                                     <i className="ni ni-single-02"/>
                                     <span>Profile</span>
-                                </DropdownItem>
+                                </DropdownItem> */}
 
                                 <DropdownItem onClick={logOut}>
                                     <i className="ni ni-user-run"/>

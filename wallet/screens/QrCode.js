@@ -11,6 +11,7 @@ const { width } = Dimensions.get("screen");
 import Toast from 'react-native-toast-message';
 import { AntDesign } from '@expo/vector-icons';
 import ViewMoreText from 'react-native-view-more-text';
+
 export default function QrCode({navigation}) {
 
   const [hasPermission, setHasPermission] = useState(null)
@@ -24,6 +25,7 @@ export default function QrCode({navigation}) {
   const [vcList, setvcList] = useState([])
   const [verifiable_presentation , setVerifiablePresentation] = useState({})
   const [modalVpVisible, setModalVpVisible] = useState(false)
+  const [idRequest, setidRequest] = useState()
 
   const [issuers, setIssuers] = useState([])
 
@@ -167,10 +169,6 @@ export default function QrCode({navigation}) {
       verifiablePresentation.verifiableCredential.push(item)
     });
 
-    //let finalres = await VcService.signVC(verifiablePresentation,privateKey)
-    
-    //console.log("finalres",finalres);
-
     return verifiablePresentation
 
   }
@@ -191,7 +189,7 @@ export default function QrCode({navigation}) {
     if(did === null){
       setDID(db,data)
     }
-    if(data.type === "vc"){
+    else if(data.type === "vc"){
       let res = await VcService.verifyVC(data.encrypted,privateKey)
       if(res.test){
         setvc(res.decrypted)
@@ -217,11 +215,12 @@ export default function QrCode({navigation}) {
         });
       }  
     }
-    if(data.type === "vp"){
+    else if(data.type === "vp"){
       let res = await VerifierService.verifyVerificationTemplate(data.encrypted,privateKey)
       if(res.test){
         let finaleRes = await createVerifiablePresentation(JSON.parse(res.verificationTemplate), res.decrypted);
         setVerifiablePresentation(finaleRes)
+        setidRequest(res.decrypted.id_request)
         openModalVp()
       }
       else{
@@ -253,7 +252,19 @@ export default function QrCode({navigation}) {
 
   const acceptVP = async () => {
     let res = await VcService.signVC(verifiable_presentation,privateKey)
-    console.log(res);
+    let data = {
+        verifiablePresentation : res, 
+        did_holder : did, 
+        did_verifier : verifiable_presentation.verifier,
+        idRequest : idRequest
+    }
+    let done = await VerifierService.generateVerificationResponse(data)
+    closeModalVp()
+    Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: "Documents sended successfully"
+    });
     navigation.navigate("Home") 
   }
 
@@ -267,6 +278,11 @@ export default function QrCode({navigation}) {
         (txObj, error) => console.log('Error', error))
     }) 
     closeModal()
+    Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: "Credential Added Successfully"
+    });
     navigation.navigate("Credentials") 
   }
 
@@ -375,10 +391,6 @@ export default function QrCode({navigation}) {
                                 >
                                     Proof Request : {verifiable_presentation.title}
                                 </Text>
-                            </Block>
-                            <Block style={{width : width*0.2}}>
-                                <AntDesign name="closesquareo" size={24} color={argonTheme.COLORS.PRIMARY} 
-                                onPress={closeModal}/>
                             </Block>
                         </Block>
                         <Block style={styles.cardHeader} style={{marginTop : 20}}>

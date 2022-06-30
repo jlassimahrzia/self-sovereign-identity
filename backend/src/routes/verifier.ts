@@ -10,6 +10,7 @@ import { Wallet } from '@ethersproject/wallet'
 import { computeAddress } from '@ethersproject/transactions'
 import { computePublicKey } from '@ethersproject/signing-key'
 import { verify } from 'crypto';
+import { stat } from 'fs';
 const EthereumEncryption = require('ethereum-encryption');
 var QRCode = require('qrcode')
 // MySQL
@@ -25,61 +26,13 @@ const web3 = new Web3('http://127.0.0.1:7545')
 let contract = new web3.eth.Contract(config.ABI_VERIFIER_REGISTRY_CONTRACT, config.RGISTRY_VERIFIER_CONTRACT_ADDRESS)
 let contract_holder_registry = new web3.eth.Contract(config.ABI_REGISTRY_CONTRACT, config.RGISTRY_CONTRACT_ADDRESS)
 let vp_contract = new web3.eth.Contract(config.ABI_VP_SCHEMA_REGISTRY_CONTRACT, config.VP_SCHEMA_VERIFIER_CONTRACT_ADDRESS)
+let contract_issuer = new web3.eth.Contract(config.ABI_ISSUER_REGISTRY_CONTRACT, config.ISSUER_REGISTRY_CONTRACT_ADDRESS)
 
-
-
-/** Verifiable Presentation Exemple
-{
-    "@context": ["https://www.w3.org/2018/credentials/v1"],
-    "type": ["VerifiablePresentation"],
-    "holder": "did:ebsi:00012345",
-    "verifier": "did:ebsi:00012345",
-    "issuanceDate": "2021-11-01T00:00:00Z",
-    "verifiableCredential" : [
-        {
-            "@context": ["https://www.w3.org/2018/credentials/v1"],
-            "id": "urn:did:123456",
-            "type": ["VerifiableCredential", "PersonalID"],
-            "issuer": "did:exemple:9999999",
-            "issuanceDate": "2021-11-01T00:00:00Z",
-            "credentialSubject": {
-                "id": "did:exemple:123",
-                "firstName": "Mahrzia",
-                "dateOfBirth": "1997-08-07"
-            },
-            "credentialSchema": {
-                "id": "https://exemple/personlId",
-                "type": "JsonSchemaValidator2018"
-            },
-            "issuerProof" : {
-
-            },
-            "holderProof" : {
-                
-            }
-        },
-    ],
-    vpSchema: {
-        "id": vp.title,
-        "type": "JsonSchemaValidator2018"
-    },
-    "verifierProof":{
-        type : "sha3_256",
-        created : "2021-11-01T00:00:00Z",
-        hash: hash,
-        proofValue : signature
-    },
-    "holderProof" : {
-        type : "sha3_256",
-        created : "2021-11-01T00:00:00Z",
-        hash: hash,
-        proofValue : signature
-    }
-} 
-
-
-
- */
+// JS JSON schema validator
+const AJV = require('ajv').default;
+const addFormats = require('ajv-formats').default;
+const ajv = new AJV({strict: false});
+addFormats(ajv);
 
 // Types
 export type KeyPair = {
@@ -98,6 +51,295 @@ export interface DidDocument {
     address: string
     updated?: string
     created?: string
+}
+
+
+const acceptRequest = (id : any) => {
+    let query = "UPDATE verificationresponse SET state='1', encrypted=NULL WHERE id=?"
+    return new Promise((resolve, reject) => {
+        db.query( query, [id], (err: any, res: any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+const declineRequest = (id : any) => {
+    let query = "UPDATE verificationresponse SET state='2', encrypted=NULL WHERE id=?"
+    return new Promise((resolve, reject) => {
+        db.query( query, [id], (err: any, res: any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+const verifyRequestState = (id : any) : any => {
+    let query = "SELECT * FROM verificationresponse WHERE id= '" + id + "' AND state='0'"
+    return new Promise((resolve, reject) => {
+        db.query(query, [id], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+const verifyResponse = async (response : any, privateKey: any) : Promise<any> => {
+ 
+    // 1- Decrypt vc with holder Private key
+    console.log(" 1- Decrypt vc with holder Private key");
+    
+    let decrypted ;
+    try{
+        decrypted = EthereumEncryption.decryptWithPrivateKey(
+            privateKey.substr(2), // privateKey
+            response.encrypted
+        );
+    }catch(error){
+        console.log("error",error); 
+        const result = await Promise.resolve({
+            msg : "Verification response encryption not valid",
+            test : false
+        });
+        return result;
+    }
+    
+    decrypted = JSON.parse(decrypted)
+
+    // 2- Verify if service request is pending
+
+    console.log("2- Verify if service request is pending");
+    
+    
+    try {
+        verifyRequestState(response.id)
+    } catch (error) {
+        const result = await Promise.resolve({
+            msg : "Request already treated",
+            test : false
+        });
+        return result;
+    }
+
+    // 3- Verify schema 
+
+    console.log(" 3- Verify schema ");
+    
+    let ipfshash
+    try {
+        ipfshash = await vp_contract.methods.getSchemasPath(response.did_verifier, decrypted.vpSchema.id).call();
+        console.log("ipfshash",ipfshash);
+    } catch (error) {
+        console.log(error);   
+    }
+    
+    
+    let vpSchema = await resolveSchema(ipfshash)
+    vpSchema = JSON.parse(vpSchema)
+   
+    const validate = ajv.compile(vpSchema)
+    let valid = validate(decrypted)
+    /*  if (!valid){
+        console.log("schema errors : " ,  validate.errors); 
+        const result = await Promise.resolve({
+            msg : "Data not valid",
+            test : false
+        });
+        return result;
+    } */
+
+    // 4- verify verifiable presentation holder signature 
+
+    console.log("4- verify verifiable presentation holder signature ");
+    
+
+    ipfshash = await contract_holder_registry.methods.getDidToHash(decrypted.holder).call();
+    let ddo = await resolve(ipfshash)
+
+    let test
+    try {
+        test = EthereumEncryption.verifyHashSignature(
+            ddo.publicKey.substr(2), // publicKey
+            decrypted.holderProof.hash , // hash
+            decrypted.holderProof.proofValue // signature
+        );
+    } catch (error) {
+        const result = await Promise.resolve({
+            msg : "Holder signature Not Valid",
+            test : false
+        });
+        return result;
+    }
+    if(!test){
+        const result = await Promise.resolve({
+            msg : "Holder signature Not Valid",
+            test : false
+        });
+        return result;
+    }
+
+    // 5- verify verifiable presentation verifier signature 
+
+    console.log("5- verify verifiable presentation verifier signature ");
+    
+
+    ipfshash = await contract.methods.getDidToHash(decrypted.verifier).call();
+    ddo = await resolve(ipfshash)
+
+    let test2
+    try {
+        test2 = EthereumEncryption.verifyHashSignature(
+            ddo.publicKey.substr(2), // publicKey
+            decrypted.verifierProof.hash , // hash
+            decrypted.verifierProof.proofValue // signature
+        );
+    } catch (error) {
+        const result = await Promise.resolve({
+            msg : "Verifier signature Not Valid",
+            test : false
+        });
+        return result;
+    }
+    if(!test2){
+        const result = await Promise.resolve({
+            msg : "Verifier signature Not Valid",
+            test : false
+        });
+        return result;
+    }
+
+    // 6- verify verifiable credentials signatures ( issuer & holder signatue )
+
+    console.log("6- verify verifiable credentials signatures ( issuer & holder signatue )");
+    
+    decrypted.verifiableCredential.forEach( async ( element : any ) => {
+        // 6.1-  Verify holder signature
+        let ipfshash = await contract_holder_registry.methods.getDidToHash(element.credentialSubject.id).call();
+        console.log("ipfshash",ipfshash);
+        
+        let ddo = await resolve(ipfshash)
+        let test
+        try {
+            test = EthereumEncryption.verifyHashSignature(
+                ddo.publicKey.substr(2), // publicKey
+                element.holderProof.hash , // hash
+                element.holderProof.proofValue // signature
+            );
+        } catch (error) {
+            const result = await Promise.resolve({
+                msg : "Holder of " + element.credentialSchema.id + " signature Not Valid",
+                test : false
+            });
+            return result;
+        }
+        if(!test){
+            const result = await Promise.resolve({
+                msg : "Holder of " + element.credentialSchema.id + " signature Not Valid",
+                test : false
+            });
+            return result;
+        }
+        // 6.2- Verify issuer signature
+        let ipfshash2 = await contract_issuer.methods.getDidToHash(element.issuer).call();
+        console.log("ipfshash2",ipfshash2);
+        
+        let ddo2 = await resolve(ipfshash2)
+        let test2
+        try {
+            test2 = EthereumEncryption.verifyHashSignature(
+                ddo2.publicKey.substr(2), // publicKey
+                element.issuerProof.hash , // hash
+                element.issuerProof.proofValue // signature
+            );
+        } catch (error) {
+            const result = await Promise.resolve({
+                msg : "Issuer of " + element.credentialSchema.id + " signature Not Valid",
+                test : false
+            });
+            return result;
+        }
+        if(!test2){
+            const result = await Promise.resolve({
+                msg : "Issuer of " + element.credentialSchema.id + " signature Not Valid",
+                test : false
+            });
+            return result;
+        }
+    });
+
+    const result = await Promise.resolve({
+        msg : "Verification Process Success",
+        decrypted: decrypted,
+        test : true
+    });
+    return result; 
+}
+
+const generateVerificationResponse = async (data : any) => {
+
+    let ddo
+    try {
+        const ipfshash = await contract.methods.getDidToHash(data.did_verifier).call();    
+        ddo = await resolve(ipfshash)
+    } catch (error) {
+        console.log(error);    
+    }
+
+    const encrypted = EthereumEncryption.encryptWithPublicKey(
+        (ddo.publicKey).substr(2), // publicKey of verifier
+        JSON.stringify(data.verifiablePresentation) // data
+    );
+    
+    let query = "INSERT INTO verificationresponse (did_holder, did_verifier, encrypted, idRequest) VALUES (?,?,?,?);"
+
+        return new Promise((resolve, reject) => {
+            db.query(query, [
+                data.did_holder, data.did_verifier, encrypted, data.idRequest
+            ], (err : any, res : any) => {
+                if (err) {
+                    console.log("error: ", err);
+                    reject(err);
+                }
+                resolve(res.insertId);
+            });
+        });
+}
+
+const getVerificationResponseList = (didVerifier : any) : any => {
+    
+    let query = "SELECT * FROM verificationresponse WHERE did_verifier= '" + didVerifier + "'"
+    return new Promise((resolve, reject) => {
+        db.query(query, [didVerifier], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+
+const declineService = (id : any) => {
+    let query = "UPDATE servicesrequests SET state='2' WHERE id=?"
+    return new Promise((resolve, reject) => {
+        db.query( query, [id], (err: any, res: any) => {
+            if (err) {
+               console.log("error: ", err);
+               reject(err);
+            }
+            resolve(res);
+        });
+    });
 }
 
 const updateServiceRequestState = (request : any) => {
@@ -124,9 +366,6 @@ const sendVerificationRequest = async (request : any , privateKey: any)  => {
         (privateKey).substr(2), // privateKey of verifier
         hash // hash
     );
-
-    
-    
     
     let verifierProof = {
         type : "sha3_256",
@@ -135,15 +374,8 @@ const sendVerificationRequest = async (request : any , privateKey: any)  => {
         proofValue : signature
     }
 
-    let valid = EthereumEncryption.verifyHashSignature(
-       "02d2394338cb5889880bebaa1b9150fd871dd9a78e715a13f76407fceb49b6e13a", // publicKey
-        hash , // hash
-        signature
-    );
-
-    console.log("verifierProof",verifierProof);
-    
     let data = {
+        id_request : request.id,
         verifier : request.did_verifier,
         verificationTemplate : request.verification_request_name,
         verifierSignature : verifierProof
@@ -265,7 +497,6 @@ const verifyVerificationRequest = async (encrypted : any, privateKey : any ) : P
     }
 
     decrypted = JSON.parse(decrypted)
-    console.log("decrypted",decrypted);
    
     
     // 2- Verify Verifier Signature
@@ -586,4 +817,41 @@ router.post('/api/sendVerificationRequest', async (req : any, res : any) => {
     let done = sendVerificationRequest(req.body.request , req.body.privateKey)
     res.json({done})
 })
+
+router.post('/api/generateVerificationResponse',async (req : any , res : any) => {
+    generateVerificationResponse(req.body.data)
+    res.json({done : true})
+})
+
+router.post('/api/verificationResponseList', async (req : any, res : any) => {
+    let didVerifier = req.body.didVerifier
+    const list = await getVerificationResponseList(didVerifier)
+    res.json({list})
+})
+
+router.post('/api/declineRequest', async (req: any, res: any) => {
+    let id = req.body.id
+    declineRequest(id)
+    res.json({done : true})
+})
+
+router.post('/api/declineService', async (req: any, res: any) => {
+    let id = req.body.id
+    declineService(id)
+    res.json({done : true})
+})
+
+router.post('/api/acceptRequest', async (req: any, res: any) => {
+    let id = req.body.id
+    acceptRequest(id)
+    res.json({done : true})
+})
+
+router.post('/api/verifyResponse', async (req : any, res : any) => {
+    let response = req.body.response
+    let privateKey = req.body.privateKey
+    let result = await verifyResponse(response,privateKey)
+    res.json({result})
+})
+
 module.exports = router;

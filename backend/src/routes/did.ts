@@ -9,7 +9,6 @@ var config = require('../config/config.js');
 var express = require('express');
 const router = express.Router()
 
-
 // IPFS
 const ipfsClient = require('ipfs-http-client')
 const ipfs = ipfsClient.create('http://127.0.0.1:5001')
@@ -261,6 +260,13 @@ router.post('/api/resolve', async (req : any , res : any) => {
     let ddo = await resolve(ipfshash)
     
     res.json({did,ipfshash,ddo}) 
+}) 
+
+router.post('/api/holderdetails', async (req : any , res : any) => {
+    let did = req.body.did
+    const ipfshash = await contract.methods.getDidToHash(did).call();
+    let ddo = await resolve(ipfshash)
+    res.json({ddo}) 
 }) 
 
 /* router.get('/api/Jwt', async (req : any , res : any) =>{

@@ -70,5 +70,17 @@ class DidService {
             });
         return ddo
     }
+
+    async holderDetails(did){
+        let ddo = {}
+        await axios.post(`${environment.SERVER_API_URL}/holderdetails`, { did })
+            .then(res => {
+                ddo = res.data.ddo
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return ddo
+    }
 }
 export default new DidService();

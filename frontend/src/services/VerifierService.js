@@ -128,6 +128,66 @@ class VerifierService {
         });
         return done;
     }
+
+    async getVerificationResponseList() {
+        let tab = []
+        let didVerifier = jwt(sessionStorage.getItem("token")).res[0].did
+        await axios.post(`${environment.SERVER_API_URL}/verificationResponseList`, {didVerifier}).then(res => {
+            tab = res.data.list
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
+
+    async verifyResponse(response){
+        let test = {}
+        let privateKey = sessionStorage.getItem("privateKey")
+        await axios.post(`${environment.SERVER_API_URL}/verifyResponse`,{response,privateKey})
+            .then(res => {
+                test = res.data.result
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
+    async acceptRequest(id){
+        let test = false
+        await axios.post(`${environment.SERVER_API_URL}/acceptRequest`,{id})
+            .then(res => {
+                test = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
+    async declineRequest(id){
+        let test = false
+        await axios.post(`${environment.SERVER_API_URL}/declineRequest`,{id})
+            .then(res => {
+                test = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
+    async declineService(id){
+        let test = false
+        await axios.post(`${environment.SERVER_API_URL}/declineService`,{id})
+            .then(res => {
+                test = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
 }
 
 export default new VerifierService();

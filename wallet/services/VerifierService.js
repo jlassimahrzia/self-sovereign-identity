@@ -58,5 +58,17 @@ class VerifierService {
         return test;
     }
 
+    async generateVerificationResponse(data){
+        let done = false
+        await axios.post(`${environment.SERVER_API_URL}/generateVerificationResponse`,{data})
+            .then(res => {
+              done = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return done
+    }
+
 }
 export default new VerifierService();

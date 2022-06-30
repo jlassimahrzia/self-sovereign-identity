@@ -590,3 +590,51 @@ VP schema
     ]
 }
 
+Verifiable Presentation Exemple
+{
+    "@context": ["https://www.w3.org/2018/credentials/v1"],
+    "type": ["VerifiablePresentation"],
+    "holder": "did:ebsi:00012345",
+    "verifier": "did:ebsi:00012345",
+    "issuanceDate": "2021-11-01T00:00:00Z",
+    "verifiableCredential" : [
+        {
+            "@context": ["https://www.w3.org/2018/credentials/v1"],
+            "id": "urn:did:123456",
+            "type": ["VerifiableCredential", "PersonalID"],
+            "issuer": "did:exemple:9999999",
+            "issuanceDate": "2021-11-01T00:00:00Z",
+            "credentialSubject": {
+                "id": "did:exemple:123",
+                "firstName": "Mahrzia",
+                "dateOfBirth": "1997-08-07"
+            },
+            "credentialSchema": {
+                "id": "https://exemple/personlId",
+                "type": "JsonSchemaValidator2018"
+            },
+            "issuerProof" : {
+
+            },
+            "holderProof" : {
+                
+            }
+        },
+    ],
+    vpSchema: {
+        "id": vp.title,
+        "type": "JsonSchemaValidator2018"
+    },
+    "verifierProof":{
+        type : "sha3_256",
+        created : "2021-11-01T00:00:00Z",
+        hash: hash,
+        proofValue : signature
+    },
+    "holderProof" : {
+        type : "sha3_256",
+        created : "2021-11-01T00:00:00Z",
+        hash: hash,
+        proofValue : signature
+    }
+} 

@@ -349,12 +349,12 @@ router.post('/api/createIssuer',async (req : any , res : any) => {
     }
     let type = "issuer"
     const token = jwt.sign(
-       
-     { identifier,result,type},'d8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
+       { identifier,result,type},
+       'd8b595680851765f38ea5405129244ba3cbad84467d190859f4c8b20c1ff6c75',
        {
          expiresIn: "1h",
        }
-     )
+    )
        
         const doc = new PDFDocument();
         doc.pipe(fs.createWriteStream('C:/Users/ASUS/OneDrive/Bureau/PFE_SSI/backend/public/files/example.pdf'));
