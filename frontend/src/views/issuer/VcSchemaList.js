@@ -5,7 +5,11 @@ import {
     Card,
     CardHeader,
     Table,
-    Col, Button, Modal
+    Col, Button, Modal,
+    FormGroup,
+    InputGroup,
+    InputGroupAddon,
+    InputGroupText,Input
 } from "reactstrap";
 import PageHeader from "components/Headers/PageHeader.js";
 import VcSchemaService from 'services/VcSchemaService';
@@ -15,6 +19,7 @@ function VcSchemaList() {
     const [schema, setSchema] = useState({});
     const [schemasList, setSchemasList] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
+    const [tab, settab] = useState([])
     
     const openModal = async (item) => {
       let data = await VcSchemaService.resolveSchema(item.name)
@@ -58,13 +63,43 @@ function VcSchemaList() {
       retrieveSchemasList().then((res) => {
         setSchemasList(res);
       });
-    
+      retrieveSchemasList().then((res) => {
+        settab(res);
+      });
     }, [])
+
+    const search = async (e) => {
+      let keyword = e.target.value
+      let data = tab.filter(template => template.name.includes(keyword))
+      setSchemasList(data)
+      if(!e.target.value)
+        await retrieveSchemasList().then((res) => {
+          setSchemasList(res);
+        });
+    }
 
     return (
         <>
             <PageHeader/>
             <Container className="mt--7" fluid>
+                  <div>
+                    <Row>
+                        <Col xs="6"></Col>
+                        <Col className="text-right" xs="6">
+                            <FormGroup>
+                                <InputGroup className="input-group-alternative mb-4">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                            <i className="ni ni-zoom-split-in"/>
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                    <Input className="form-control-alternative" placeholder="Search by name ..." type="text"
+                                    onChange={(e) => search(e)}/>
+                                </InputGroup>
+                            </FormGroup>
+                        </Col>
+                    </Row>
+                </div>
                 <Row>
                     <div className="col">
                         <Card className="shadow">

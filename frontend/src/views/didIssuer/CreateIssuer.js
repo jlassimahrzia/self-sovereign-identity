@@ -35,11 +35,7 @@ function CreateIssuer() {
 
     useEffect(() => {
         retrieveIssuerRequestsList();
-
     }, [])
-    useEffect(() => {
-       // retrieveIssuerRequestsList();
-    }, [IssuerRequestsList])
 
     const createIssuer = async (name,email, id) => {
         const data = await IssuerService.createIssuer(name,email, id)
@@ -60,7 +56,7 @@ function CreateIssuer() {
     }
     const createIss = async (item) => {
         await createIssuer(item.name,item.email, item.id)
-       
+        await retrieveIssuerRequestsList();
     };
 
     const createIssuerFailed = async (email, id) => {
@@ -74,7 +70,7 @@ function CreateIssuer() {
     }
     const SendFailed = async (item) => {
         await createIssuerFailed(item.email, item.id)
-       
+        await retrieveIssuerRequestsList();
     }
 
     // PDF Modal

@@ -26,6 +26,19 @@ function VC() {
     const [formData, setFormData] = useState(null)
     const [vcRequestsList, setvcRequestsList] = useState([]);
     const [item, setitem] = useState({})
+    const [holder, setholder] = useState({})
+    const [holderModal, setholderModal] = useState(false)
+
+    const openHolderModal = async (did) => {
+        let ddo = await DidService.holderDetails(did)
+        setholder(ddo)
+        setholderModal(true)
+    }
+
+    const closeHolderModal = () => {
+        setholder({})
+        setholderModal(false)
+    }
 
     const retrieveVcRequestsList = async () => {
 
@@ -37,11 +50,6 @@ function VC() {
     useEffect(() => {
         retrieveVcRequestsList();
     }, [])
-
-    useEffect(() => { // retrieveVcRequestsList();
-    }, [vcRequestsList, vcModal])
-
-    useEffect(() => {}, [vcRequestsList])
 
     const openVcModal = async (item) => {
         setitem(item)
@@ -75,6 +83,7 @@ function VC() {
             console.log(err)
             swal("Something went wrong!", "try again!", "error");
         }
+        await retrieveVcRequestsList();
     }
 
     const declineRequest = async(item) => {
@@ -90,6 +99,7 @@ function VC() {
             console.log(error)
             swal("Something went wrong!", "try again!", "error");
         }
+        await retrieveVcRequestsList();
     }
     return (
         <div>
@@ -158,6 +168,11 @@ function VC() {
                                                             color: "white"
                                                         }
                                                     }
+
+                                                    onClick={
+                                                        () => openHolderModal(item.did_holder)
+                                                    }
+
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                 }>Holder details</Button>
@@ -201,10 +216,66 @@ function VC() {
                         </div>
                     </Modal>
                 </Row>
+                <Modal className="modal-dialog-centered"
+                    isOpen={holderModal}
+                    toggle={closeHolderModal}>
+                    <div className="modal-header">
 
+                        <h4 className="modal-title" id="modal-title-default"
+                            style={
+                                {textTransform: "uppercase"}
+                        }>
+                            Holder Details
+                        </h4>
+                        <button aria-label="Close" className="close" data-dismiss="modal" type="button"
+                            onClick={closeHolderModal}>
+                            <span aria-hidden={true}>×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <span className='headingProp'>
+                               Firstname
+                            </span>
+                            <span className='descriptionProp'>
+                                {
+                                holder.firstname
+                            } </span>
+                        </div>
+                        <div>
+                            <span className='headingProp'>
+                               Lastname
+                            </span>
+                            <span className='descriptionProp'>
+                                {
+                                holder.lastname
+                            } </span>
+                        </div>
+                        <div>
+                            <span className='headingProp'>
+                               Email
+                            </span>
+                            <span className='descriptionProp'>
+                                {
+                                holder.email
+                            } </span>
+                        </div>
+                        <div>
+                            <span className='headingProp'>
+                               public key
+                            </span>
+                            <span className='descriptionProp'>
+                                {
+                                holder.publicKey
+                            } </span>
+                        </div>
+                    </div>
+                </Modal>
             </Container>
         </div>
     )
 }
+
+
 
 export default VC

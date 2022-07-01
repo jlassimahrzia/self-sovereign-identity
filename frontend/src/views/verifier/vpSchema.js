@@ -38,6 +38,7 @@ const VpSchema = (props) => {
 
     const [schema, setSchema] = useState({});
     const [modalVisible, setModalVisible] = useState(false);
+    const [tab, settab] = useState([])
     
     const openModal = async (item) => {
       let data = await VerifierService.resolveVerificationTemplate(item.name)
@@ -144,13 +145,12 @@ const VpSchema = (props) => {
         retrieveVerificationTemplates().then((res) => {
             setverificationTemplatesList(res);
         });
+        retrieveVerificationTemplates().then((res) => {
+            settab(res);
+        });
         retrieveIssuersList();
     }, [])
 
-    useEffect(() => {
-      
-    }, [verificationTemplatesList])
-    
     const initialValues = {
         title: '',
         description: '',
@@ -175,7 +175,7 @@ const VpSchema = (props) => {
     }
  
     function onChangeCredentials(e, field, values, setValues) { // update dynamic form
-       
+    
             const credentiels = [...values.credentiels];
             const numberOfCredentials = e.target.value || 0;
             const previousNumber = parseInt(field.value || '0');
@@ -208,6 +208,19 @@ const VpSchema = (props) => {
             ClosevpModal()
             swal("Something went wrong try again!", "", "error");
         }
+        await retrieveVerificationTemplates().then((res) => {
+            setverificationTemplatesList(res);
+        });
+    }
+
+    const search = async (e) => {
+        let keyword = e.target.value
+        let data = tab.filter(template => template.name.includes(keyword))
+        setverificationTemplatesList(data)
+        if(!e.target.value)
+            await retrieveVerificationTemplates().then((res) => {
+                setverificationTemplatesList(res);
+            });
     }
 
     return (
@@ -230,7 +243,8 @@ const VpSchema = (props) => {
                                             <i className="ni ni-zoom-split-in"/>
                                         </InputGroupText>
                                     </InputGroupAddon>
-                                    <Input className="form-control-alternative" placeholder="Search by name ..." type="text"/>
+                                    <Input className="form-control-alternative" placeholder="Search by name ..." type="text"
+                                    onChange={(e) => search(e)}/>
                                 </InputGroup>
                             </FormGroup>
                         </Col>

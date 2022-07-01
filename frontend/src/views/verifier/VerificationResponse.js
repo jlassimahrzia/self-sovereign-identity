@@ -98,9 +98,6 @@ const VerificationResponse = () => {
         return data[0].label
     }
 
-    useEffect(() => {}, [verificationResponseList, servicesRequestsList])
-
-
     const acceptRequest = async (id) => {
         let done = await VerifierService.acceptRequest(id)
         if (done) {
@@ -109,6 +106,7 @@ const VerificationResponse = () => {
             swal("Something went wrong", "Try again", "error");
         }
         setModalVisible(false)
+        await retrieveVerificationResponseList()
     }
 
     const declineRequest = async (id) => {
@@ -119,6 +117,7 @@ const VerificationResponse = () => {
             swal("Something went wrong", "Try again", "error");
         }
         setModalVisible(false)
+        await retrieveVerificationResponseList()
     }
 
     const openHolderModal = async (did) => {

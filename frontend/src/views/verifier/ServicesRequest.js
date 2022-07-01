@@ -33,10 +33,6 @@ function ServicesRequest() {
         retrieveServicesRequestsList();
     }, [])
 
-    useEffect(() => { 
-
-    }, [servicesRequestsList])
-
     const sendVerificationRequest = async (request) => {
         let done = VerifierService.sendVerificationRequest(request)
         if (done) {
@@ -45,6 +41,7 @@ function ServicesRequest() {
         else{
             swal("Something went wrong try again!", "", "error");
         }
+        await retrieveServicesRequestsList()
     }
 
     const openHolderModal = async (did) => {
@@ -66,6 +63,7 @@ function ServicesRequest() {
         else{
             swal("Something went wrong try again!", "", "error");
         }
+        await retrieveServicesRequestsList()
     }
 
     return (

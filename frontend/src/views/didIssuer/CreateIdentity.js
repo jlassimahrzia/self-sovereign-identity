@@ -24,10 +24,6 @@ const CreateIdentity = () => {
     retrieveDidRequestsList();
   }, [])
 
-  useEffect(() => {
-    //retrieveDidRequestsList();
-  }, [didRequestsList])
-
   const createIdentity1 = async (publickey, email, id, firstname, lastname) => {
     const data = await DidService.createIdentity(publickey, email, id, firstname, lastname)
     if (data) {
@@ -42,9 +38,9 @@ const CreateIdentity = () => {
     }
   }
 
-  const createIdentity2 = (item) => {
-    createIdentity1(item.publickey, item.email, item.id, item.firstname, item.lastname)
-
+  const createIdentity2 = async (item) => {
+    await createIdentity1(item.publickey, item.email, item.id, item.firstname, item.lastname)
+    await retrieveDidRequestsList();
   };
 
   const createIdentityFailed = async (email, id) => {
@@ -56,8 +52,9 @@ const CreateIdentity = () => {
         swal("Something went wrong try again!", "", "error");
     }
   }
-  const SendFailed = (item) => {
-    createIdentityFailed(item.email, item.id)
+  const SendFailed = async (item) => {
+    await createIdentityFailed(item.email, item.id)
+    await retrieveDidRequestsList();
   }
 
   return (

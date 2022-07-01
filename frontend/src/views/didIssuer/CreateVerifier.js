@@ -55,8 +55,9 @@ function CreateVerifier() {
             else{
                 swal("Something went wrong try again!", "", "error");
             }
-            
         }
+
+        await retrieveVerifierRequestsList();
     }
 
     const createVerifierFailed = async (item) => {
@@ -67,6 +68,7 @@ function CreateVerifier() {
         else{
             swal("Something went wrong try again!", "", "error");
         }
+        await retrieveVerifierRequestsList();
     }
 
     // PDF Modal
