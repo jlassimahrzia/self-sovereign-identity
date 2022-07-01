@@ -67,7 +67,19 @@ const getVCRequestList = (data : any) : any => {
     });
 }
 
+const getVCRequestListByHolder = (didHolder : any) : any => {
 
+    let query = "SELECT * FROM vcrequest WHERE did_holder= '" + didHolder + "'"
+    return new Promise((resolve, reject) => {
+        db.query(query, [didHolder], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
 
 const updateStatusDeclined = (data : any) : any => {
     let ID = data
@@ -94,6 +106,11 @@ router.post('/api/vcRequestList', async (req : any, res : any) => {
     res.json({list})
 })
 
+router.post('/api/vcRequestListByHolder', async (req : any, res : any) => {
+    let didholder = req.body.didholder
+    const list = await getVCRequestListByHolder(didholder)
+    res.json({list})
+})
 
 var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 var charactersLength = characters.length;

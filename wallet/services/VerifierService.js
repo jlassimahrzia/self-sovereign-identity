@@ -70,5 +70,16 @@ class VerifierService {
         return done
     }
 
+    async serviceRequestList(didHolder){
+        let tab
+        await axios.post(`${environment.SERVER_API_URL}/servicesRequestListByHolder`, {didHolder}).then(res => {
+            tab = res.data.list
+        }).catch(error => {
+            console.log(error)
+        });
+        console.log(tab);
+        return tab;
+    }
+
 }
 export default new VerifierService();

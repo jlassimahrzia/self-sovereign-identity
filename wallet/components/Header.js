@@ -133,6 +133,20 @@ class Header extends React.Component {
       />
     );
   }
+  renderVerifierSearch = () => {
+    const { navigation } = this.props;
+    return (
+      <Input
+        right
+        color="black"
+        style={styles.search}
+        placeholder="Search"
+        placeholderTextColor={'#8898AA'}
+        onFocus={() => {Keyboard.dismiss(); navigation.navigate('VerifierSearch');}}
+        iconContent={<Icon size={16} color={theme.COLORS.MUTED} name="search-zoom-in" family="ArgonExtra" />}
+      />
+    );
+  }
   renderOptions = () => {
     const { navigation, optionLeft, optionRight } = this.props;
 
@@ -167,12 +181,13 @@ class Header extends React.Component {
     )
   }
   renderHeader = () => {
-    const { search, options, tabs, credsearch } = this.props;
-    if (search || tabs || options || credsearch) {
+    const { search, options, tabs, credsearch , verifiersearch} = this.props;
+    if (search || tabs || options || credsearch || verifiersearch) {
       return (
         <Block center>
           {search ? this.renderSearch() : null}
           {credsearch ? this.renderCredSearch() : null}
+          {verifiersearch ? this.renderVerifierSearch() : null}
           {options ? this.renderOptions() : null}
           {tabs ? this.renderTabs() : null}
         </Block>

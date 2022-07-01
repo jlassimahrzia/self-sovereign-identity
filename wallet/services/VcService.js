@@ -25,5 +25,15 @@ class VcService {
             });
         return result;
     }
+
+    async getVCRequestList(didholder) {
+        let tab = []
+        await axios.post(`${environment.SERVER_API_URL}/vcRequestListByHolder`, {didholder}).then(res => {
+            tab = res.data.list
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
 }
 export default new VcService();

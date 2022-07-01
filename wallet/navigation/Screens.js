@@ -27,6 +27,9 @@ import Search from "../screens/Search";
 import SqliteService from "../services/SqliteService"
 import CredSearch from "../components/CredSearch";
 import VerifierServices from "../screens/VerifierServices";
+import VcRequest from "../screens/VcRequest";
+import ServiceRequest from "../screens/ServiceRequest";
+import VerifierSearch from "../screens/VerifierSearch";
 
 const { width } = Dimensions.get("screen");
 
@@ -39,6 +42,70 @@ const category = [
   { id: '2', title: 'Category 2' },
   { id: '3', title: 'Category 3' }
 ]
+
+function RequestsStack(props) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color }) => {
+          let iconName;
+          if (route.name === "Credentials Requests") {
+            iconName = "documents";
+          } else if (route.name === "Services Requests") {
+            iconName = "grid";
+          }
+          // You can return any component that you like here!
+          return (
+            <Icon
+              name={iconName}
+              family="entypo"
+              size={22}
+              color={color}
+              style={{ marginTop: 10 }}
+            />
+          );
+        }
+      })}
+      tabBarOptions={{
+        activeTintColor: argonTheme.COLORS.PRIMARY,
+        inactiveTintColor: "gray",
+        labelStyle: {
+          fontFamily: "open-sans-regular"
+        }
+        
+      }}
+    >
+      <Tab.Screen name="Credentials Requests" component={VcRequest} />
+      <Tab.Screen name="Services Requests" component={ServiceRequest} />
+    </Tab.Navigator>
+  );
+}
+
+function HistoryStack(props){
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
+      <Stack.Screen
+        name="History"
+        component={RequestsStack}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="History"
+              scene={scene}
+              navigation={navigation}
+            />
+          ),
+          cardStyle: { backgroundColor: "#F8F9FE" }
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
 
 function QrCodeStack(props) {
   return (
@@ -82,7 +149,6 @@ function OrganisationsStack(props) {
             <Header
               title="Organisations"
               search
-              tabs={category}
               navigation={navigation}
               scene={scene}
             />
@@ -134,8 +200,7 @@ function VerifiersStack(props) {
           header: ({ navigation, scene }) => (
             <Header
               title="Verifiers"
-              search
-              tabs={category}
+              verifiersearch
               navigation={navigation}
               scene={scene}
             />
@@ -158,16 +223,16 @@ function VerifiersStack(props) {
           cardStyle: { backgroundColor: "#F8F9FE" }
         }}
       />
-      {/* <Stack.Screen
-        name="Search"
-        component={Search}
+      <Stack.Screen
+        name="VerifierSearch"
+        component={VerifierSearch}
         options={{
           header: ({ navigation, scene }) => (
             <Header title="Search" back navigation={navigation} scene={scene} />
           ),
           cardStyle: { backgroundColor: "#F8F9FE" }
         }}
-      /> */}
+      /> 
     </Stack.Navigator>
   );
 }
@@ -396,6 +461,7 @@ function AppStack(props) {
       { did ? <Drawer.Screen name="Credentials" component={CredentialsStack} /> : null }
       { did ? <Drawer.Screen name="Organisations" component={OrganisationsStack} /> : null }
       { did ? <Drawer.Screen name="Verifiers" component={VerifiersStack} /> : null }
+      { did ?<Drawer.Screen name="History" component={HistoryStack} /> : null }
       <Drawer.Screen name="Settings" component={SettingsStack} />
     </Drawer.Navigator>
   );

@@ -314,8 +314,7 @@ const generateVerificationResponse = async (data : any) => {
         });
 }
 
-const getVerificationResponseList = (didVerifier : any) : any => {
-    
+const getVerificationResponseList = (didVerifier : any) : any => {  
     let query = "SELECT * FROM verificationresponse WHERE did_verifier= '" + didVerifier + "'"
     return new Promise((resolve, reject) => {
         db.query(query, [didVerifier], (err : any, res : any) => {
@@ -328,6 +327,26 @@ const getVerificationResponseList = (didVerifier : any) : any => {
     });
 }
 
+
+const getServiceRequestListByHolder = ( didHolder : any) : any => {
+    let query = "SELECT * FROM verificationresponse, servicesrequests WHERE  servicesrequests.id=verificationresponse.idRequest AND verificationresponse.did_holder=? "
+    return new Promise((resolve, reject) => {
+        db.query(query, [didHolder], (err : any, res : any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res);
+        });
+    });
+}
+
+// servicesRequestListByHolder
+router.post('/api/servicesRequestListByHolder', async (req : any, res : any) => {
+    let didHolder = req.body.didHolder
+    const list = await getServiceRequestListByHolder(didHolder)
+    res.json({list})
+})
 
 const declineService = (id : any) => {
     let query = "UPDATE servicesrequests SET state='2' WHERE id=?"
@@ -463,6 +482,13 @@ const getServicesRequestList = (didVerifier : any) : any => {
         });
     });
 }
+
+// servicesRequestList
+router.post('/api/servicesRequestList', async (req : any, res : any) => {
+    let didVerifier = req.body.didVerifier
+    const list = await getServicesRequestList(didVerifier)
+    res.json({list})
+})
 
 const getVerifierList = () : any => {
     let query = "SELECT * FROM verifiers"
@@ -807,12 +833,6 @@ router.post('/api/verificationRequest', async (req : any, res : any) => {
     }
 })
 
-router.post('/api/servicesRequestList', async (req : any, res : any) => {
-    let didVerifier = req.body.didVerifier
-    const list = await getServicesRequestList(didVerifier)
-    res.json({list})
-})
-
 router.post('/api/sendVerificationRequest', async (req : any, res : any) => {
     let done = sendVerificationRequest(req.body.request , req.body.privateKey)
     res.json({done})
@@ -823,6 +843,7 @@ router.post('/api/generateVerificationResponse',async (req : any , res : any) =>
     res.json({done : true})
 })
 
+//verificationResponseList
 router.post('/api/verificationResponseList', async (req : any, res : any) => {
     let didVerifier = req.body.didVerifier
     const list = await getVerificationResponseList(didVerifier)

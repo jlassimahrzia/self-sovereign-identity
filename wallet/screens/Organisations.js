@@ -40,7 +40,6 @@ renderEmpty = () => {
 function Organisations({navigation}) {
 
     const [organisations, setOrganisations] = useState([])
-    const [img, setimg] = useState("")
 
     const retrieveIssuersList = async () => {
       let data = await IssuerService.getIssuerList()

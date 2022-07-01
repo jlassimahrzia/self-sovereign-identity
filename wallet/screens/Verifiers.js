@@ -42,14 +42,14 @@ function Verifiers({navigation}) {
     const [verifiers, setVerifiers] = useState([])
     const [img, setimg] = useState("")
 
-    const retrieveIssuersList = async () => {
+    const retrieveVerifiersList = async () => {
       let data = await VerifierService.getVerifierList()
       console.log(data);
       setVerifiers(data)
     }
     
     useEffect(() => {
-      retrieveIssuersList();
+      retrieveVerifiersList();
       console.log("useEffect org");
     }, [])
 

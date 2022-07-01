@@ -4,7 +4,7 @@ import { Block, Text, theme } from "galio-framework";
 
 import argonTheme from "../constants/Theme";
 
-import { Octicons , AntDesign } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons , AntDesign } from '@expo/vector-icons'; 
 
 function DrawerItem({ title,focused,navigation }) {
   renderIcon = () => {
@@ -46,8 +46,11 @@ function DrawerItem({ title,focused,navigation }) {
           <AntDesign name="setting" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
-      case "Log out":
-        return <Icon />;
+      case "History":
+        return (
+          <MaterialCommunityIcons name="history" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
       default:
         return null;
     }
