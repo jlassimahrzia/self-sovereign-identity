@@ -1,7 +1,7 @@
 import { Block , Text, theme} from "galio-framework";
 const { width } = Dimensions.get("screen");
 import {
-    StyleSheet, Dimensions, Image, FlatList
+    StyleSheet, Dimensions, Image, FlatList, RefreshControl
 } from "react-native";
 import { Icon } from "../components";
 import { argonTheme, Images } from "../constants";
@@ -18,6 +18,16 @@ function ServiceRequest() {
     const [serviceRequestList, setserviceRequestList] = useState([])
     const [did, setDid] = useState(null)
     const [verifiers, setVerifiers] = useState([])
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = () => {
+        setRefreshing(true)
+        getIdentity()
+        retrieveServiceRequestList()
+        retrieveVerifiersList()
+        setRefreshing(false)
+    };
 
     const retrieveVerifiersList = async () => {
         let data = await VerifierService.getVerifierList()
@@ -67,6 +77,12 @@ function ServiceRequest() {
             <Block flex center style={styles.cart}>
             {serviceRequestList ?
                 <FlatList
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
                     data={serviceRequestList}
                     renderItem={({item}) => (
                         <Block>

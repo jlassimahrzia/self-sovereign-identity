@@ -1,7 +1,7 @@
 import { Block , Text, theme} from "galio-framework";
 const { width } = Dimensions.get("screen");
 import {
-    StyleSheet, Dimensions, Image, FlatList
+    StyleSheet, Dimensions, Image, FlatList, RefreshControl
 } from "react-native";
 import { Icon } from "../components";
 import { argonTheme, Images } from "../constants";
@@ -16,6 +16,16 @@ function VcRequest() {
     const [vcrequestList, setvcrequestList] = useState([])
     const [organisations, setOrganisations] = useState([])
     const [did, setDid] = useState(null)
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = () => {
+        setRefreshing(true)
+        getIdentity()
+        retrieveVcRequestList()
+        retrieveIssuersList()
+        setRefreshing(false)
+    };
 
     const retrieveIssuersList = async () => {
         let data = await IssuerService.getIssuerList()
@@ -67,6 +77,12 @@ function VcRequest() {
             <Block flex center style={styles.cart}>
             {vcrequestList ?
                 <FlatList
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                        />
+                    }
                     data={vcrequestList}
                     renderItem={({item}) => (
                         <Block>

@@ -1,7 +1,8 @@
 
 import { Block, Text, theme } from "galio-framework";
 import {
-    StyleSheet, Dimensions, Image, Modal, TouchableWithoutFeedback, TouchableOpacity,FlatList
+    StyleSheet, Dimensions, Image, Modal, TouchableWithoutFeedback, TouchableOpacity,FlatList,
+    RefreshControl
 } from "react-native";
 import { argonTheme, Images } from "../constants";
 import { Button } from "../components/";
@@ -12,7 +13,6 @@ import SqliteService from "../services/SqliteService"
 import IssuerService from "../services/IssuerService";
 import { environment } from '../constants/env';
 import * as SQLite from 'expo-sqlite';
-
 function Credentials({navigation}) {
     const [modalVisible, setModalVisible] = useState(false);
     const [vcList, setvcList] = useState([])
@@ -20,7 +20,30 @@ function Credentials({navigation}) {
     const [item, setitem] = useState(null)
     const [tab, settab] = useState([])
     const [organisations, setOrganisations] = useState([])
-    
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        retrieveIssuersList()
+        openDb().then(db =>{
+            db.transaction((tx) => {
+                tx.executeSql(
+                  `select * from verifiableCredentials`,
+                  [],(transaction, resultSet) => setvcList(resultSet.rows._array),
+                  (transaction, error) => console.log(error)
+                )
+            })
+        })
+        let credentials = []
+        vcList.forEach((element) => {
+            let vc = JSON.parse(element.vc)
+            const result = organisations.filter(item => item.did === vc.issuer);
+            vc = {...vc, issuerInfo : result[0]}
+            credentials.push(vc)
+        });
+        setcredentialList(credentials)
+        setRefreshing(false)
+    };
 
     const openModal = (item) => {
         setitem(item)
@@ -72,18 +95,15 @@ function Credentials({navigation}) {
                 )
             })
         })
-        console.log("vcList",vcList);
         let credentials = []
         vcList.forEach((element) => {
             let vc = JSON.parse(element.vc)
             const result = organisations.filter(item => item.did === vc.issuer);
-            console.log("result",result);
             vc = {...vc, issuerInfo : result[0]}
             credentials.push(vc)
         });
         
         setcredentialList(credentials)
-        console.log("credentialList",credentialList);
     }, [])  
 
     renderEmpty = () => {
@@ -93,8 +113,15 @@ function Credentials({navigation}) {
     return(
         <>
         <Block flex center style={styles.cart}>
+        
         {credentialList ?
         <FlatList
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                />
+            }
             data={credentialList}
             renderItem={({item}) => (
                 <Block>

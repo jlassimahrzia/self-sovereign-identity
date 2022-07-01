@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import { Block, Text, theme, Button } from "galio-framework";
-import { View, StyleSheet, Dimensions, Modal, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
+import { View, StyleSheet, Dimensions, Modal, TouchableOpacity, Image, Alert, RefreshControl
+, ScrollView, SafeAreaView } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import SqliteService from "../services/SqliteService"
 import { argonTheme, Images } from "../constants";
@@ -13,7 +14,7 @@ import { AntDesign } from '@expo/vector-icons';
 import ViewMoreText from 'react-native-view-more-text';
 
 export default function QrCode({navigation}) {
-
+  const db = SqliteService.openDatabase()
   const [hasPermission, setHasPermission] = useState(null)
   const [scanned, setScanned] = useState(false)
   const [did, setDid] = useState(null)
@@ -29,6 +30,21 @@ export default function QrCode({navigation}) {
 
   const [issuers, setIssuers] = useState([])
 
+  const [refreshing, setRefreshing] = useState(false)
+
+  const onRefresh = async () => {
+      setRefreshing(true);
+      await (async () => {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+      })();
+      await getIdentity();
+      await getCredentials();
+      await retrieveIssuersList();
+      console.log("did from qr code",did);
+      setRefreshing(false);
+  };
+
   const retrieveIssuersList = async () => {
       let data = await IssuerService.getIssuerList()
       let issuerList = []
@@ -39,7 +55,7 @@ export default function QrCode({navigation}) {
       });
       setIssuers(issuerList)
     }
-  const db = SqliteService.openDatabase()
+  
   
   const openModal = () => {
     setModalVisible(true)
@@ -297,7 +313,20 @@ export default function QrCode({navigation}) {
 
   return (
     <>
-        <View style={styles.container}>
+
+    <SafeAreaView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <Text center size={14} style={{marginTop: 5}}>Scan QrCode to get your DID, Credentials and Requests. </Text>
+      </ScrollView>
+    </SafeAreaView>
+    <View style={styles.container}>
             <BarCodeScanner
             onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
             style={StyleSheet.absoluteFillObject}
@@ -305,7 +334,6 @@ export default function QrCode({navigation}) {
             {scanned && <Button onPress={() => setScanned(false)} size="small" 
             style={{width: width , margin:0, borderRadius: 0, backgroundColor: "#172B4D"}}>Tap to Scan Again</Button>}
         </View>
-      
         { vc && tab ? <Modal
             animationType="slide"
             transparent={false}
@@ -512,7 +540,6 @@ export default function QrCode({navigation}) {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
     },
     rightSide : {
         width: width*0.8, 

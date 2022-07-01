@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Image, Linking, Platform, Modal
+  Image, Linking, Platform, Modal, RefreshControl
 } from "react-native";
 import { Block, Text, Input, theme } from "galio-framework";
 import { environment } from '../constants/env';
@@ -54,10 +54,18 @@ function CredSearch({navigation}){
     setcredentialList(credentials)  
   }
 
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = () => {
+      setRefreshing(true)
+      retrieveIssuersList()
+      getCredentials()
+      setRefreshing(false)
+    };
+
   useEffect(() => {
     retrieveIssuersList()
     getCredentials()
-    console.log("credentialList",credentialList);
   }, [])
 
   const animate = () => { 
@@ -127,46 +135,14 @@ function CredSearch({navigation}){
     );
   };
 
-  const renderResult = result => {
-    
-
-
-    return (
-      
-      <Block flex center style={styles.cart}>  
-        <Text>hgghudu</Text>
-          {/* <Block card shadow style={styles.product}>
-                        <TouchableWithoutFeedback onPress={() => openModal(result)}>
-                            <Block row>
-                            <Block style={{width: width*0.2, alignItems: 'center'}} >
-                                <Image
-                                    source={{uri: `${environment.SERVER_API_URL}/image/` + item.vc.issuerInfo.logo}}
-                                    style={styles.image}
-                                    resizeMode="contain"
-                                />
-                            </Block>
-                            <Block style={styles.rightSide}>
-                                <Text size={16} style={styles.productTitle} color={argonTheme.COLORS.BLACK}
-                                    style={{fontWeight: "bold"}}>
-                                    {result.credentialSchema.id}
-                                </Text>
-                                <Text size={14} muted style={{marginVertical: 5}}>
-                                    {result.issuerInfo.name}
-                                </Text>
-                            </Block>
-                        </Block>
-                    </TouchableWithoutFeedback>
-          </Block>    */}
-      </Block>
-      /*     */
-    );
-  };
-
   const renderResults = () => {
 
     const [item, setitem] = useState(null)
     const [tab, settab] = useState([])
     const [modalVisible, setModalVisible] = useState(false);
+
+    
+
     const opacity = animatedValue.interpolate({
       inputRange: [0, 1],
       outputRange: [0.8, 1],
@@ -194,6 +170,7 @@ function CredSearch({navigation}){
     
     return (
       <>
+    
       {results.length === 0 && search ? (
         <Block style={{ width: width - 40 }}>
           {renderNotFound()}
@@ -226,6 +203,7 @@ function CredSearch({navigation}){
           )})}
         </Block>
       )}
+  
       {item ? <Modal
           animationType="slide"
           transparent={false}
@@ -284,7 +262,13 @@ function CredSearch({navigation}){
         <Block center style={styles.header}>
           {renderSearch()}
         </Block>
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.cart}>
+        <ScrollView showsVerticalScrollIndicator={false} style={styles.cart}
+        refreshControl={
+          <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+          />
+        } >
           {renderResults()}
         </ScrollView>
       </Block>
