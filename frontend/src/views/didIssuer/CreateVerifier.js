@@ -29,7 +29,6 @@ function CreateVerifier() {
     const retrieveVerifierRequestsList = async () => {
         let data = await VerifierService.getVerifierList();
         setVerifierRequestsList([...data])
-        console.log(data)
     }
 
     useEffect(() => {

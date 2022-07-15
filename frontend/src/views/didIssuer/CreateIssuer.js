@@ -27,10 +27,8 @@ function CreateIssuer() {
     const [pdf, setPdf] = useState("");
 
     const retrieveIssuerRequestsList = async () => {
-        console.log("aaa")
         let data = await IssuerService.getIssuersList();
         setIssuerRequestsList([...data])
-        console.log(data)
     }
 
     useEffect(() => {

@@ -1,20 +1,3 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 import { useState } from "react";
 // node.js library that concatenates classes (strings)
 import classnames from "classnames";
@@ -31,7 +14,7 @@ import {
   NavLink,
   Nav,
   Container,
-  Row,
+  Row,CardTitle,
   Col,
 } from "reactstrap";
 
@@ -43,90 +26,286 @@ import {
   chartExample2,
 } from "variables/charts.js";
 
-
+import { useEffect } from "react";
 import PageHeader from "components/Headers/PageHeader";
 
+import DidService from "services/DidService";
+import IssuerService from "services/IssuerService";
+import VerifierService from "services/VerifierService";
 const Index = (props) => {
-  const [activeNav, setActiveNav] = useState(1);
-  const [chartExample1Data, setChartExample1Data] = useState("data1");
 
   if (window.Chart) {
     parseOptions(Chart, chartOptions());
   }
 
-  const toggleNavs = (e, index) => {
-    e.preventDefault();
-    setActiveNav(index);
-    setChartExample1Data("data" + index);
-  };
+  const [HolderIssued, setHolderIssued] = useState([]);
+  const [HolderPending, setHolderPending] = useState([]);
+  const [HolderDeclined, setHolderDeclined] = useState([]);
+  const [HolderChart, setHolderChart] = useState()
+
+  const retrieveDidRequestsList = async () => {
+    let data = await DidService.getdidRequestList();
+    let dataIssued = data.filter(vc => vc.state === 1)
+    setHolderIssued(dataIssued)
+    let dataPending = data.filter(vc => vc.state === 0)
+    setHolderPending(dataPending)
+    let dataDeclined = data.filter(vc => vc.state === 2)
+    setHolderDeclined(dataDeclined)
+    setHolderChart({
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value;
+                  }
+                },
+              },
+            },
+          ],
+        },
+        tooltips: {
+          callbacks: {
+            label: function (item, data) {
+              var label = data.datasets[item.datasetIndex].label || "";
+              var yLabel = item.yLabel;
+              var content = "";
+              if (data.datasets.length > 1) {
+                content += label;
+              }
+              content += yLabel;
+              return content;
+            },
+          },
+        },
+      },
+      data: {
+        labels: ["Pending", "Issued", "Declined"],
+        datasets: [
+          {
+            label: "Sales",
+            data: [HolderPending.length, HolderIssued.length, HolderDeclined.length],
+            maxBarThickness: 10,
+          },
+        ],
+      },
+    })
+  }
+
+  const [IssuerIssued, setIssuerIssued] = useState([]);
+  const [IssuerPending, setIssuerPending] = useState([]);
+  const [IssuerDeclined, setIssuerDeclined] = useState([]);
+  const [IssuerChart, setIssuerChart] = useState()
+
+  const retrieveIssuerDidRequestsList = async () => {
+    let data = await IssuerService.getIssuersList();
+    let dataIssued = data.filter(vc => vc.state === 1)
+    setIssuerIssued(dataIssued)
+    let dataPending = data.filter(vc => vc.state === 0)
+    setIssuerPending(dataPending)
+    let dataDeclined = data.filter(vc => vc.state === 2)
+    setIssuerDeclined(dataDeclined)
+    setIssuerChart({
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value;
+                  }
+                },
+              },
+            },
+          ],
+        },
+        tooltips: {
+          callbacks: {
+            label: function (item, data) {
+              var label = data.datasets[item.datasetIndex].label || "";
+              var yLabel = item.yLabel;
+              var content = "";
+              if (data.datasets.length > 1) {
+                content += label;
+              }
+              content += yLabel;
+              return content;
+            },
+          },
+        },
+      },
+      data: {
+        labels: ["Pending", "Issued", "Declined"],
+        datasets: [
+          {
+            label: "Sales",
+            data: [IssuerPending.length, IssuerIssued.length, IssuerDeclined.length],
+            maxBarThickness: 10,
+          },
+        ],
+      },
+    })
+  }
+
+  const [VerifierIssued, setVerifierIssued] = useState([]);
+  const [VerifierPending, setVerifierPending] = useState([]);
+  const [VerifierDeclined, setVerifierDeclined] = useState([]);
+  const [VerifierChart, setVerifierChart] = useState()
+
+  const retrieveVerifierDidRequestsList = async () => {
+    let data = await VerifierService.getVerifierList();
+    let dataIssued = data.filter(vc => vc.state === 1)
+    setVerifierIssued(dataIssued)
+    let dataPending = data.filter(vc => vc.state === 0)
+    setVerifierPending(dataPending)
+    let dataDeclined = data.filter(vc => vc.state === 2)
+    setVerifierDeclined(dataDeclined)
+    setVerifierChart({
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value;
+                  }
+                },
+              },
+            },
+          ],
+        },
+        tooltips: {
+          callbacks: {
+            label: function (item, data) {
+              var label = data.datasets[item.datasetIndex].label || "";
+              var yLabel = item.yLabel;
+              var content = "";
+              if (data.datasets.length > 1) {
+                content += label;
+              }
+              content += yLabel;
+              return content;
+            },
+          },
+        },
+      },
+      data: {
+        labels: ["Pending", "Issued", "Declined"],
+        datasets: [
+          {
+            label: "Sales",
+            data: [VerifierPending.length, VerifierIssued.length, VerifierDeclined.length],
+            maxBarThickness: 10,
+          },
+        ],
+      },
+    })
+  }
+
+  useEffect(() => {
+    retrieveDidRequestsList();
+    retrieveIssuerDidRequestsList();
+    retrieveVerifierDidRequestsList();
+  }, [])
+ 
   return (
     <>
       <PageHeader/>
       {/* Page content */}
       <Container className="mt--7" fluid>
-        <Row>
-          <Col className="mb-5 mb-xl-0" xl="8">
-          <Card className="shadow">
-          <CardHeader className="bg-transparent">
-                <Row className="align-items-center">
-                  <div className="col">
-                    <h6 className="text-uppercase text-light ls-1 mb-1">
-                      Overview
-                    </h6>
-                    <h2 className=" mb-0">DID requests </h2>
-                  </div>
-                  <div className="col">
-                    <Nav className="justify-content-end" pills>
-                      <NavItem>
-                        <NavLink
-                          className={classnames("py-2 px-3", {
-                            active: activeNav === 1,
-                          })}
-                          href="#pablo"
-                          onClick={(e) => toggleNavs(e, 1)}
-                        >
-                          <span className="d-none d-md-block">Month</span>
-                          <span className="d-md-none">M</span>
-                        </NavLink>
-                      </NavItem>
-                      <NavItem>
-                        <NavLink
-                          className={classnames("py-2 px-3", {
-                            active: activeNav === 2,
-                          })}
-                          data-toggle="tab"
-                          href="#pablo"
-                          onClick={(e) => toggleNavs(e, 2)}
-                        >
-                          <span className="d-none d-md-block">Week</span>
-                          <span className="d-md-none">W</span>
-                        </NavLink>
-                      </NavItem>
-                    </Nav>
-                  </div>
-                </Row>
-              </CardHeader>
-              <CardBody>
-                {/* Chart */}
-                <div className="chart">
-                  <Line
-                    data={chartExample1[chartExample1Data]}
-                    options={chartExample1.options}
-                    getDatasetAtEvent={(e) => console.log(e)}
-                  />
+      <Row>
+      <Col lg="12" xl="4">
+        <Card className="card-stats mb-4 mb-xl-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle
+                  tag="h5"
+                  className="text-uppercase text-muted mb-0"
+                >
+                  Holders
+                </CardTitle>
+                <span className="h2 font-weight-bold mb-0">
+                  {HolderIssued.length}
+                </span>
+              </div>
+              <Col className="col-auto">
+              <div className="icon icon-shape bg-info text-white rounded-circle shadow">
+              <i className="ni ni-single-02"></i>
+              </div>
+                
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+      </Col>
+      <Col lg="12" xl="4">
+         <Card className="card-stats mb-4 mb-xl-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle
+                  tag="h5"
+                  className="text-uppercase text-muted mb-0"
+                >
+                  Issuers
+                </CardTitle>
+                <span className="h2 font-weight-bold mb-0">{IssuerIssued.length}</span>
+              </div>
+              <Col className="col-auto">
+                <div className="icon icon-shape bg-info text-white rounded-circle shadow">
+                  <i className="ni ni-building" />
                 </div>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col xl="4">
-            <Card className="shadow">
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+      </Col>
+      <Col lg="12" xl="4">
+        <Card className="card-stats mb-4 mb-xl-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle
+                  tag="h5"
+                  className="text-uppercase text-muted mb-0"
+                >
+                  Verifiers
+                </CardTitle>
+                <span className="h2 font-weight-bold mb-0">
+                  {VerifierIssued.length}
+                </span>
+              </div>
+              <Col className="col-auto">
+              <div className="icon icon-shape bg-info text-white rounded-circle shadow">
+              <i className="ni ni-check-bold"></i>
+              </div>
+                
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+      </Col>
+
+    </Row>
+    <br/>
+        <Row>
+        <Col xl="4">
+            {HolderChart && <Card className="shadow">
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
                     <h6 className="text-uppercase text-muted ls-1 mb-1">
                       Status
                     </h6>
-                    <h2 className="mb-0">DID requests</h2>
+                    <h2 className="mb-0">Holder DID requests</h2>
                   </div>
                 </Row>
               </CardHeader>
@@ -134,17 +313,61 @@ const Index = (props) => {
                 {/* Chart */}
                 <div className="chart">
                   <Bar
-                    data={chartExample2.data}
-                    options={chartExample2.options}
+                    data={HolderChart.data}
+                    options={HolderChart.options}
                   />
                 </div>
               </CardBody>
-            </Card>
+            </Card>}
           </Col>
-        </Row>
-
-  
-      
+          <Col xl="4">
+            { IssuerChart && <Card className="shadow">
+              <CardHeader className="bg-transparent">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h6 className="text-uppercase text-muted ls-1 mb-1">
+                      Status
+                    </h6>
+                    <h2 className="mb-0">Issuer DID requests</h2>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                {/* Chart */}
+                <div className="chart">
+                  <Bar
+                    data={IssuerChart.data}
+                    options={IssuerChart.options}
+                  />
+                </div>
+              </CardBody>
+            </Card>}
+          </Col>
+         
+          <Col xl="4">
+            {VerifierChart && <Card className="shadow">
+              <CardHeader className="bg-transparent">
+                <Row className="align-items-center">
+                  <div className="col">
+                    <h6 className="text-uppercase text-muted ls-1 mb-1">
+                      Status
+                    </h6>
+                    <h2 className="mb-0">Verifier DID requests</h2>
+                  </div>
+                </Row>
+              </CardHeader>
+              <CardBody>
+                {/* Chart */}
+                <div className="chart">
+                  <Bar
+                    data={VerifierChart.data}
+                    options={VerifierChart.options}
+                  />
+                </div>
+              </CardBody>
+            </Card>}
+          </Col>
+        </Row>    
       </Container>
     </>
   );
