@@ -30,7 +30,7 @@ import VerifierServices from "../screens/VerifierServices";
 import VcRequest from "../screens/VcRequest";
 import ServiceRequest from "../screens/ServiceRequest";
 import VerifierSearch from "../screens/VerifierSearch";
-
+import Backup from "../screens/Backup";
 const { width } = Dimensions.get("screen");
 
 const Stack = createStackNavigator();
@@ -262,6 +262,31 @@ function ProfileStack(props) {
   );
 }
 
+function BackupStack(props) {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        mode: "card",
+        headerShown: "screen",
+      }}
+    >
+      <Stack.Screen
+        name="Backup"
+        component={Backup}
+        options={{
+          header: ({ navigation, scene }) => (
+            <Header
+              title="Backup and Restore"
+              navigation={navigation}
+              scene={scene}
+            />
+          ),
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function SettingsStack(props) {
   return (
     <Stack.Navigator
@@ -457,12 +482,13 @@ function AppStack(props) {
     >
       <Drawer.Screen name="Home" component={HomeStack} />
       <Drawer.Screen name="QR-Code" component={QrCodeStack} />
+      <Drawer.Screen name="Credentials" component={CredentialsStack} />
+      <Drawer.Screen name="Organisations" component={OrganisationsStack} />
+      <Drawer.Screen name="Verifiers" component={VerifiersStack} /> 
       <Drawer.Screen name="Profile" component={ProfileStack} />
-      { did ? <Drawer.Screen name="Credentials" component={CredentialsStack} /> : null }
-      { did ? <Drawer.Screen name="Organisations" component={OrganisationsStack} /> : null }
-      { did ? <Drawer.Screen name="Verifiers" component={VerifiersStack} /> : null }
-      { did ?<Drawer.Screen name="History" component={HistoryStack} /> : null }
-      <Drawer.Screen name="Settings" component={SettingsStack} />
+      <Drawer.Screen name="Backup and Restore" component={BackupStack} /> 
+      <Drawer.Screen name="Settings" component={SettingsStack} />     
+      <Drawer.Screen name="History" component={HistoryStack} />    
     </Drawer.Navigator>
   );
 }

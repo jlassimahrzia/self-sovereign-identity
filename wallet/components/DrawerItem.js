@@ -1,10 +1,9 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, Linking } from "react-native";
 import { Block, Text, theme } from "galio-framework";
-
 import argonTheme from "../constants/Theme";
 
-import { MaterialCommunityIcons , AntDesign } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons , AntDesign, MaterialIcons } from '@expo/vector-icons'; 
 
 function DrawerItem({ title,focused,navigation }) {
   renderIcon = () => {
@@ -49,6 +48,11 @@ function DrawerItem({ title,focused,navigation }) {
       case "History":
         return (
           <MaterialCommunityIcons name="history" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
+      case "Backup and Restore":
+        return (
+          <MaterialCommunityIcons name="backup-restore" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
       default:

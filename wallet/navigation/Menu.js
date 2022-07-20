@@ -5,6 +5,7 @@ import { DrawerItem as DrawerCustomItem } from "../components";
 import Images from "../constants/Images";
 import {React, useState, useEffect} from "react";
 import SqliteService from "../services/SqliteService"
+import { log } from "react-native-reanimated";
 
 function CustomDrawerContent({
   drawerPosition,
@@ -14,10 +15,10 @@ function CustomDrawerContent({
   state,
   ...rest
 }) {
-  
   const db = SqliteService.openDatabase()
   const [did, setDid] = useState(null)
   const [routes, setRoutes] = useState([])
+  const [settings, setSettings] = useState([])
 
   const getIdentity = () => {
     db.transaction((tx) => {
@@ -30,12 +31,14 @@ function CustomDrawerContent({
       );
     });
   }
-  const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Verifiers", 'History', "Profile","Settings"];
+  const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Verifiers"];
+  const settingScreens = ["Profile", "Backup and Restore","Settings",  'History'];
   const screens2 = ["Home", "QR-Code", "Profile","Settings"];
   useEffect(() => {
     getIdentity()
     console.log("fom appstack", did)
     setRoutes([...screens])
+    setSettings([...settingScreens])
     /* if(did !== null){
       setRoutes([...screens])
     }
@@ -67,10 +70,10 @@ function CustomDrawerContent({
               />
             );
           })}
-        </ScrollView>
-          {/* <Block
+      </ScrollView>
+        <Block
             flex
-            style={{ marginTop: 24, marginVertical: 8, paddingHorizontal: 8 }}
+            style={{ marginTop: 10, marginVertical: 8, paddingHorizontal: 8 }}
           >
             <Block
               style={{
@@ -80,10 +83,21 @@ function CustomDrawerContent({
               }}
             />
             <Text color="#8898AA" style={{ marginTop: 16, marginLeft: 8 }}>
-              DOCUMENTATION
+              SETTINGS
             </Text>
+            {settings.map((item, index) => {
+              index = index + 5
+              return (
+                <DrawerCustomItem
+                  title={item}
+                  key={index}
+                  navigation={navigation}
+                  focused={state.index === index ? true : false}
+                />
+              );
+            })}
           </Block>
-          <DrawerCustomItem title="Getting Started" navigation={navigation} /> */}
+          
        
       </Block>
     </Block>

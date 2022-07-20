@@ -69,7 +69,7 @@ function ServiceRequest() {
     }, [])
 
     renderEmpty = () => {
-        return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The cart is empty</Text>;
+        return <Text style={{ fontFamily: 'open-sans-regular' }} color={argonTheme.COLORS.ERROR}>The list is empty</Text>;
     }
 
     return(

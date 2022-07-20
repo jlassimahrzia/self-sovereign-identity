@@ -11,6 +11,7 @@ const androidLogo = require("../assets/imgs/android.png");
 const logoMunicipalite = require("../assets/imgs/municipalite.jpg")
 const logoEnsi = require("../assets/imgs/logo_ensi.jpg")
 const homeImage = require("../assets/imgs/home.png")
+const backupImage = require("../assets/imgs/backup.png")
 //const logoCNSS = require("../assets/imgs/cnss.png") */
 // internet imgs
 
@@ -44,6 +45,7 @@ export default {
   androidLogo,
   logoMunicipalite,
   logoEnsi,
-  homeImage
+  homeImage,
+  backupImage
   //logoCNSS*/
 };
