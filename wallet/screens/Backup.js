@@ -1,6 +1,19 @@
 import {React, useState, useEffect} from "react";
-import {Dimensions, StyleSheet, Image, Modal, TouchableOpacity, TextInput} from 'react-native';
-import {Block, Text, theme, Button, Input} from "galio-framework";
+import {
+    Dimensions,
+    StyleSheet,
+    Image,
+    Modal,
+    TouchableOpacity,
+    TextInput
+} from 'react-native';
+import {
+    Block,
+    Text,
+    theme,
+    Button,
+    Input
+} from "galio-framework";
 import Images from "../constants/Images";
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
@@ -9,20 +22,23 @@ import * as SQLite from 'expo-sqlite';
 import CryptoES from "crypto-es";
 import {Buffer} from "buffer";
 import CryptoJS, {algo} from 'crypto-js'
-import { Entypo } from '@expo/vector-icons';
-import { Icon } from "../components/Icon";
+import {Entypo} from '@expo/vector-icons';
+import {Icon} from "../components/Icon";
 const {width, height} = Dimensions.get('screen');
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
+import * as Crpyt from '../services/CryptService';
+
+
 function Backup() {
     const [modalVisible, setModalVisible] = useState(false);
     const [copied, setcopied] = useState(false)
-   
+
     const copyToClipboard = async () => {
         await Clipboard.setString('Hello')
         setcopied(true)
     };
-    
+
     const openModal = () => {
         setModalVisible(true)
     };
@@ -40,8 +56,7 @@ function Backup() {
     };
     const exportDB = async () => {
 
-        await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => {
-            console.log(error);
+        await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => { // console.log(error);
         })
     }
 
@@ -51,161 +66,137 @@ function Backup() {
             FileSystem.documentDirectory
         }SQLite/wallet.db`
         const result = await DocumentPicker.getDocumentAsync();
-        console.log({result});
+        // console.log({result});
         const copyResult = await FileSystem.copyAsync({from: result.uri, to: localdb});
 
         let db = SQLite.openDatabase(localdb);
-        console.log(db);
+        // console.log(db);
+    }
+
+
+    const key = CryptoES.enc.Utf8.parse("Hello world!");
+    const iv = CryptoES.enc.Utf8.parse("ABCDEF1234123412");
+
+
+    function Decrypt(word, key) {
+        const encryptedHexStr = CryptoES.enc.Hex.parse(word);
+        const srcs = CryptoES.enc.Base64.stringify(encryptedHexStr);
+        const decrypt = CryptoES.AES.decrypt(srcs, CryptoES.enc.Utf8.parse(key), {
+            iv,
+            mode: CryptoES.mode.CBC,
+            padding: CryptoES.pad.Pkcs7
+        });
+        const decryptedStr = decrypt.toString(CryptoES.enc.Utf8);
+        return decryptedStr.toString();
+    }
+
+
+    function Encrypt(word, key) {
+        const srcs = CryptoES.enc.Utf8.parse(word);
+        const encrypted = CryptoES.AES.encrypt(srcs, CryptoES.enc.Utf8.parse(key), {
+            iv,
+            mode: CryptoES.mode.CBC,
+            padding: CryptoES.pad.Pkcs7
+        });
+        return encrypted.ciphertext.toString().toUpperCase();
     }
 
 
     const exportDB2 = async () => {
-        let dbPath = FileSystem.documentDirectory + 'SQLite/wallet.db';
 
-        let dbEncryptedPath = FileSystem.documentDirectory + 'SQLite/wallet.txt';
+        let content = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {encoding: FileSystem.EncodingType.Base64}).then(async res => {
 
-        
-        let getB64File = await FileSystem.readAsStringAsync(dbPath, {encoding: FileSystem.EncodingType.Base64}).then(async res => {
-            let saveNewFile = await FileSystem.writeAsStringAsync(dbEncryptedPath, res).then(async () => {
-                await Sharing.shareAsync(dbEncryptedPath, {dialogTitle: 'Share or copy your database via'}).catch(error => {
-                    console.log(error);
+
+            let encryptedRes = Encrypt(res, "123456789")
+
+
+            await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/encwallet.db', encryptedRes, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
+                await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/encwallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => { // console.log(error);
                 })
-            })
-            /* let db64;
-                db64 = res
-                console.log(db64);
-                const key = CryptoJS.enc.Utf8.parse('1234123412ABCDEF') 
-                const iv = CryptoJS.enc.Utf8.parse('ABCDEF1234123412')
-                const srcs = CryptoJS.enc.UTF8.parse(db64)
-                const encrypted = CryptoJS.AES.encrypt(srcs, key, {
-                iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7,
-                })
-            // return encrypted.ciphertext.toString().toUpperCase()
-                let dbEncryptedPath = FileSystem.documentDirectory + 'SQLite/wallet.db.enc';
+            });
 
-        
-                let saveNewFile = await FileSystem.writeAsStringAsync(dbEncryptedPath, encrypted.ciphertext.toString()).then(async () => {
-                    await Sharing.shareAsync(dbEncryptedPath, {dialogTitle: 'Share or copy your database via'}).catch(error => {
-                        console.log(error);
-                    })
-                }) */
-            /* var pass = "12345689"; // TODO
-
-                let arrayBff = base64ToBytesArr(db64);
-
-                const words = CryptoES.lib.WordArray.create(arrayBff);
-
-                const encrypted = CryptoES.AES.encrypt(words, pass).toString();
-        
-                let dbEncryptedPath = FileSystem.documentDirectory + 'SQLite/wallet.db.enc';
-
-        
-                let saveNewFile = await FileSystem.writeAsStringAsync(dbEncryptedPath, encrypted).then(async () => {
-                    await Sharing.shareAsync(dbEncryptedPath, {dialogTitle: 'Share or copy your database via'}).catch(error => {
-                        console.log(error);
-                    })
-                }) */
 
         });
 
 
-        // var mytexttoEncryption = "Hello"
-        // var pass = "your password"
-        // const encrypted = CryptoES.AES.encrypt(mytexttoEncryption, pass).toString();
-
-        // var C = require("crypto-js");
-
-        // var Decrypted = C.AES.decrypt(encrypted, pass);
-        // var result = Decrypted.toString(C.enc.Utf8);
-
-        // console.log(result)
     }
 
-    // fichier --> base64 --> cryptage base 64 --> fichier crypté
 
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    const Base64 = {
+        btoa: (input : string = '') => {
+            let str = input;
+            let output = '';
 
-    //  decryptage --> fichier base 64 --> fichier normal
+            for (let block = 0, charCode, i = 0, map = chars; str.charAt(i | 0) || (map = '=', i % 1); output += map.charAt(63 & block >> 8 - i % 1 * 8)) {
+
+                charCode = str.charCodeAt(i += 3 / 4);
+
+                if (charCode > 0xFF) {
+                    throw new Error("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
+                }
+
+                block = block << 8 | charCode;
+            }
+
+            return output;
+        },
+
+        atob: (input : string = '') => {
+            let str = input.replace(/=+$/, '');
+            let output = '';
+
+            if (str.length % 4 == 1) {
+                throw new Error("'atob' failed: The string to be decoded is not correctly encoded.");
+            }
+            for (let bc = 0, bs = 0, buffer, i = 0; buffer = str.charAt(i++); ~ buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc ++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
+                buffer = chars.indexOf(buffer);
+            }
+
+            return output;
+        }
+    };
+
 
     const importDB2 = async () => {
-        var C = require("crypto-js");
-        const originalDBPATH = `${FileSystem.documentDirectory}SQLite/wallet1.db`
         const result = await DocumentPicker.getDocumentAsync();
-       
-        let dbtodecrypt64 = FileSystem.readAsStringAsync(result.uri, {encoding: FileSystem.EncodingType.base64}).then(async res => {
-            let saveNewFile = await FileSystem.writeAsStringAsync(originalDBPATH, res, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
-                await Sharing.shareAsync(originalDBPATH, {dialogTitle: 'share or copy your DB via'}).catch(error => {
-                    console.log(error);
-                })
-            })
 
-            //         // let db = SQLite.openDatabase(originalDBPATH);
-            //         // console.log(db);
-            // })
-            /* const key = CryptoJS.enc.Utf8.parse('1234123412ABCDEF')
-            const iv = CryptoJS.enc.Utf8.parse('ABCDEF1234123412') */
-
-            // var pass = "123456789"
+        let content = await FileSystem.readAsStringAsync(result.uri, {encoding: FileSystem.EncodingType.Base64}).then(async res => {
 
 
-            // var Decrypted = C.AES.decrypt(res, pass);
-            // var result = Decrypted.toString(C.enc.Base64);
-
-            // const decrypted = CryptoES.AES.decrypt(res, pass).toString();
-
-            /* const encryptedHexStr = CryptoJS.enc.UTF8.parse(res)
-                const srcs = CryptoJS.enc.UTF8.stringify(encryptedHexStr)
-                const decrypt = CryptoJS.AES.decrypt(srcs, key, {
-                    iv,
-                    mode: CryptoJS.mode.CBC,
-                    padding: CryptoJS.pad.Pkcs7,
-                })
-                const decryptedStr = decrypt.toString(CryptoJS.enc.UTF8)
-                //return decryptedStr.toString()
-
-                let saveNewFile = await FileSystem.writeAsStringAsync(originalDBPATH, decryptedStr.toString(), {
-                    encoding: FileSystem.EncodingType.UTF8
-                }).then(async () => {
+            decryptedRes = Decrypt(res, "123456789");
+            decryptedAtob = Base64.atob(decryptedRes);
 
 
+            if (decryptedAtob.includes('SQLite')) {
+                await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', decryptedRes, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
+                    let db = SQLite.openDatabase(FileSystem.documentDirectory + 'SQLite/wallet.db');
+                });
+            } else {
+                console.log("mot de passe incorrecte");
+            }
 
 
-                    await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => {
-                        console.log(error);
-                    })
+        });
+
+        //    let content = await FileSystem.readAsStringAsync(result.uri, { encoding: FileSystem.EncodingType.Base64 }).then(res => console.log(Base64.atob(res)));
 
 
-
-                })  */
-
-            //         // let db = SQLite.openDatabase(originalDBPATH);
-            //         // console.log(db);
-            // })
-
-
-        })
-
-
-        // const copyResult = await FileSystem.copyAsync({from: result.uri, to: originalDBPATH});
-
-
-        // let db = SQLite.openDatabase(originalDBPATH);
-        // console.log(db);
     }
 
     const copyPhrase = () => {
         setcopied(true)
-        console.log("done");
+        // console.log("done");
     }
+
 
     return (
         <>
-        <Button onPress={exportDB}>export</Button>
-        <Button onPress={importDB}>import</Button>
-        <Button onPress={exportDB2}>export2</Button>
-        <Button onPress={importDB2}>import2</Button> 
-        {/* <Block center
+            <Button onPress={exportDB}>export</Button>
+            <Button onPress={importDB}>import</Button>
+            <Button onPress={exportDB2}>export2</Button>
+            <Button onPress={importDB2}>import2</Button>
+            {/*   <Block center
             style={
                 {paddingHorizontal: theme.SIZES.BASE}
         }>
@@ -333,59 +324,58 @@ function Backup() {
                     </Block>
                 </Block>
             </TouchableOpacity>
-        </Modal> */}
-        </>
-    )}
+        </Modal>  */} </>
+    )
+}
 
-    const styles = StyleSheet.create({
-        title: {
-            padding:20
-        },
-        image: {
-            width: width ,
-            height: height * 0.5
-        },
-        centeredView: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: 'rgba(0,0,0,0.1)',
-            marginTop: 22
-        },
-        modalView: {
-            //margin: 20,
-            backgroundColor: "white",
-            //borderRadius: 20,
-            //padding: 20,
-            alignItems: "center",
-            shadowColor: "#000",
-            shadowOffset: {
+const styles = StyleSheet.create({
+    title: {
+        padding: 20
+    },
+    image: {
+        width: width,
+        height: height * 0.5
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: 'rgba(0,0,0,0.1)',
+        marginTop: 22
+    },
+    modalView: {
+        // margin: 20,
+        backgroundColor: "white",
+        // borderRadius: 20,
+        // padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
             width: 0,
             height: 2
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5
-        },    
-        card: {
-            width: 320,
-            height: 450
         },
-        card1: {
-            width: 320,
-            height: 250
-        },
-        input: {
-           // height: auto,
-            marginTop: 0,
-            margin: 20,
-            borderWidth: 1,
-            padding: 10,
-        },
-        button: {
-            marginBottom: theme.SIZES.BASE,
-            width: width*0.8
-        }
-    });
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    card: {
+        width: 320,
+        height: 450
+    },
+    card1: {
+        width: 320,
+        height: 250
+    },
+    input: { // height: auto,
+        marginTop: 0,
+        margin: 20,
+        borderWidth: 1,
+        padding: 10
+    },
+    button: {
+        marginBottom: theme.SIZES.BASE,
+        width: width * 0.8
+    }
+});
 
 export default Backup;
