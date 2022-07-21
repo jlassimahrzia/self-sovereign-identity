@@ -4,17 +4,19 @@ import {
   Image,
   StyleSheet,
   StatusBar,
-  Dimensions
+  Dimensions,
+  TouchableOpacity
 } from "react-native";
 import { Block, Button, Text, theme} from "galio-framework";
 const { height, width } = Dimensions.get("screen");
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
-
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
 import SqliteService from "../services/SqliteService"
 import DidService from '../services/DidService';
 import Toast from 'react-native-toast-message';
-
+import * as SQLite from 'expo-sqlite';  
 function Onboarding({ navigation }) {
 
     const db = SqliteService.openDatabase()
@@ -41,6 +43,20 @@ function Onboarding({ navigation }) {
         }
       );
     }
+
+    const importDB = async () => {
+
+      const localdb = `${
+          FileSystem.documentDirectory
+      }SQLite/wallet.db`
+      const result = await DocumentPicker.getDocumentAsync();
+      // console.log({result});
+      const copyResult = await FileSystem.copyAsync({from: result.uri, to: localdb});
+
+      let db = SQLite.openDatabase(localdb);
+      // console.log(db);
+    }
+
 
     const createIdentity = async () => {
       setLoading(true)
@@ -80,13 +96,13 @@ function Onboarding({ navigation }) {
             <Block flex space="around" style={{ zIndex: 2 }}>
               <Block style={styles.title}>
                 <Block>
-                  <Text color="white" size={60}>
+                  <Text color="white" size={25}>
                     Get Started
                   </Text>
                 </Block>
                 <Block>
-                  <Text color="white" size={30}>
-                    By Creating a new identity
+                  <Text color="white" size={25}>
+                    By Creating a new identity OR Recover Identity
                   </Text>
                 </Block>
                 <Block style={styles.subTitle}>
@@ -107,6 +123,9 @@ function Onboarding({ navigation }) {
                 >
                   Get Started
                 </Button>
+                <TouchableOpacity onPress={importDB}>
+                  <Text color="white" size={16} bold>Recover Identity</Text>
+                </TouchableOpacity>
               </Block>
           </Block>
         </Block>

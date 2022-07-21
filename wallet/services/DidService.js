@@ -26,5 +26,17 @@ class DidService {
             });
         return id;
     }
+
+    async getMnemonic(address){
+        let phrase 
+        await axios.post(`${environment.SERVER_API_URL}/getMnemonic`, {address})
+            .then(res => {
+                phrase = res.data.words
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return phrase;
+    }
 }
 export default new DidService();

@@ -182,6 +182,13 @@ const updateStatusDeclined = (data: any): any => {
     
 } */
 
+/** convert ethereum addresses to mnemonic words for Backup */
+var generator = require('mnemonic-generator')
+router.post('/api/getMnemonic', (req : any , res : any) => {
+    let words = generator(req.body.address)
+    res.json({words})
+})
+
 /**
  *  Routes
  */

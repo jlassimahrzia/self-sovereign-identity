@@ -19,34 +19,38 @@ import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import * as SQLite from 'expo-sqlite';
-import CryptoES from "crypto-es";
 import {Buffer} from "buffer";
-import CryptoJS, {algo} from 'crypto-js'
+import CryptoJS from 'crypto-js'
+import CryptoES from "crypto-es";
 import {Entypo} from '@expo/vector-icons';
 import {Icon} from "../components/Icon";
 const {width, height} = Dimensions.get('screen');
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-toast-message';
-import * as Crpyt from '../services/CryptService';
-
-
+import DidService from "../services/DidService";
+import SqliteService from "../services/SqliteService";
 function Backup() {
+    const db = SqliteService.openDatabase()
     const [modalVisible, setModalVisible] = useState(false);
     const [copied, setcopied] = useState(false)
+    const [modalVisible1, setModalVisible1] = useState(false);
+    const [phrase, setphrase] = useState("")
+    const [address, setAddress] = useState(null)
 
     const copyToClipboard = async () => {
-        await Clipboard.setString('Hello')
+        await Clipboard.setString(phrase)
         setcopied(true)
     };
 
     const openModal = () => {
+        generateKey()
         setModalVisible(true)
     };
 
     const closeModal = () => {
         setModalVisible(false)
     };
-    const [modalVisible1, setModalVisible1] = useState(false);
+    
     const openModal1 = () => {
         setModalVisible1(true)
     };
@@ -54,11 +58,6 @@ function Backup() {
     const closeModal1 = () => {
         setModalVisible1(false)
     };
-    const exportDB = async () => {
-
-        await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => { // console.log(error);
-        })
-    }
 
     const importDB = async () => {
 
@@ -73,6 +72,28 @@ function Backup() {
         // console.log(db);
     }
 
+    useEffect(() => {
+        getIdentity()
+    }, [])
+
+    const getIdentity = async () => {
+        await db.transaction((tx) => {
+          tx.executeSql(
+            `select * from identity`,
+            [],(transaction, resultSet) => { 
+              if(resultSet.rows.length != 0){
+                setAddress(resultSet.rows._array[0].address)}
+            },
+            (transaction, error) => console.log(error)
+          );
+        });
+    }
+
+    const generateKey = async () => {
+        console.log(address);
+        let key = await DidService.getMnemonic(address)
+        setphrase(key)
+    }
 
     const key = CryptoES.enc.Utf8.parse("Hello world!");
     const iv = CryptoES.enc.Utf8.parse("ABCDEF1234123412");
@@ -106,100 +127,49 @@ function Backup() {
 
         let content = await FileSystem.readAsStringAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', {encoding: FileSystem.EncodingType.Base64}).then(async res => {
 
-
-            let encryptedRes = Encrypt(res, "123456789")
-
-
+            encryptedRes = Encrypt(res, "123456789")
+            console.log(encryptedRes);
             await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/encwallet.db', encryptedRes, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
                 await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/encwallet.db', {dialogTitle: 'share or copy your DB via'}).catch(error => { // console.log(error);
+                    Toast.show({
+                        type: 'success',
+                        text1: 'Success',
+                        text2: "Wallet backed up successfully"
+                    });
                 })
             });
 
 
         });
 
+        closeModal()
+        setphrase("")
 
     }
 
-
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    const Base64 = {
-        btoa: (input : string = '') => {
-            let str = input;
-            let output = '';
-
-            for (let block = 0, charCode, i = 0, map = chars; str.charAt(i | 0) || (map = '=', i % 1); output += map.charAt(63 & block >> 8 - i % 1 * 8)) {
-
-                charCode = str.charCodeAt(i += 3 / 4);
-
-                if (charCode > 0xFF) {
-                    throw new Error("'btoa' failed: The string to be encoded contains characters outside of the Latin1 range.");
-                }
-
-                block = block << 8 | charCode;
-            }
-
-            return output;
-        },
-
-        atob: (input : string = '') => {
-            let str = input.replace(/=+$/, '');
-            let output = '';
-
-            if (str.length % 4 == 1) {
-                throw new Error("'atob' failed: The string to be decoded is not correctly encoded.");
-            }
-            for (let bc = 0, bs = 0, buffer, i = 0; buffer = str.charAt(i++); ~ buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc ++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
-                buffer = chars.indexOf(buffer);
-            }
-
-            return output;
-        }
-    };
-
-
     const importDB2 = async () => {
         const result = await DocumentPicker.getDocumentAsync();
-
+        console.log(phrase);
         let content = await FileSystem.readAsStringAsync(result.uri, {encoding: FileSystem.EncodingType.Base64}).then(async res => {
-
-
             decryptedRes = Decrypt(res, "123456789");
-            decryptedAtob = Base64.atob(decryptedRes);
-
-
-            if (decryptedAtob.includes('SQLite')) {
-                await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', decryptedRes, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
-                    let db = SQLite.openDatabase(FileSystem.documentDirectory + 'SQLite/wallet.db');
-                });
-            } else {
-                console.log("mot de passe incorrecte");
-            }
-
-
+            console.log(decryptedRes);
+            await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/wallet.db', decryptedRes, {encoding: FileSystem.EncodingType.Base64}).then(async () => {
+                SQLite.openDatabase(FileSystem.documentDirectory + 'SQLite/wallet.db');
+            });
         });
-
-        //    let content = await FileSystem.readAsStringAsync(result.uri, { encoding: FileSystem.EncodingType.Base64 }).then(res => console.log(Base64.atob(res)));
-
-
+        closeModal1()
+        setphrase("")
     }
 
     const copyPhrase = () => {
         setcopied(true)
-        // console.log("done");
     }
 
 
     return (
         <>
-            <Button onPress={exportDB}>export</Button>
-            <Button onPress={importDB}>import</Button>
-            <Button onPress={exportDB2}>export2</Button>
-            <Button onPress={importDB2}>import2</Button>
-            {/*   <Block center
-            style={
-                {paddingHorizontal: theme.SIZES.BASE}
-        }>
+        {/* <Button onPress={importDB}>import</Button> */}
+        <Block center style={{paddingHorizontal: theme.SIZES.BASE}}>
             <Block flex>
                 <Block>
                     <Block style={styles.title}>
@@ -258,7 +228,7 @@ function Backup() {
                             </Text>
                         </Block>
                         <Block>
-                            <TextInput value="ready wine slim arch produce conduct trial project dirt spoon shock authorm"
+                            <TextInput value={phrase}
                                style={styles.input} multiline 
                                numberOfLines={3} autoCorrect={false} editable={false}/>
                         </Block>
@@ -281,11 +251,11 @@ function Backup() {
                             </Text>
                             <Text textStyle={{ color: "white", fontSize: 15}}>
                                 This phrase is used to recover your encrypted wallet in case your device is lost or destroyed.
-                                This of it as an extra secure password. Write this down in a safe location whre ou will remember it.
+                                This of it as an extra secure password. Write this down in a safe location where you will remember it.
                             </Text>
                         </Block>
                         <Block style={{ margin: 5  }}>
-                            <Button style={styles.button} >
+                            <Button style={styles.button} onPress={exportDB2}>
                                 <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
                                     Done
                                 </Text>
@@ -310,12 +280,13 @@ function Backup() {
                             </Text>
                         </Block>
                         <Block>
-                            <TextInput
+                            <TextInput onChangeText={setphrase}
+                            value={phrase}
                                style={styles.input} multiline
                                numberOfLines={3} autoCorrect={false}/>
                         </Block>
                         <Block style={{ margin: 5  }}>
-                            <Button style={styles.button} >
+                            <Button style={styles.button} onPress={importDB2}>
                                 <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
                                     Done
                                 </Text>
@@ -324,7 +295,8 @@ function Backup() {
                     </Block>
                 </Block>
             </TouchableOpacity>
-        </Modal>  */} </>
+        </Modal> 
+        </>
     )
 }
 
