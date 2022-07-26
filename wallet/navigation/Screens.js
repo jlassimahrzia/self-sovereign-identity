@@ -31,6 +31,8 @@ import VcRequest from "../screens/VcRequest";
 import ServiceRequest from "../screens/ServiceRequest";
 import VerifierSearch from "../screens/VerifierSearch";
 import Backup from "../screens/Backup";
+import RecoveryNetwork from "../screens/RecoveryNetwork";
+import TrusteesRequest from "../screens/TrusteesRequest";
 const { width } = Dimensions.get("screen");
 
 const Stack = createStackNavigator();
@@ -42,6 +44,44 @@ const category = [
   { id: '2', title: 'Category 2' },
   { id: '3', title: 'Category 3' }
 ]
+
+function KeyBackupStack(props) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color }) => {
+          let iconName;
+          if (route.name === "Recovery Network") {
+            iconName = "team";
+          } else if (route.name === "Trustees Requests") {
+            iconName = "slack";
+          }
+          // You can return any component that you like here!
+          return (
+            <Icon
+              name={iconName}
+              family="AntDesign"
+              size={22}
+              color={color}
+              style={{ marginTop: 10 }}
+            />
+          );
+        }
+      })}
+      tabBarOptions={{
+        activeTintColor: argonTheme.COLORS.PRIMARY,
+        inactiveTintColor: "gray",
+        labelStyle: {
+          fontFamily: "open-sans-regular"
+        }
+        
+      }}
+    >
+      <Tab.Screen name="Recovery Network" component={RecoveryNetwork} />
+      <Tab.Screen name="Trustees Requests" component={TrusteesRequest} />
+    </Tab.Navigator>
+  );
+}
 
 function RequestsStack(props) {
   return (
@@ -486,7 +526,8 @@ function AppStack(props) {
       <Drawer.Screen name="Organisations" component={OrganisationsStack} />
       <Drawer.Screen name="Verifiers" component={VerifiersStack} /> 
       <Drawer.Screen name="Profile" component={ProfileStack} />
-      <Drawer.Screen name="Backup and Restore" component={BackupStack} /> 
+      <Drawer.Screen name="Backup and Restore" component={BackupStack} />
+      <Drawer.Screen name="Key Backup" component={KeyBackupStack} /> 
       <Drawer.Screen name="Settings" component={SettingsStack} />     
       <Drawer.Screen name="History" component={HistoryStack} />    
     </Drawer.Navigator>

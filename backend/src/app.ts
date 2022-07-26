@@ -17,6 +17,7 @@ app.use(require('./routes/vc'));
 app.use(require('./routes/issuer'));
 app.use(require('./routes/verifier'));
 app.use(require('./routes/verifiablePresentation'));
+app.use(require('./routes/backup'))
 
 app.get('/', (req : any , res : any ) => {
     console.log("Hello World")

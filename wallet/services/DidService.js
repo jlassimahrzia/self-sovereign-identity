@@ -38,5 +38,17 @@ class DidService {
             });
         return phrase;
     }
+
+    async getProfile(did) {
+        let result = {}
+        await axios.post(`${environment.SERVER_API_URL}/getProfile`, { did })
+            .then(res => {
+                result = res.data.result
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return result
+    }
 }
 export default new DidService();

@@ -32,7 +32,7 @@ function CustomDrawerContent({
     });
   }
   const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Verifiers"];
-  const settingScreens = ["Profile", "Backup and Restore","Settings",  'History'];
+  const settingScreens = ["Profile", "Backup and Restore", "Key Backup","Settings",  'History'];
   const screens2 = ["Home", "QR-Code", "Profile","Settings"];
   useEffect(() => {
     getIdentity()

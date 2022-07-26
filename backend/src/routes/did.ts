@@ -130,7 +130,6 @@ const pushDDO_ipfs = async (_ddo: DidDocument): Promise<String> => {
 const resolve = async (ipfsHash: String)  : Promise<any> => {
     //let res= await ipfs.get(ipfsHash)
     let asyncitr = ipfs.cat(ipfsHash)
-    console.log(asyncitr)
     let data 
     for await (const itr of asyncitr) {
         data = Buffer.from(itr).toString()
@@ -274,6 +273,32 @@ router.post('/api/holderdetails', async (req : any , res : any) => {
     const ipfshash = await contract.methods.getDidToHash(did).call();
     let ddo = await resolve(ipfshash)
     res.json({ddo}) 
+}) 
+
+const getProfile = async (did : any ) : Promise<any> => {
+    let ipfshash
+    let result
+    try {
+        ipfshash = await contract.methods.getDidToHash(did).call();
+    } catch (error) {
+        result = await Promise.resolve({
+            msg : "DID not valid",
+            test : false
+        });
+        return result
+    }
+    let ddo = await resolve(ipfshash)
+    result = await Promise.resolve({
+        test : true,
+        ddo: ddo
+    });
+    return result
+}
+
+router.post('/api/getProfile', async (req : any , res : any) => {
+    let did = req.body.did
+    let result = await getProfile(did)
+    res.json({result})
 }) 
 
 /* router.get('/api/Jwt', async (req : any , res : any) =>{

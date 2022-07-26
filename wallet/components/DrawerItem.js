@@ -55,6 +55,11 @@ function DrawerItem({ title,focused,navigation }) {
           <MaterialCommunityIcons name="backup-restore" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
+      case "Key Backup":
+        return (
+          <AntDesign name="key" size={20} 
+          color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
+        );
       default:
         return null;
     }

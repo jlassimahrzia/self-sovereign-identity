@@ -40,6 +40,7 @@
     "path": "^0.12.7",
     "pdfkit": "^0.13.0",
     "qrcode": "^1.5.0",
+    "shamir": "^0.7.1",
     "web3": "^1.7.3"
   },
   "devDependencies": {
