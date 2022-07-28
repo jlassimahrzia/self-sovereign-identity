@@ -1,6 +1,6 @@
 import {React, useState, useEffect} from "react";
 import { Dimensions , StyleSheet, Image, ScrollView, Input, TextInput, Modal, TouchableOpacity,
-     FlatList, RefreshControl} from 'react-native';
+     FlatList, RefreshControl, View} from 'react-native';
 import { Block, Text, theme, Button} from "galio-framework";
 const { width } = Dimensions.get('screen');
 import { argonTheme, Images } from "../constants";
@@ -11,6 +11,7 @@ import DidService from "../services/DidService";
 import BackupService from "../services/BackupService";
 import SqliteService from "../services/SqliteService"
 import Toast from 'react-native-toast-message';
+import TrusteesRequest from "./TrusteesRequest";
 
 function RecoveryNetwork() {
 
@@ -20,11 +21,12 @@ function RecoveryNetwork() {
     const [ddo, setddo] = useState({})
     const [did, setDid] = useState()
     const [refreshing, setRefreshing] = useState(false);
+    const [number, setnumber] = useState()
 
     const onRefresh = () => {
         setRefreshing(true);
         getIdentity()
-        getrecoveryNetworkList(did)
+        getRecoveryNetworkList()
         setRefreshing(false)
     };
 
@@ -42,14 +44,19 @@ function RecoveryNetwork() {
     }
 
     const getRecoveryNetworkList = async () => {
-        console.log("did",did);
         let tab = await BackupService.getRecoveryNetworkList(did)
         setrecoveryNetworkList(tab)
+    }
+
+    const getAcceptedRequestNumber = () => {
+        let res = recoveryNetworkList.filter( (item) => item.state === 1)
+        setnumber(res.length)
     }
 
     useEffect(() => {
         getIdentity()
         getRecoveryNetworkList()
+        getAcceptedRequestNumber()
     }, [])
 
     const didValidation = Yup.object().shape({
@@ -75,6 +82,7 @@ function RecoveryNetwork() {
                 text2: "Request sended successfully"
             });
             setddo({})
+            onRefresh()
         }
         else{
             Toast.show({
@@ -88,11 +96,13 @@ function RecoveryNetwork() {
     const { handleChange, handleSubmit, handleBlur, values, errors, touched } = useFormik({
         validationSchema: didValidation,
         initialValues: { did: ""},
-        onSubmit: async (values) =>{
-            console.log(values.did);
+        onSubmit: async (values, actions) =>{
             let result = await DidService.getProfile(values.did)
             if(result.test){
                 openModal(result.ddo)
+                actions.resetForm({
+                    values: { did : "" }
+                })
             }
             else{
                 Toast.show({
@@ -110,8 +120,15 @@ function RecoveryNetwork() {
 
     return(
         <>
-        <Block>        
-            <Block style={{padding:20}} >
+        <ScrollView
+           refreshControl={
+            <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+            />
+            } 
+        >        
+            <Block style={{padding:15}} >
                 <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
                     WHAT IS RECOVERY NETWORK?
                 </Text>
@@ -121,14 +138,31 @@ function RecoveryNetwork() {
                 you need at least 5 contacts. You are asked to collect the DID of your trusted contacts.
                 </Text>
             </Block> 
+            {number >= 5 ? <Block style={{padding:15}} >
+                <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
+                    SEND REQUEST
+                </Text>
+                <Text textStyle={{ color: "white", fontSize: 15}}>
+                You have collected the 5 required contacts,
+                you can send a request to the administrator to validate your recovery network. 
+                </Text>
+                <Block style={{ margin: 10  }}>
+                    <Button style={styles.button}>
+                        <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
+                            Send Request
+                        </Text>
+                    </Button>
+                </Block>
+            </Block> : null}
             <Block style={styles.title}>
                 <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
                     Enter DID :
                 </Text>
             </Block>
-            <Block>
+            <Block >
                 <TextInput
                     style={styles.input}
+                    value={values.did}
                     onChangeText={handleChange('did')}
                 />
                 <Block row style={styles.passwordCheck}>
@@ -137,10 +171,12 @@ function RecoveryNetwork() {
                     </Text>
                 </Block>
             </Block>
-            <Block center>
+            <Block center style={{padding:10}} >
                 <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>ADD</Button>
             </Block> 
-            { recoveryNetworkList ?  <FlatList
+       
+        { recoveryNetworkList ?  <FlatList
+                    
                     data={recoveryNetworkList}
                     renderItem={({item}) => (
                         <Block>
@@ -218,8 +254,7 @@ function RecoveryNetwork() {
                     keyExtractor={(item) => item.id}
                     ListEmptyComponent={renderEmpty}
                 /> : null }
-        </Block>
-        
+        </ScrollView>
         <Modal
             animationType="slide"
             transparent={false}
@@ -266,6 +301,7 @@ const styles = StyleSheet.create({
     },
     input: { // height: auto,
         marginTop: 0,
+        marginBottom: 0,
         margin: 20,
         borderWidth: 1,
         padding: 10

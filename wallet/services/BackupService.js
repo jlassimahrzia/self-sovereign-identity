@@ -31,10 +31,53 @@ class BackupService {
             let request = {...element, ddo}
             tab.push(request)
         }));
-        console.log("from service",tab);
         return tab;
     }
 
+    async gettrusteeRequestList(did){
+        let list = []
+        await axios.post(`${environment.SERVER_API_URL}/trusteeRequestList`,{did})
+            .then(res => {
+                list = res.data.list
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        let tab = []
+        await Promise.all(list.map(async (element) => {
+            let result = await DidService.getProfile(element.did_holder)
+            let ddo = result.ddo
+            let request = {...element, ddo}
+            tab.push(request)
+        }));
+        return tab;
+    }
+
+    async acceptRequest(id){
+        let result = false
+        await axios.post(`${environment.SERVER_API_URL}/acceptTrusteeRequest`,{id})
+        .then(res => {
+            result = res.data.result
+        })
+        .catch(error => {
+            console.log(error)
+        });
+        return result
+    }
+
+    async declineRequest(id){
+        let test 
+        await axios.post(`${environment.SERVER_API_URL}/declineTrusteeRequest`,{id})
+        .then(res => {
+            test = res.data.result
+            console.log("result",test);
+        })
+        .catch(error => {
+            console.log(error)
+        });
+        console.log(test);
+        return test
+    }
 
 }
 export default new BackupService();

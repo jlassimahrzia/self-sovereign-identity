@@ -65,7 +65,7 @@ const getRecoveryNetworkList = (did : string) : any => {
 }
 
 const getTrusteeRequestList = (did : string) : any => {
-    let query = 'SELECT * FROM trusteesrequests WHERE did_holder = ? ORDER BY state'
+    let query = 'SELECT * FROM trusteesrequests WHERE did_trustee = ? ORDER BY state'
     return new Promise((resolve, reject) => {
         db.query(query, [did] ,(err: any, res: any) => {
             if (err) {
@@ -76,6 +76,62 @@ const getTrusteeRequestList = (did : string) : any => {
         });
     });
 }
+
+
+
+const AcceptRequest = (id: any): any => {
+    
+    let query = "Update trusteesrequests SET state='1' where id = ?"
+    return new Promise((resolve, reject) => {
+        db.query(query, [id] ,(err: any, res: any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res.affectedRows);
+        });
+    })
+}
+
+const DeclineRequest = (id: any): any => {
+    
+    let query = "Update trusteesrequests SET state='2' where id = ?" 
+    return new Promise((resolve, reject) => {
+        db.query(query, [id] ,(err: any, res: any) => {
+            if (err) {
+                console.log("error: ", err);
+                reject(err);
+            }
+            resolve(res.affectedRows);
+        });
+    })
+}
+
+router.post('/api/acceptTrusteeRequest', async (req : any , res : any) => {
+    
+    let id = req.body.id
+    
+    let result = await AcceptRequest(id)
+     
+    res.json({result})
+})
+
+router.post('/api/declineTrusteeRequest', async (req : any , res : any) => {
+    
+    let id = req.body.id
+    
+    let result = await DeclineRequest(id)
+    res.json({result})
+})
+
+router.post('/api/trusteeRequestList', async (req : any , res : any) => {
+    let did_trustee = req.body.did
+    
+    let list = await getTrusteeRequestList(did_trustee)
+   
+    
+    res.json({list})
+})
 
 router.post('/api/recoveryNetworkList', async (req : any , res : any) => {
     let did_holder = req.body.did
