@@ -26,9 +26,16 @@ module.exports = {
     PASSWORD: "",
     DB: "ssi",
 
-    MAILTRAP_USER : "331a15d20b66f4",
-    MAILTRAP_PASS : "4efe60cdf7001e",
-    MAILTRAP_HOST : "smtp.mailtrap.io",
-    MAILTRAP_PORT : 587,
-    MAILTRAP_FROM_ADDRESS : "identityTN@example.com"
+    /* 
+        MAILTRAP_USER : "331a15d20b66f4",
+        MAILTRAP_PASS : "4efe60cdf7001e",
+        MAILTRAP_HOST : "smtp.MAIL.io",
+        MAILTRAP_PORT : 587,
+        MAILTRAP_FROM_ADDRESS : "identityTN@example.com" 
+    */
+    MAIL_USER : 'user',
+    MAIL_PASS : 'password',
+    MAIL_HOST : '127.0.0.1',
+    MAIL_PORT : '1025',
+    MAIL_FROM_ADDRESS : "identityTN@example.com"
 };

@@ -373,16 +373,16 @@ router.post('/api/createVCFailed', async (req: any, res: any) => {
 
 function emailSenderFunction(target : String, message : String) {
     const transporter = nodemailer.createTransport({
-        host: config.MAILTRAP_HOST,
-        port: config.MAILTRAP_PORT,
+        host: config.MAIL_HOST,
+        port: config.MAIL_PORT,
         auth: {
-            user: config.MAILTRAP_USER ,
-            pass: config.MAILTRAP_PASS
+            user: config.MAIL_USER ,
+            pass: config.MAIL_PASS
         }
     });
    
     var mailOptions = {
-        from: config.MAILTRAP_FROM_ADDRESS,
+        from: config.MAIL_FROM_ADDRESS,
         to: target,
         subject: "VC Issuance",
         attachDataUrls: true,
@@ -399,16 +399,16 @@ function emailSenderFunction(target : String, message : String) {
 // Email function when failure
 function emailSenderFailure(target : String) {
     const transporter = nodemailer.createTransport({
-        host: config.MAILTRAP_HOST,
-        port: config.MAILTRAP_PORT,
+        host: config.MAIL_HOST,
+        port: config.MAIL_PORT,
         auth: {
-            user: config.MAILTRAP_USER ,
-            pass: config.MAILTRAP_PASS
+            user: config.MAIL_USER ,
+            pass: config.MAIL_PASS
         }
     });
    
     var mailOptions = {
-        from: config.MAILTRAP_FROM_ADDRESS,
+        from: config.MAIL_FROM_ADDRESS,
         to: target,
         subject: "VC Issuance Request Declined",
         text: "VC Issuance Request Declined",

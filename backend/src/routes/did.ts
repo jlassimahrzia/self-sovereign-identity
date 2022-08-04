@@ -312,16 +312,16 @@ router.post('/api/getProfile', async (req : any , res : any) => {
 // Email function when success 
 function emailSenderFunction(target: String, message: String) {
     const transporter = nodemailer.createTransport({
-        host: config.MAILTRAP_HOST,
-        port: config.MAILTRAP_PORT,
+        host: config.MAIL_HOST,
+        port: config.MAIL_PORT,
         auth: {
-            user: config.MAILTRAP_USER ,
-            pass: config.MAILTRAP_PASS
+            user: config.MAIL_USER ,
+            pass: config.MAIL_PASS
         }
     });
    
     var mailOptions = {
-        from: config.MAILTRAP_FROM_ADDRESS,
+        from: config.MAIL_FROM_ADDRESS,
         to: target,
         subject: "DID Issuance",
         attachDataUrls: true,
@@ -341,16 +341,16 @@ function emailSenderFunction(target: String, message: String) {
 // Email function when failure
 function emailSenderFailure(target: String) {
     const transporter = nodemailer.createTransport({
-        host: config.MAILTRAP_HOST,
-        port: config.MAILTRAP_PORT,
+        host: config.MAIL_HOST,
+        port: config.MAIL_PORT,
         auth: {
-            user: config.MAILTRAP_USER ,
-            pass: config.MAILTRAP_PASS
+            user: config.MAIL_USER ,
+            pass: config.MAIL_PASS
         }
     });
    
     var mailOptions = {
-        from: config.MAILTRAP_FROM_ADDRESS,
+        from: config.MAIL_FROM_ADDRESS,
         to: target,
         subject: "DID Issuance Request Declined",
         text: "DID Issuance Request Declined",

@@ -19,6 +19,11 @@ class SqliteService {
             "create table if not exists verifiableCredentials (id integer primary key not null, vc_id text ,vc text);"
           );
         });
+        db.transaction((tx) => {
+          tx.executeSql(
+            "create table if not exists recoveryParameters (id integer primary key not null, participants integer , threshold integer);"
+          );
+        }); 
         return db;
     }
 

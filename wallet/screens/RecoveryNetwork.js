@@ -5,7 +5,7 @@ import { Block, Text, theme, Button} from "galio-framework";
 const { width } = Dimensions.get('screen');
 import { argonTheme, Images } from "../constants";
 import { Icon } from "../components";
-import { useFormik } from 'formik';
+import { Formik } from 'formik';
 import * as Yup from 'yup';
 import DidService from "../services/DidService";
 import BackupService from "../services/BackupService";
@@ -22,13 +22,30 @@ function RecoveryNetwork() {
     const [did, setDid] = useState()
     const [refreshing, setRefreshing] = useState(false);
     const [number, setnumber] = useState()
+    const [threshold, setthreshold] = useState(0)
+    const [participants, setparticipants] = useState(0)
 
     const onRefresh = () => {
         setRefreshing(true);
         getIdentity()
         getRecoveryNetworkList()
+        getRecoveryParameters()
         setRefreshing(false)
     };
+
+    const addRecoveryParameters = async (n, t) =>{
+        await db.transaction(
+          (tx) => {
+            tx.executeSql("insert into recoveryParameters (participants, threshold) values (?,?)", 
+            [n, t],
+            (tx, resultSet) => { 
+                return resultSet.insertId 
+            },
+            (tx, error) => console.log(error)
+            );
+          }
+        );
+      }
 
     const getIdentity = async () => {
         await db.transaction((tx) => {
@@ -42,6 +59,23 @@ function RecoveryNetwork() {
           );
         });
     }
+
+    const getRecoveryParameters = async () => {
+        await db.transaction((tx) => {
+          tx.executeSql(
+            `select * from recoveryParameters`,
+            [],(transaction, resultSet) => { 
+            //console.log(resultSet.rows); 
+              if(resultSet.rows.length != 0){
+                setparticipants(resultSet.rows._array[0].participants)
+                setthreshold(resultSet.rows._array[0].threshold)
+              }
+            },
+            (transaction, error) => console.log(error)
+          );
+        });
+    }
+
 
     const getRecoveryNetworkList = async () => {
         let tab = await BackupService.getRecoveryNetworkList(did)
@@ -57,10 +91,17 @@ function RecoveryNetwork() {
         getIdentity()
         getRecoveryNetworkList()
         getAcceptedRequestNumber()
+        getRecoveryParameters()
+        console.log("dddd",participants , threshold, number);
     }, [])
 
     const didValidation = Yup.object().shape({
-        did: Yup.string().required('You should enter a DID'),
+        did: Yup.string().required('You should enter a DID.'),
+    });
+
+    const recoveryPrametersValidation = Yup.object().shape({
+        participants: Yup.number().required('You should enter the number of participants.'),
+        threshold: Yup.number().required('You should enter the number of the minimum of fragment you should get to recover your key.'),
     });
 
     const openModal = (ddo) => {
@@ -93,27 +134,6 @@ function RecoveryNetwork() {
         }
     }
 
-    const { handleChange, handleSubmit, handleBlur, values, errors, touched } = useFormik({
-        validationSchema: didValidation,
-        initialValues: { did: ""},
-        onSubmit: async (values, actions) =>{
-            let result = await DidService.getProfile(values.did)
-            if(result.test){
-                openModal(result.ddo)
-                actions.resetForm({
-                    values: { did : "" }
-                })
-            }
-            else{
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: result.msg
-                });
-            }
-        }
-    });
-
     renderEmpty = () => {
         return <Text center style={{ fontFamily: 'open-sans-regular' , padding: 20}} color={argonTheme.COLORS.ERROR}>The list is empty</Text>;
     }
@@ -135,48 +155,162 @@ function RecoveryNetwork() {
                 <Text textStyle={{ color: "white", fontSize: 15}}>
                 Recovery Network are close friends that you can call for help to get back into your account. 
                 You will share fragments of your private key with your trustees. We will split your private key as trustees you add, 
-                you need at least 5 contacts. You are asked to collect the DID of your trusted contacts.
+                you need n participants and t threshold minimum number of fragments you should recover. 
                 </Text>
+                { ((participants !== 0) && (threshold !== 0)) ? 
+                <Text>
+                    You are asked to collect the DID of your trusted contacts. Number of participants is {participants} and the 
+                    number of threshold is {threshold}.
+                </Text>   : null }
             </Block> 
-            {number >= 5 ? <Block style={{padding:15}} >
-                <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
-                    SEND REQUEST
-                </Text>
-                <Text textStyle={{ color: "white", fontSize: 15}}>
-                You have collected the 5 required contacts,
-                you can send a request to the administrator to validate your recovery network. 
-                </Text>
-                <Block style={{ margin: 10  }}>
-                    <Button style={styles.button}>
+            
+           { (participants !== number) ? 
+           <Formik
+                validationSchema={didValidation}
+                initialValues={{ did: ""}}
+                onSubmit={
+                    async (values, actions) =>{
+                        let result = await DidService.getProfile(values.did)
+                        if(result.test){
+                            openModal(result.ddo)
+                            actions.resetForm({
+                                values: { did : "" }
+                            })
+                        }
+                        else{
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: result.msg
+                            });
+                        }
+                    }
+                }
+            >
+                {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
+                    <View>
+                    <Block>
+                        <Block style={styles.title}>
+                            <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                                Enter DID :
+                            </Text>
+                        </Block>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={handleChange('did')}
+                            onBlur={handleBlur('did')}
+                            value={values.did}
+                        />
+                        <Block row style={styles.passwordCheck}>
+                            <Text size={12} color={argonTheme.COLORS.DEFAULT}>
+                                {errors.did && touched.did ?  errors.did : null }
+                            </Text>
+                        </Block>
+                    </Block>
+                    <Block center style={{padding:10}}>
+                        <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
+                            Send request
+                        </Button>
+                    </Block> 
+                    </View>
+             )}
+            </Formik> :
+            <Block>
+                <Block style={{ margin: 20  }}>
+                    <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                        You have reached the number of participants requested click above to send the fragments of each participant.
+                    </Text>
+                    <Button style={styles.button} >
                         <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
-                            Send Request
+                            Send fragment to all participants
                         </Text>
                     </Button>
                 </Block>
-            </Block> : null}
-            <Block style={styles.title}>
-                <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
-                    Enter DID :
+            </Block>
+            }
+            { ((participants === 0) && (threshold === 0)) ?  <Formik
+                validationSchema={recoveryPrametersValidation}
+                initialValues={{ participants : "" , threshold : ""}}
+                onSubmit={
+                    async (values, actions) =>{
+                        let id = await addRecoveryParameters(values.participants, values.threshold)
+                        if(id){
+                            actions.resetForm({
+                                values: {participants : "" , threshold : ""}
+                            })
+                            onRefresh()
+                            Toast.show({
+                                type: 'sucess',
+                                text1: 'Succes',
+                                text2: "Recovery parameters added successfully"
+                            });
+                        }
+                        else{
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: "Something went wrong, "
+                            });
+                            actions.resetForm({
+                                values: {participants : "" , threshold : ""}
+                            })
+                        }
+                    }
+                }
+            >
+                {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
+                    <View>
+                    <Block>
+                        <Block style={styles.title}>
+                            <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                                Enter the number of participants :
+                            </Text>
+                        </Block>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={handleChange('participants')}
+                            onBlur={handleBlur('participants')}
+                            value={values.participants}
+                        />
+                        <Block row style={styles.passwordCheck}>
+                            <Text size={12} color={argonTheme.COLORS.DEFAULT}>
+                                {errors.participants && touched.participants ?  errors.participants : null }
+                            </Text>
+                        </Block>
+                    </Block>
+                    <Block>
+                        <Block style={styles.title}>
+                            <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                                Enter the number of threshold :
+                            </Text>
+                        </Block>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={handleChange('threshold')}
+                            onBlur={handleBlur('threshold')}
+                            value={values.threshold}
+                        />
+                        <Block row style={styles.passwordCheck}>
+                            <Text size={12} color={argonTheme.COLORS.DEFAULT}>
+                                {errors.threshold && touched.threshold ?  errors.threshold : null }
+                            </Text>
+                        </Block>
+                    </Block>
+                    <Block center style={{padding:10}}>
+                        <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
+                            Store
+                        </Button>
+                    </Block> 
+                    </View>
+             )}
+            </Formik> : null}
+            <Block style={{padding:15}} center >
+                <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
+                    LIST OF REQUESTS
                 </Text>
             </Block>
-            <Block >
-                <TextInput
-                    style={styles.input}
-                    value={values.did}
-                    onChangeText={handleChange('did')}
-                />
-                <Block row style={styles.passwordCheck}>
-                    <Text size={12} color={argonTheme.COLORS.DEFAULT}>
-                        {errors.did && touched.did ?  errors.did : null }
-                    </Text>
-                </Block>
-            </Block>
-            <Block center style={{padding:10}} >
-                <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>ADD</Button>
-            </Block> 
-       
-        { recoveryNetworkList ?  <FlatList
-                    
+        { recoveryNetworkList ?  
+        <FlatList
                     data={recoveryNetworkList}
                     renderItem={({item}) => (
                         <Block>
@@ -239,13 +373,6 @@ function RecoveryNetwork() {
                                                             </Text> : null}
                                         </Block>
                                     </Block>
-                                    { item.state === 1 ?  <Block>
-                                        <Button style={styles.button}>
-                                            <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
-                                                Send
-                                            </Text>
-                                        </Button>
-                                    </Block> : null }
                             </Block>
                         </Block>
                         </Block>
