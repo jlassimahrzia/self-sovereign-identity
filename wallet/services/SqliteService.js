@@ -23,6 +23,11 @@ class SqliteService {
           tx.executeSql(
             "create table if not exists recoveryParameters (id integer primary key not null, participants integer , threshold integer);"
           );
+        });
+        db.transaction((tx) => {
+          tx.executeSql(
+            "create table if not exists trusteesFragment (id integer primary key not null, idRequest integer , fragment text);"
+          );
         }); 
         return db;
     }

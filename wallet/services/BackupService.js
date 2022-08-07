@@ -79,5 +79,41 @@ class BackupService {
         return test
     }
 
+    async decryptFragment(encrypted, privateKey){
+        let test = {}
+        await axios.post(`${environment.SERVER_API_URL}/decryptFragment`,{encrypted, privateKey})
+            .then(res => {
+                test = res.data.result
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
+    async sendFragments(did, privateKey, threshold){
+        let test 
+        await axios.post(`${environment.SERVER_API_URL}/backupKey`,{did, privateKey, threshold})
+            .then(res => {
+                test = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
+    async sendFragmentToHolder(did_holder, fragment){
+        let test 
+        await axios.post(`${environment.SERVER_API_URL}/sendFragment`,{did_holder, fragment})
+            .then(res => {
+                test = res.data.done
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
 }
 export default new BackupService();

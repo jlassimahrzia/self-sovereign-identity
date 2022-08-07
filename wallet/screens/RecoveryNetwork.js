@@ -24,6 +24,7 @@ function RecoveryNetwork() {
     const [number, setnumber] = useState()
     const [threshold, setthreshold] = useState(0)
     const [participants, setparticipants] = useState(0)
+    const [privateKey, setPrivateKey] = useState(null)
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -53,7 +54,9 @@ function RecoveryNetwork() {
             `select * from identity`,
             [],(transaction, resultSet) => { 
               if(resultSet.rows.length != 0){
-                setDid(resultSet.rows._array[0].did)}
+                setDid(resultSet.rows._array[0].did)
+                setPrivateKey(resultSet.rows._array[0].privateKey)
+              }
             },
             (transaction, error) => console.log(error)
           );
@@ -124,6 +127,24 @@ function RecoveryNetwork() {
             });
             setddo({})
             onRefresh()
+        }
+        else{
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: "Something went wrong, try again!"
+            });
+        }
+    }
+
+    const sendFragments = async () => {
+        let res = await BackupService.sendFragments(did, privateKey, threshold)
+        if(res){
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: "Fragments sended successfully"
+            });
         }
         else{
             Toast.show({
@@ -220,7 +241,7 @@ function RecoveryNetwork() {
                     <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
                         You have reached the number of participants requested click above to send the fragments of each participant.
                     </Text>
-                    <Button style={styles.button} >
+                    <Button style={styles.button} onPress={sendFragments}>
                         <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
                             Send fragment to all participants
                         </Text>

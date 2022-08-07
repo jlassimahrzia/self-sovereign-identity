@@ -5,6 +5,7 @@ const { width } = Dimensions.get('screen');
 import SqliteService from "../services/SqliteService"
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+import { AntDesign } from '@expo/vector-icons';
 function Home() {
   const db = SqliteService.openDatabase()
   const [did, setDid] = useState(null)
@@ -38,27 +39,38 @@ function Home() {
       <Block center style={{ paddingHorizontal: theme.SIZES.BASE }}>
         <Block flex >
           <Block >
+            <Block center>
+              <Image source={Images.homeImage} style={styles.image}/>
+            </Block>
             <Block style={styles.title}>
-              <Text color="black" size={30} center>
+              <Text color={argonTheme.COLORS.PRIMARY} size={30} center>
                 IdentityTN
               </Text>
             </Block>
             <Block style={styles.subTitle} >
-                <Text color={argonTheme.COLORS.PRIMARY} size={20} center>
-                Tunisian Self-Sovereign Identity Network (TSSIN) is an e-government platform for the benefit of citizens and society.
-                Make paperwork become digital, easy and quick.
+                <Text color="black" size={16}>
+                  Tunisian Self-Sovereign Identity Network (TSSIN) is an e-government platform for the benefit of citizens and society.
+                  Make paperwork become digital, easy and quick.
+                </Text> 
+            </Block>
+            <Block style={styles.subTitle}>
+                <Text color="black" size={16} >
+                  <AntDesign name="checkcircleo" size={15} color={argonTheme.COLORS.PRIMARY} />
+                  &nbsp; Connect with services and build network that you fully control.
+                </Text> 
+                <Text color="black" size={16}>
+                  <AntDesign name="checkcircleo" size={15} color={argonTheme.COLORS.PRIMARY} />
+                  &nbsp; Request, receive and share information about yourself.
                 </Text> 
             </Block>
             { did == null ? 
               <Block style={styles.subTitle}>
-                <Text color={argonTheme.COLORS.MUTED} size={16} center>
+                <Text color={argonTheme.COLORS.SUCCESS} size={16} center>
                 Your request is being processed 
                 </Text> 
               </Block>: null
             }
-            <Block center>
-              <Image source={Images.homeImage} style={styles.image}/>
-            </Block>
+            
           </Block>
           
         </Block>
@@ -71,10 +83,10 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   title : {
-    marginTop: 80
+    marginTop: 20
   },
   image : {
-    marginTop: 50,
+    marginTop: 80,
     width : width*0.8,
     height: 300
   }

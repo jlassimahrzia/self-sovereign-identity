@@ -28,16 +28,16 @@ var QRCode = require('qrcode')
  */
 
 const acceptedRequestsList = (did_holder : string) : any => {
-    let query = 'SELECT * FROM trusteesrequests WHERE did_holder = ? AND state=1'
-    return new Promise((resolve, reject) => {
-        db.query(query, [did_holder] ,(err: any, res: any) => {
-            if (err) {
-                console.log("error: ", err);
-                reject(err);
-            }
-            resolve(res);
+        let query = 'SELECT * FROM trusteesrequests WHERE did_holder = ? AND state=1'
+        return new Promise((resolve, reject) => {
+            db.query(query, [did_holder] ,(err: any, res: any) => {
+                if (err) {
+                    console.log("error: ", err);
+                    reject(err);
+                }
+                resolve(res);
+            });
         });
-    });
 }
 
 const resolve = async (ipfsHash: String)  : Promise<any> => {
@@ -90,6 +90,9 @@ const backupKey =  async (data : any) : Promise<any> => {
 
     let ipfshash = await contract1.methods.getDidToHash(data.did).call();
     let holder_ddo = await resolve(ipfshash)
+
+    console.log("1-",list1);
+    
     
     let tab : any
     tab = []
@@ -100,39 +103,41 @@ const backupKey =  async (data : any) : Promise<any> => {
         tab.push(request)
     }));
     
-
+    console.log("2-",tab);
    
     const utf8Encoder = new TextEncoder();
     const secretBytes = utf8Encoder.encode("0x23a4608947366e9b0ad99d88a5fc4b623617f908a3dfdbce47ae99be0e8ca1c9");
-    let fragments = split(randomBytes, 10, 5, secretBytes);
+    let fragments = split(randomBytes, list1.length, data.threshold, secretBytes);
     
-    
+    console.log("2-",fragments);
     
     let paquets : any
     paquets = []
 
-    for (let index = 1; index <= list1.length; index++) {
-        const fragment = fragments[index];
-        //console.log(fragment);
-        let hash = EthereumEncryption.hash(JSON.stringify(fragment))
+    for (let index = 0; index < list1.length; index++) {
+        console.log(index);
+        
+        let tabfragment = Object.values(fragments);
+        console.log(fragments[index]);
+        let hash = EthereumEncryption.hash(JSON.stringify(tabfragment[index]))
         
         let signature = EthereumEncryption.signHash(
             (data.privateKey).substr(2), 
             hash
         );
 
-        let paquet = { [index]: fragment, "proof": signature, idRequest : list1[index].id}
-//console.log(paquet);
+        let paquet = { [index+1]: tabfragment[index], "proof": {hash: hash , signature : signature}, idRequest : tab[index].id}
 
         paquets.push(paquet)
         
     }
 
+    console.log("1- fragments", paquets);
+    
     let encryptedFragments : any
     encryptedFragments = []
     
     for (let index = 0; index < tab.length; index++) {
-        console.log(paquets[index]);
         
         const encrypted = EthereumEncryption.encryptWithPublicKey(
             (tab[index].ddo.publicKey).substr(2), // publicKey of holder
@@ -140,6 +145,8 @@ const backupKey =  async (data : any) : Promise<any> => {
         );
         encryptedFragments[index] = encrypted
     }
+
+    console.log("2- encryptedFragments", encryptedFragments);
 
     for (let index = 0; index < tab.length; index++) {
         console.log(index);
@@ -157,16 +164,21 @@ const backupKey =  async (data : any) : Promise<any> => {
         
     } 
 
-    return fragments
+    return true
 }
 
 router.post('/api/backupKey', async (req : any , res : any) => {
+    let done = false
+
     let data = {
         did: req.body.did,
         privateKey: req.body.privateKey,
         threshold: req.body.threshold
     }
-    let done = await backupKey(data)
+    
+    console.log(data);
+    
+    done = await backupKey(data)
     
     
     res.send({done})
@@ -179,34 +191,6 @@ router.post('/api/backupKey', async (req : any , res : any) => {
 /**
  * START KEY RECOVERY
  */
-
-const decryptFragment = async (encrypted : any, privateKey : any ) : Promise<any> => {
-    
-    let decrypted ;
-    try{
-        decrypted = EthereumEncryption.decryptWithPrivateKey(
-            privateKey.substr(2), // privateKey
-            encrypted
-            
-        );
-    }catch(error){
-        console.log("error",error); 
-        const result = await Promise.resolve({
-            msg : "Fragment encryption not valid",
-            test : false
-        });
-        return result;
-    }
-    
-    
-    const result = await Promise.resolve({
-        test : true,
-        decrypted : JSON.parse(decrypted)
-    });
-    return result;
-    
-}
-
 
 const recoverKey =  async (fragments : any) : Promise<any> => {
     let parts = {}
@@ -236,6 +220,145 @@ router.post('/api/recoverKey', async (req : any , res : any) => {
     let fragments = req.body.fragments
 
     let result = await recoverKey(fragments)
+    
+    res.json({result})
+})
+
+const getRequestById = (id: any) => {
+    let query = 'SELECT * FROM trusteesrequests WHERE id = ?'
+        return new Promise((resolve, reject) => {
+            db.query(query, [id] ,(err: any, res: any) => {
+                if (err) {
+                    console.log("error: ", err);
+                    reject(err);
+                }
+                resolve(res);
+            });
+        });
+}
+
+const decryptFragment = async (encrypted : any, privateKey : any) : Promise<any> => {
+    
+    let decrypted ;
+   
+    
+    try{
+        
+        decrypted = EthereumEncryption.decryptWithPrivateKey(
+            privateKey.substr(2), // privateKey
+            encrypted
+        );
+    }catch(error){
+        console.log("error",error); 
+        const result = await Promise.resolve({
+            msg : "Fragment encryption not valid",
+            test : false
+        });
+        return result;
+    }
+    decrypted = JSON.parse(decrypted)
+    
+    let request : any
+    request = await getRequestById(decrypted.idRequest)
+    
+    
+    // Resolve Issuer ddo      
+    const ipfshash = await contract1.methods.getDidToHash(request[0].did_holder).call();
+    const ddo = await resolve(ipfshash)
+    
+    
+    let valid
+    try {
+        valid = EthereumEncryption.verifyHashSignature(
+            ddo.publicKey.substr(2), // publicKey
+            decrypted.proof.hash , // hash
+            decrypted.proof.signature // signature
+        );
+    } catch (error) {
+        const result = await Promise.resolve({
+            msg : "Fragment signature Not Valid",
+            test : false
+        });
+        return result;
+    }
+    if(!valid){
+        console.log("valid",valid);
+        
+        const result = await Promise.resolve({
+            msg : "Fragment signature Not Valid",
+            test : false
+        });
+        return result;
+    } 
+    
+    const result = await Promise.resolve({
+        test : true,
+        decrypted : decrypted
+    });
+    return result;
+    
+}
+
+const sendFragmentByEmail = (target : any, sender : any, message : any)  => {
+    const transporter = nodemailer.createTransport({
+        host: config.MAIL_HOST,
+        port: config.MAIL_PORT,
+        auth: {
+            user: config.MAIL_USER ,
+            pass: config.MAIL_PASS
+        }
+    });
+   
+    var mailOptions = {
+        from: config.MAIL_FROM_ADDRESS,
+        to: target,
+        subject: "Identity TN - Fragment sended from [ "+ sender.firstname + " " + sender.lastname + " ]",
+        attachDataUrls: true,
+        html: "<h4>Scan the QR code to get the fragment from [ "+ sender.firstname + " " + sender.lastname + " ]. </h4><br> If you get this email, pick up the phone and call your friend before scanning the QR-Code they've shared. <br><img src=" + message + ">"
+    };
+    transporter.sendMail(mailOptions, function (error : String) {
+        if (error) {
+            console.log(error);
+        }
+    });
+}
+
+router.post('/api/sendFragment', async (req : any , res : any) => {
+    let done = false
+    let did_holder = req.body.did_holder
+    let fragment = req.body.fragment
+    
+    try {
+        const ipfshash = await contract1.methods.getDidToHash(did_holder).call();
+        const ddo = await resolve(ipfshash)
+
+        QRCode.toDataURL(JSON.stringify(fragment), {
+            type: 'terminal',
+            width: '500',
+            errorCorrectionLevel: 'M'
+        }, function (err : any, url : any) {
+            if (err) 
+                return console.log("error occured", err)
+            sendFragmentByEmail(ddo.email, ddo, url);
+        })
+
+        done = true
+    } catch (error) {
+        
+    }
+    
+
+    res.json({done})
+})
+
+router.post('/api/decryptFragment', async (req : any , res : any) => {
+    let privateKey = req.body.privateKey
+    let encrypted = req.body.encrypted
+    console.log(encrypted);
+    console.log(privateKey);
+
+
+    let result = await decryptFragment(encrypted, privateKey)
     
     res.json({result})
 })
