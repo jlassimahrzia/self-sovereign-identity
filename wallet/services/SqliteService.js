@@ -29,6 +29,11 @@ class SqliteService {
             "create table if not exists trusteesFragment (id integer primary key not null, idRequest integer , fragment text);"
           );
         }); 
+        db.transaction((tx) => {
+          tx.executeSql(
+            "create table if not exists Fragments (id integer primary key not null, fragment text);"
+          );
+        }); 
         return db;
     }
 

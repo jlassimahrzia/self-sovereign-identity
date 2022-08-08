@@ -18,6 +18,9 @@ import DidService from '../services/DidService';
 import Toast from 'react-native-toast-message';
 import * as SQLite from 'expo-sqlite';  
 import CryptoES from "crypto-es";
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import BackupService from '../services/BackupService';
+
 
 function Onboarding({ navigation }) {
 
@@ -25,8 +28,109 @@ function Onboarding({ navigation }) {
 
     const [id, setId] = useState(null)
     const [load, setLoading] = useState(false)
-    const [modalVisible1, setModalVisible1] = useState(false);
+    
     const [phrase, setphrase] = useState("")
+
+    const [fragmentsList, setfragmentsList] = useState([])
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalVisible1, setModalVisible1] = useState(false);
+    const [modalVisible2, setModalVisible2] = useState(false);
+    const [modalVisible3, setModalVisible3] = useState(false);
+
+    const [hasPermission, setHasPermission] = useState(null)
+    const [scanned, setScanned] = useState(false)
+
+    const scan = () => {
+      (async () => {
+          const { status } = await BarCodeScanner.requestPermissionsAsync();
+          setHasPermission(status === 'granted');
+          openModal3()
+      })();
+      
+    }
+
+    const addFragment = async (fragment) =>{
+      await db.transaction(
+        (tx) => {
+          tx.executeSql("insert into Fragments (fragment) values (?)", 
+          [JSON.stringify(fragment)],
+          (tx, resultSet) => { 
+              return resultSet.insertId 
+          },
+          (tx, error) => console.log(error)
+          );
+        }
+      );
+    }
+    
+    const getFragments = async () => {
+      await db.transaction((tx) => {
+        tx.executeSql(
+          `select * from Fragments`,
+          [],(transaction, resultSet) => setfragmentsList(resultSet.rows._array),
+          (transaction, error) => console.log(error)
+        );
+      });
+    }
+
+    const handleBarCodeScanned = async ({ type, data }) => {
+      setScanned(true);
+      data = JSON.parse(data)
+      console.log(data);
+      let id = addFragment(data)
+      if(id){
+          Toast.show({
+              type: 'info',
+              text1: 'Success',
+              text2: "Fragment added successfully"
+          });
+          closeModal3()
+          getFragments()
+      }
+      else{
+          Toast.show({
+              type: 'error',
+              text1: 'Error',
+              text2: "Something went wrong, try again!"
+          });
+      }
+      
+    };
+
+    const recoverKey = async () => {
+      let result = await BackupService.recoverKey(fragmentsList)
+      if(result.test){
+        await recoverIdentity(result.identity)
+        Toast.show({
+          type: 'info',
+          text1: 'Success',
+          text2: "Identity recovered successfully"
+        });
+        navigation.navigate('App');
+      }
+      else{
+        Toast.show({
+          type: 'info',
+          text1: 'Success',
+          text2: result.msg
+        });
+      } 
+    }
+
+    useEffect(() => {
+      getFragments()
+    }, [])
+    
+
+    const openModal2 = () => {
+      setModalVisible2(true)
+    };
+
+    const closeModal2 = () => {
+        setModalVisible2(false)
+    };
+
     const openModal1 = () => {
       setModalVisible1(true)
     };
@@ -35,6 +139,21 @@ function Onboarding({ navigation }) {
         setModalVisible1(false)
     };
 
+    const openModal = () => {
+      setModalVisible(true)
+    };
+
+    const closeModal = () => {
+        setModalVisible(false)
+    };
+
+    const openModal3 = () => {
+      setModalVisible3(true)
+    };
+
+    const closeModal3 = () => {
+        setModalVisible3(false)
+    };
 
     const iv = CryptoES.enc.Utf8.parse("ABCDEF1234123413");
 
@@ -96,6 +215,18 @@ function Onboarding({ navigation }) {
       );
     }
 
+    
+    const recoverIdentity = (keyPair) =>{
+      db.transaction(
+        (tx) => {
+          tx.executeSql("insert into identity (address, privateKey,publicKey,did) values (?,?,?,?)", 
+          [keyPair.address,keyPair.privateKey,keyPair.publicKey , keyPair.did],
+          (tx, resultSet) => { setId(resultSet.insertId)},
+          (tx, error) => console.log(error)
+          );
+        }
+      );
+    }
 
     const createIdentity = async () => {
       setLoading(true)
@@ -162,7 +293,7 @@ function Onboarding({ navigation }) {
                 >
                   Get Started
                 </Button>
-                <TouchableOpacity onPress={openModal1}>
+                <TouchableOpacity onPress={openModal}>
                   <Text color="white" size={16} bold>Recover Identity</Text>
                 </TouchableOpacity>
               </Block>
@@ -198,6 +329,108 @@ function Onboarding({ navigation }) {
                         </Block>
                     </Block>
                 </Block>
+            </TouchableOpacity>
+        </Modal>
+        <Modal
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible}
+            onRequestClose={closeModal}
+        >
+            <TouchableOpacity style={styles.centeredView} onPress={closeModal}>
+                <Block style={styles.modalView}>
+                    <Block style={styles.card1}>
+                    <Block>
+                        <Block style={styles.title2}>
+                            <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                            You can recover all your data if you have backed up the database. If not, you can recover your private key by collecting the fragments from your trustees.
+                            </Text>
+                        </Block>
+                            <Block center>
+                                <Button
+                                    color={theme.COLORS.DEFAULT}
+                                    textStyle={{ color: "white", fontSize: 15, fontFamily: 'open-sans-bold' }}
+                                    style={styles.button}
+                                    size="large"
+                                    icon="database" iconFamily="antdesign" iconSize={20} iconColor="white"
+                                    onPress={openModal1}
+                                >
+                                Restore Wallet
+                              </Button>
+                            </Block>
+                            <Block center>
+                                <Button
+                                    color="#5E72E4"
+                                    textStyle={{ color: "white", fontSize: 15, fontFamily: 'open-sans-bold' }}
+                                    style={styles.button}
+                                    size="large"
+                                    icon="key" iconFamily="antdesign" iconSize={20} iconColor="white"
+                                    onPress={openModal2}
+                                >
+                                    Recover Key
+                                </Button>
+                            </Block>
+                            
+                        </Block>
+                    </Block>
+                </Block>
+            </TouchableOpacity>
+        </Modal>
+        <Modal
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible2}
+            onRequestClose={closeModal2}
+        >
+            <TouchableOpacity style={styles.centeredView} onPress={closeModal2}>
+                <Block style={styles.modalView}>
+                    <Block style={styles.card1}>
+                      <Block style={styles.title2}>
+                        <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                        You have collected {fragmentsList.length} fragment(s) right now. Click the button bellow to scan again. If you have collected enough fragments, click on "Done" button.
+                        </Text>
+                      </Block>
+                      <Block center>
+                                <Button
+                                    color={theme.COLORS.DEFAULT}
+                                    textStyle={{ color: "white", fontSize: 15, fontFamily: 'open-sans-bold' }}
+                                    style={styles.button}
+                                    size="large"
+                                    icon="scan1" iconFamily="antdesign" iconSize={20} iconColor="white"
+                                    onPress={scan}
+                                >
+                                Scan
+                              </Button>
+                            </Block>
+                            <Block center>
+                                <Button
+                                    color="#5E72E4"
+                                    textStyle={{ color: "white", fontSize: 15, fontFamily: 'open-sans-bold' }}
+                                    style={styles.button}
+                                    size="large"
+                                    icon="check" iconFamily="antdesign" iconSize={20} iconColor="white"
+                                    onPress={recoverKey}
+                                >
+                                  Done
+                                </Button>
+                            </Block>
+                          </Block>
+                </Block>
+            </TouchableOpacity>
+        </Modal>
+        <Modal
+            animationType="slide"
+            transparent={false}
+            visible={modalVisible3}
+            onRequestClose={closeModal3}
+        >
+            <TouchableOpacity style={styles.centeredView} onPress={closeModal3}>
+                    <BarCodeScanner
+                    onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+                    style={StyleSheet.absoluteFillObject}
+                    />
+                    {scanned && <Button onPress={() => setScanned(false)} size="small" 
+                    style={{width: width , margin:0, borderRadius: 0, backgroundColor: "#172B4D"}}>Tap to Scan Again</Button>}
             </TouchableOpacity>
         </Modal>
       </>

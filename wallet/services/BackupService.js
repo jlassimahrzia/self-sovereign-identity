@@ -115,5 +115,17 @@ class BackupService {
         return test;
     }
 
+    async recoverKey(fragments){
+        let test 
+        await axios.post(`${environment.SERVER_API_URL}/recoverKey`,{fragments})
+            .then(res => {
+                test = res.data.result
+            })
+            .catch(error => {
+                console.log(error)
+            });
+        return test;
+    }
+
 }
 export default new BackupService();

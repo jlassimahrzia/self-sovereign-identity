@@ -1,12 +1,14 @@
+
+import { computePublicKey } from '@ethersproject/signing-key'
+import { computeAddress } from '@ethersproject/transactions'
 var express = require('express');
 var router = express.Router()
 var config = require('../config/config.js');
 // MySQL
 var db = require("../config/db.config.js");
-
 // Contract
-Web3 = require('web3')
-web3 = new Web3('http://127.0.0.1:7545')  
+var Web3 = require('web3')
+var web3 = new Web3('http://127.0.0.1:7545')  
 let contract1 = new web3.eth.Contract(config.ABI_REGISTRY_CONTRACT, config.RGISTRY_CONTRACT_ADDRESS)
 
 // IPFS
@@ -22,6 +24,7 @@ const EthereumEncryption = require('ethereum-encryption');
 
 var nodemailer = require("nodemailer");
 var QRCode = require('qrcode')
+
 
 /**
  * START KEY BACKUP
@@ -194,26 +197,87 @@ router.post('/api/backupKey', async (req : any , res : any) => {
 
 const recoverKey =  async (fragments : any) : Promise<any> => {
     let parts = {}
-    fragments.forEach( (fragment : any) => {
+    console.log("fragments",fragments);
+
+    let list :any
+    list = []
+
+    fragments.forEach((element : any) => {
+        let item = JSON.parse(element.fragment)
+        list.push(JSON.parse(item))
+    });
+
+    //console.log("list",list);
+    
+
+    list.forEach( (fragment : any) => {
         parts = {...parts, [Object.keys(fragment)[0]] : Object.values(fragment[Object.keys(fragment)[0]])}
     });
+    console.log("parts",parts);
     const utf8Decoder = new TextDecoder();
     const recovered = join(parts);
     let secret = utf8Decoder.decode(recovered);
-    let result
-    if(secret.includes('/')){
-        result = await Promise.resolve({
-            test : false
+    console.log("secret",secret);
+    
+    
+    if(secret.includes("\\")){
+        
+        
+        const result = await Promise.resolve({
+            test : false,
+            msg : "You have to collect more fragments."
         });
+
+        return result
+
     }
     else {
-        result = await Promise.resolve({
-            test : true,
-            secret : secret
+        console.log("gg");
+        
+        let valid
+
+        let publicKey : any
+        publicKey = computePublicKey(secret, true)
+        
+        list.forEach( async (element : any) => {
+                
+            
+            try {
+                valid = EthereumEncryption.verifyHashSignature(
+                    publicKey.substr(2), // publicKey
+                    element.proof.hash , // hash
+                    element.proof.signature // signature
+                );
+            } catch (error) {
+                const result = await Promise.resolve({
+                    msg : "Fragment signature Not Valid",
+                    test : false
+                });
+                return result;
+            }
+            if(!valid){
+                console.log("valid",valid);
+                
+                const result = await Promise.resolve({
+                    msg : "Fragment signature Not Valid",
+                    test : false
+                });
+                return result;
+            } 
         });
+        
     } 
+
     
-    return result
+    const address = computeAddress(secret)
+    const publicKey = computePublicKey(secret, true)
+
+    const result = await Promise.resolve({
+        test : true,
+        identity : { address : address, privateKey : secret , publicKey : publicKey , did : `did:exemple:${publicKey}` }
+    });
+    
+    return result 
 }
 
 router.post('/api/recoverKey', async (req : any , res : any) => {
