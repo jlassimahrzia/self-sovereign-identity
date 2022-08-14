@@ -6,9 +6,13 @@ import SqliteService from "../services/SqliteService"
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
 import { AntDesign } from '@expo/vector-icons';
+
+const db = SqliteService.openDatabase()
+
 function Home() {
-  const db = SqliteService.openDatabase()
+  
   const [did, setDid] = useState(null)
+  
   const getIdentity = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -22,8 +26,21 @@ function Home() {
   }
   useEffect(() => {
     getIdentity()
+
+    return () => {
+      setDid(null); // This worked for me
+    };
+
     console.log("did",did)
   }, []);
+
+
+  /* if(!did) {
+    return null;
+  } */
+
+
+
   const showToast = () => {
     Toast.show({
       type: 'success',
@@ -86,9 +103,9 @@ const styles = StyleSheet.create({
     marginTop: 20
   },
   image : {
-    marginTop: 80,
+    marginTop: 50,
     width : width*0.8,
-    height: 300
+    height: 260
   }
 });
 

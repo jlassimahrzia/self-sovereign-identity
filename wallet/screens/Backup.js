@@ -140,6 +140,7 @@ function Backup() {
 
         closeModal()
         setphrase("")
+        navigation.navigate('App');
     }
 
     const importDB = async () => {

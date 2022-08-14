@@ -78,7 +78,10 @@ function Onboarding({ navigation }) {
       setScanned(true);
       data = JSON.parse(data)
       console.log(data);
-      let id = addFragment(data)
+      let id 
+      if( typeof data !== String)
+        id = addFragment(data)
+      
       if(id){
           Toast.show({
               type: 'info',
@@ -100,19 +103,29 @@ function Onboarding({ navigation }) {
 
     const recoverKey = async () => {
       let result = await BackupService.recoverKey(fragmentsList)
+      console.log(result);
       if(result.test){
         await recoverIdentity(result.identity)
+        db.transaction(tx => {
+          tx.executeSql('INSERT INTO profile (firstname, lastname, email) values (?,?,?)', 
+          [result.profile.firstname, result.profile.lastname, result.profile.email],
+            (txObj, resultSet) => setId(resultSet.insertId),
+            (txObj, error) => console.log('Error', error))
+        })
         Toast.show({
-          type: 'info',
+          type: 'success',
           text1: 'Success',
           text2: "Identity recovered successfully"
         });
         navigation.navigate('App');
       }
       else{
+        closeModal2()
+        closeModal()
+        
         Toast.show({
           type: 'info',
-          text1: 'Success',
+          text1: 'Failed',
           text2: result.msg
         });
       } 
@@ -120,6 +133,7 @@ function Onboarding({ navigation }) {
 
     useEffect(() => {
       getFragments()
+      console.log(fragmentsList);
     }, [])
     
 

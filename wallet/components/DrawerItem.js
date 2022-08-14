@@ -30,7 +30,7 @@ function DrawerItem({ title,focused,navigation }) {
           <AntDesign name="creditcard" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
         );
-      case "Organisations":
+      case "Organizations":
         return (
           <AntDesign name="link" size={20} 
           color={focused ? "white" : argonTheme.COLORS.PRIMARY} />
@@ -75,7 +75,7 @@ function DrawerItem({ title,focused,navigation }) {
 
   return (
       <TouchableOpacity
-        style={{ height: 60 }}
+        style={{ height: 51 }}
         onPress={() =>
           title == "Getting Started"
             ? Linking.openURL(

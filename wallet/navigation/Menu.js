@@ -31,7 +31,7 @@ function CustomDrawerContent({
       );
     });
   }
-  const screens = ["Home", "QR-Code", "Credentials", "Organisations", "Verifiers"];
+  const screens = ["Home", "QR-Code", "Credentials", "Organizations", "Verifiers"];
   const settingScreens = ["Profile", "Backup and Restore", "Key Backup","Settings",  'History'];
   const screens2 = ["Home", "QR-Code", "Profile","Settings"];
   useEffect(() => {
@@ -59,7 +59,7 @@ function CustomDrawerContent({
         <Image styles={styles.logo} source={Images.Logo} />
       </Block>
       <Block flex style={{ paddingLeft: 8, paddingRight: 14 }}>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <Block style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {routes.map((item, index) => {
             return (
               <DrawerCustomItem
@@ -70,10 +70,10 @@ function CustomDrawerContent({
               />
             );
           })}
-      </ScrollView>
+      </Block>
         <Block
             flex
-            style={{ marginTop: 10, marginVertical: 8, paddingHorizontal: 8 }}
+            style={{ marginTop: 0, marginVertical: 8, paddingHorizontal: 8 }}
           >
             <Block
               style={{

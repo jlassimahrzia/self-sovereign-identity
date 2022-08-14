@@ -13,9 +13,11 @@ import SqliteService from "../services/SqliteService"
 import Toast from 'react-native-toast-message';
 import TrusteesRequest from "./TrusteesRequest";
 
+const db = SqliteService.openDatabase()
+
 function RecoveryNetwork() {
 
-    const db = SqliteService.openDatabase()
+   
     const [modalVisible, setModalVisible] = useState(false);
     const [recoveryNetworkList, setrecoveryNetworkList] = useState([])
     const [ddo, setddo] = useState({})
@@ -34,8 +36,8 @@ function RecoveryNetwork() {
         setRefreshing(false)
     };
 
-    const addRecoveryParameters = async (n, t) =>{
-        await db.transaction(
+    const addRecoveryParameters =  (n, t) =>{
+         db.transaction(
           (tx) => {
             tx.executeSql("insert into recoveryParameters (participants, threshold) values (?,?)", 
             [n, t],
@@ -48,8 +50,8 @@ function RecoveryNetwork() {
         );
       }
 
-    const getIdentity = async () => {
-        await db.transaction((tx) => {
+    const getIdentity = () => {
+        db.transaction((tx) => {
           tx.executeSql(
             `select * from identity`,
             [],(transaction, resultSet) => { 
@@ -63,8 +65,9 @@ function RecoveryNetwork() {
         });
     }
 
-    const getRecoveryParameters = async () => {
-        await db.transaction((tx) => {
+    
+    const getRecoveryParameters = () => {
+        db.transaction((tx) => {
           tx.executeSql(
             `select * from recoveryParameters`,
             [],(transaction, resultSet) => { 
@@ -94,8 +97,13 @@ function RecoveryNetwork() {
         getIdentity()
         getRecoveryNetworkList()
         getAcceptedRequestNumber()
-        getRecoveryParameters()
-        console.log("dddd",participants , threshold, number);
+        getRecoveryParameters()   
+        console.log("dddd",participants , threshold, number, did); 
+        /* db.transaction((tx) => {
+            tx.executeSql(
+              "drop table recoveryParameters"
+            );
+        }); */
     }, [])
 
     const didValidation = Yup.object().shape({
@@ -185,87 +193,39 @@ function RecoveryNetwork() {
                 </Text>   : null }
             </Block> 
             
-           { (participants !== number) ? 
-           <Formik
-                validationSchema={didValidation}
-                initialValues={{ did: ""}}
-                onSubmit={
-                    async (values, actions) =>{
-                        let result = await DidService.getProfile(values.did)
-                        if(result.test){
-                            openModal(result.ddo)
-                            actions.resetForm({
-                                values: { did : "" }
-                            })
-                        }
-                        else{
-                            Toast.show({
-                                type: 'error',
-                                text1: 'Error',
-                                text2: result.msg
-                            });
-                        }
-                    }
-                }
-            >
-                {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
-                    <View>
-                    <Block>
-                        <Block style={styles.title}>
-                            <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
-                                Enter DID :
-                            </Text>
-                        </Block>
-                        <TextInput
-                            style={styles.input}
-                            onChangeText={handleChange('did')}
-                            onBlur={handleBlur('did')}
-                            value={values.did}
-                        />
-                        <Block row style={styles.passwordCheck}>
-                            <Text size={12} color={argonTheme.COLORS.DEFAULT}>
-                                {errors.did && touched.did ?  errors.did : null }
-                            </Text>
-                        </Block>
-                    </Block>
-                    <Block center style={{padding:10}}>
-                        <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
-                            Send request
-                        </Button>
-                    </Block> 
-                    </View>
-             )}
-            </Formik> :
+           { (participants === number) && (participants !== 0)? 
             <Block>
-                <Block style={{ margin: 20  }}>
-                    <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
-                        You have reached the number of participants requested click above to send the fragments of each participant.
+            <Block style={{ margin: 20  }}>
+                <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                    You have reached the number of participants requested click above to send the fragments of each participant.
+                </Text>
+                <Button style={styles.button} onPress={sendFragments}>
+                    <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
+                        Send fragment to all participants
                     </Text>
-                    <Button style={styles.button} onPress={sendFragments}>
-                        <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
-                            Send fragment to all participants
-                        </Text>
-                    </Button>
-                </Block>
+                </Button>
             </Block>
+            </Block>
+          :
+           null
             }
             { ((participants === 0) && (threshold === 0)) ?  <Formik
                 validationSchema={recoveryPrametersValidation}
                 initialValues={{ participants : "" , threshold : ""}}
                 onSubmit={
-                    async (values, actions) =>{
-                        let id = await addRecoveryParameters(values.participants, values.threshold)
-                        if(id){
+                     (values, actions) =>{
+                        let id =  addRecoveryParameters(values.participants, values.threshold)
+                       /*  if(id){
                             actions.resetForm({
                                 values: {participants : "" , threshold : ""}
-                            })
+                            }) */
                             onRefresh()
                             Toast.show({
-                                type: 'sucess',
+                                type: 'success',
                                 text1: 'Succes',
                                 text2: "Recovery parameters added successfully"
                             });
-                        }
+                        /* }
                         else{
                             Toast.show({
                                 type: 'error',
@@ -275,7 +235,7 @@ function RecoveryNetwork() {
                             actions.resetForm({
                                 values: {participants : "" , threshold : ""}
                             })
-                        }
+                        } */
                     }
                 }
             >
@@ -324,7 +284,59 @@ function RecoveryNetwork() {
                     </Block> 
                     </View>
              )}
-            </Formik> : null}
+            </Formik> : 
+            null
+           /*  <Formik
+            validationSchema={didValidation}
+            initialValues={{ did: ""}}
+            onSubmit={
+                async (values, actions) =>{
+                    let result = await DidService.getProfile(values.did)
+                    if(result.test){
+                        openModal(result.ddo)
+                        actions.resetForm({
+                            values: { did : "" }
+                        })
+                    }
+                    else{
+                        Toast.show({
+                            type: 'error',
+                            text1: 'Error',
+                            text2: result.msg
+                        });
+                    }
+                }
+            }
+        >
+            {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
+                <View>
+                <Block>
+                    <Block style={styles.title}>
+                        <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                            Enter DID :
+                        </Text>
+                    </Block>
+                    <TextInput
+                        style={styles.input}
+                        onChangeText={handleChange('did')}
+                        onBlur={handleBlur('did')}
+                        value={values.did}
+                    />
+                    <Block row style={styles.passwordCheck}>
+                        <Text size={12} color={argonTheme.COLORS.DEFAULT}>
+                            {errors.did && touched.did ?  errors.did : null }
+                        </Text>
+                    </Block>
+                </Block>
+                <Block center style={{padding:10}}>
+                    <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
+                        Send request
+                    </Button>
+                </Block> 
+                </View>
+         )}
+            </Formik>  */
+            }
             <Block style={{padding:15}} center >
                 <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
                     LIST OF REQUESTS

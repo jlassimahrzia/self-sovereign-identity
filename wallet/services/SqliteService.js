@@ -37,7 +37,7 @@ class SqliteService {
         return db;
     }
 
-    deleteTable(db){
+    /* deleteTable(db){
         db.transaction((tx) => {
             tx.executeSql(
               "drop table verifiableCredentials"
@@ -48,7 +48,7 @@ class SqliteService {
               "drop table profile"
             );
         }); */
-    }
+   /*  }
 
     getIdentity(db){
         db.transaction((tx) => {
@@ -65,7 +65,7 @@ class SqliteService {
               (transaction, error) => console.log(error)
             );
         });
-    }
+    } */ 
 }
 
 export default new SqliteService();

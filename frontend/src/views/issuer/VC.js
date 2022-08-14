@@ -17,7 +17,7 @@ import Form from "@rjsf/bootstrap-4";
 import VcSchemaService from 'services/VcSchemaService';
 import DidService from 'services/DidService';
 import swal from 'sweetalert';
-
+import ReactReadMoreReadLess from "react-read-more-read-less";  
 function VC() {
 
     const [status, setStatus] = useState(0);
@@ -149,9 +149,17 @@ function VC() {
                                             <td>{
                                                 index + 1
                                             }</td>
-                                            <td>{
-                                                item.did_holder
-                                            }</td>
+                                            <td>
+                                                <ReactReadMoreReadLess
+                                                    charLimit={5}
+                                                    readMoreText={"Read more ▼"}
+                                                    readLessText={"Read less ▲"}
+                                                    readMoreStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                    readLessStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                >
+                                                    {item.did_holder}
+                                                </ReactReadMoreReadLess> 
+                                            </td>
                                             <td>{
                                                 item.vc_name
                                             }</td>
@@ -162,7 +170,7 @@ function VC() {
                                                 item.state === 0 ? <Badge color="warning">Pending</Badge> : item.state === 1 ? <Badge color="success">Issued</Badge> : <Badge color="danger">Declined</Badge>
                                             }</td>
                                             <td>
-                                                <Button style={
+                                                <Button className='btn-sm' style={
                                                         {
                                                             background: "#d7363c",
                                                             color: "white"
@@ -176,14 +184,14 @@ function VC() {
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                 }>Holder details</Button>
-                                                <Button color="success"
+                                                <Button className='btn-sm' color="success"
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                     }
                                                     onClick={
                                                         () => openVcModal(item)
                                                 }>Create VC</Button>
-                                                <Button color="secondary" onClick={()=>declineRequest(item)}
+                                                <Button className='btn-sm' color="secondary" onClick={()=>declineRequest(item)}
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                 }>Decline Request</Button>

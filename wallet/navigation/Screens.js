@@ -182,12 +182,12 @@ function OrganisationsStack(props) {
       }}
     >
       <Stack.Screen
-        name="Organisations"
+        name="Organizations"
         component={Organisations}
         options={{
           header: ({ navigation, scene }) => (
             <Header
-              title="Organisations"
+              title="Organizations"
               search
               navigation={navigation}
               scene={scene}
@@ -523,7 +523,7 @@ function AppStack(props) {
       <Drawer.Screen name="Home" component={HomeStack} />
       <Drawer.Screen name="QR-Code" component={QrCodeStack} />
       <Drawer.Screen name="Credentials" component={CredentialsStack} />
-      <Drawer.Screen name="Organisations" component={OrganisationsStack} />
+      <Drawer.Screen name="Organizations" component={OrganisationsStack} />
       <Drawer.Screen name="Verifiers" component={VerifiersStack} /> 
       <Drawer.Screen name="Profile" component={ProfileStack} />
       <Drawer.Screen name="Backup and Restore" component={BackupStack} />

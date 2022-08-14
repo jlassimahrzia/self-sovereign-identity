@@ -1,14 +1,18 @@
 
-import { computePublicKey } from '@ethersproject/signing-key'
-import { computeAddress } from '@ethersproject/transactions'
-var express = require('express');
+
+const { computePublicKey } = require("@ethersproject/signing-key");
+
+const { computeAddress} = require("@ethersproject/transactions");
+var express = require('express')
+
 var router = express.Router()
+
 var config = require('../config/config.js');
 // MySQL
 var db = require("../config/db.config.js");
 // Contract
-var Web3 = require('web3')
-var web3 = new Web3('http://127.0.0.1:7545')  
+ Web3 = require('web3')
+ web3 = new Web3('http://127.0.0.1:7545')  
 let contract1 = new web3.eth.Contract(config.ABI_REGISTRY_CONTRACT, config.RGISTRY_CONTRACT_ADDRESS)
 
 // IPFS
@@ -24,7 +28,6 @@ const EthereumEncryption = require('ethereum-encryption');
 
 var nodemailer = require("nodemailer");
 var QRCode = require('qrcode')
-
 
 /**
  * START KEY BACKUP
@@ -197,7 +200,7 @@ router.post('/api/backupKey', async (req : any , res : any) => {
 
 const recoverKey =  async (fragments : any) : Promise<any> => {
     let parts = {}
-    console.log("fragments",fragments);
+    
 
     let list :any
     list = []
@@ -207,17 +210,19 @@ const recoverKey =  async (fragments : any) : Promise<any> => {
         list.push(JSON.parse(item))
     });
 
-    //console.log("list",list);
+    
+    console.log(list);
     
 
     list.forEach( (fragment : any) => {
+        
         parts = {...parts, [Object.keys(fragment)[0]] : Object.values(fragment[Object.keys(fragment)[0]])}
     });
-    console.log("parts",parts);
+    
     const utf8Decoder = new TextDecoder();
     const recovered = join(parts);
     let secret = utf8Decoder.decode(recovered);
-    console.log("secret",secret);
+    
     
     
     if(secret.includes("\\")){
@@ -232,7 +237,7 @@ const recoverKey =  async (fragments : any) : Promise<any> => {
 
     }
     else {
-        console.log("gg");
+        
         
         let valid
 
@@ -271,10 +276,15 @@ const recoverKey =  async (fragments : any) : Promise<any> => {
     
     const address = computeAddress(secret)
     const publicKey = computePublicKey(secret, true)
+    const did = `did:exemple:${publicKey}`
+
+    const ipfshash = await contract1.methods.getDidToHash(did).call();
+    let ddo = await resolve(ipfshash)
 
     const result = await Promise.resolve({
         test : true,
-        identity : { address : address, privateKey : secret , publicKey : publicKey , did : `did:exemple:${publicKey}` }
+        identity : { address : address, privateKey : secret , publicKey : publicKey , did : did },
+        profile : ddo
     });
     
     return result 
@@ -282,12 +292,13 @@ const recoverKey =  async (fragments : any) : Promise<any> => {
 
 router.post('/api/recoverKey', async (req : any , res : any) => {
     let fragments = req.body.fragments
-
+    
+    
     let result = await recoverKey(fragments)
     
     res.json({result})
 })
-
+ 
 const getRequestById = (id: any) => {
     let query = 'SELECT * FROM trusteesrequests WHERE id = ?'
         return new Promise((resolve, reject) => {

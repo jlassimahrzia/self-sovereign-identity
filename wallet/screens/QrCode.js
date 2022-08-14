@@ -323,7 +323,7 @@ export default function QrCode({navigation}) {
           />
         }
       >
-        <Text center size={14} style={{marginTop: 5}}>Scan QrCode to get your DID, Credentials and Requests. </Text>
+        <Text center size={14} style={{marginTop: 5}}>Scan QR Code to get your DID, Credentials and Requests. </Text>
       </ScrollView>
     </SafeAreaView>
     <View style={styles.container}>

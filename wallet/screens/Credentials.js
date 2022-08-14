@@ -13,6 +13,7 @@ import SqliteService from "../services/SqliteService"
 import IssuerService from "../services/IssuerService";
 import { environment } from '../constants/env';
 import * as SQLite from 'expo-sqlite';
+const db = SqliteService.openDatabase()
 function Credentials({navigation}) {
     const [modalVisible, setModalVisible] = useState(false);
     const [vcList, setvcList] = useState([])
@@ -25,15 +26,7 @@ function Credentials({navigation}) {
     const onRefresh = () => {
         setRefreshing(true);
         retrieveIssuersList()
-        openDb().then(db =>{
-            db.transaction((tx) => {
-                tx.executeSql(
-                  `select * from verifiableCredentials`,
-                  [],(transaction, resultSet) => setvcList(resultSet.rows._array),
-                  (transaction, error) => console.log(error)
-                )
-            })
-        })
+        getCredentials()
         let credentials = []
         vcList.forEach((element) => {
             let vc = JSON.parse(element.vc)
@@ -64,8 +57,8 @@ function Credentials({navigation}) {
         setModalVisible(false)
     };
 
-    const getCredentials = async () => {
-        const db = SqliteService.openDatabase()
+    const getCredentials = () => {
+        
         db.transaction((tx) => {
             tx.executeSql(
               `select * from verifiableCredentials`,
@@ -77,24 +70,15 @@ function Credentials({navigation}) {
 
     const retrieveIssuersList = async () => {
         let data = await IssuerService.getIssuerList()
+        
         setOrganisations(data)
     }
 
-    async function openDb() {
-        return SQLite.openDatabase("wallet.db");
-    }
+    
 
     useEffect(() => {  
         retrieveIssuersList()
-        openDb().then(db =>{
-            db.transaction((tx) => {
-                tx.executeSql(
-                  `select * from verifiableCredentials`,
-                  [],(transaction, resultSet) => setvcList(resultSet.rows._array),
-                  (transaction, error) => console.log(error)
-                )
-            })
-        })
+        getCredentials()
         let credentials = []
         vcList.forEach((element) => {
             let vc = JSON.parse(element.vc)
