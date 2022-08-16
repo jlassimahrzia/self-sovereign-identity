@@ -28,7 +28,7 @@ import VerifierService from "services/VerifierService";
 import IssuerService from "services/IssuerService";
 import jwt from 'jwt-decode'
 import DidService from "services/DidService";
-
+import ReactReadMoreReadLess from "react-read-more-read-less";  
 const VerificationResponse = () => {
 
     const [status, setStatus] = useState(0);
@@ -174,9 +174,15 @@ const VerificationResponse = () => {
                                             <td>{
                                                 index + 1
                                             }</td>
-                                            <td>{
-                                                item.did_holder
-                                            }</td>
+                                            <td><ReactReadMoreReadLess
+                                                    charLimit={5}
+                                                    readMoreText={"Read more ▼"}
+                                                    readLessText={"Read less ▲"}
+                                                    readMoreStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                    readLessStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                >
+                                                    {item.did_holder}
+                                                </ReactReadMoreReadLess> </td>
                                             <td>{
                                                 getService(item.idRequest)
                                             }</td>

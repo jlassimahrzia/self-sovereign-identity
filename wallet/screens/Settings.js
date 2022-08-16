@@ -33,11 +33,7 @@ function Settings() {
 
     const getIdentity = () => {
         db.transaction((tx) => {
-            tx.executeSql(`select * from identity`, [], (transaction, resultSet) => {
-                if (resultSet.rows.length != 0) {
-                    setDid(resultSet.rows._array[0].did)
-                    setAddress(resultSet.rows._array[0].address)
-                }
+            tx.executeSql(`select * from identity`, [], (transaction, resultSet) => {s
                 setData([
                     {
                         title: "DID",
@@ -53,8 +49,6 @@ function Settings() {
 
     useEffect(() => {
         getIdentity()
-
-        console.log("did", did, "address", address)
     }, []);
 
     return(

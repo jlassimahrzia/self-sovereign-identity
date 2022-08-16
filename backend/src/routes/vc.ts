@@ -191,7 +191,7 @@ router.post('/api/issueVC', async (req : any, res : any) => {
     
     Object.assign(VerifiableCredential.credentialSubject, k)
 
-    //console.log("VerifiableCredential : ",VerifiableCredential);
+    console.log("VerifiableCredential : ",VerifiableCredential);
     
 
     const hashVC = EthereumEncryption.hash(JSON.stringify(VerifiableCredential));
@@ -220,7 +220,10 @@ router.post('/api/issueVC', async (req : any, res : any) => {
 
     let qrcodeData = {encrypted, type : "vc"}
 
-    QRCode.toDataURL(JSON.stringify(qrcodeData), {
+    console.log("qrcodeData",qrcodeData);
+    
+
+   /*  QRCode.toDataURL(JSON.stringify(qrcodeData), {
         type: 'terminal',
         width: '500',
         errorCorrectionLevel: 'M'
@@ -228,8 +231,8 @@ router.post('/api/issueVC', async (req : any, res : any) => {
         if (err) 
             return console.log("error occured", err)
         emailSenderFunction(ddo.email, url);
-    }) 
-    res.json({done : true})
+    })  */
+    res.json({done : true, qrcodeData: qrcodeData})
 })
 
 /** Verify VC sTART*/
@@ -264,6 +267,7 @@ const verifyVC = async (encrypted : any, privateKey : any ) : Promise<any> => {
         decrypted = EthereumEncryption.decryptWithPrivateKey(
             privateKey.substr(2), // privateKey
             encrypted
+            //'0333eec583d04a55ce0aba9dbfb04035e8c6de4f501ecc9b26c08fa501a5ec1507e05518776f305c3e664d119522483884d80b4fec3ff4fbadc546e3a37fe189d35220eaeb1715fe4d4170b06a6d1494768442235be8e9584537bec968c37e93dbb577db4ec085b400631f93ac0b8daab8df77ac7a1cedbe516557d9bacaa1cae6cfd8a04ecf2b92b8dc4fd9da03fe7d53d55e6e724f6cc38018c3f387bca40a9a9018db3af12fec90b964a128e096151907d6b1beed4e22464d6396b99e7037a2dbb13502f7bcd1d74e7b2c979150c8296df422b7e5ec6aef9121a2bb1c952646b29900e19e3dce9247a92e839e4fd006ebd7e3fd27017ba4cd36d504a113f77c3b128d5c1af0ca36eeb5638a5fb0097a9820511d63be9d0bdb31a42f08a4d9f3fb4e5a41b913a45daf610a6c1b4b8f2c276981c483517517e34b883440a2cbc72f93340e96f604bd2dd4da079854e7081e0ab7a7d32fe1d5f03b459059e500d9799fda06be31820e9d339f80e77e5be4e5775d0b2abe17048254d6f1b39d9ce7b70debfd892fddbf1de45d0ef27d9370a2e0f4876d312964b4416ac934f3c6a38d966d3e0f80e9f61ccd1fdc8f3e6f8d2533549732c68a548fae227b9663bf71c37a96dbb50191ab4148c35be8baae7bc017391359fc13ccb9510c216ddf40f3bc7d1eb6dcaa1bf5312a2f8a245396214fa5a4ec71f972e04070a25d15b37e1f950554539490b4684f893a100de216c443655f7f3b528fe4820c8a0445e8e6790a09be39ed9f4c27527662fee0ed169d3d3a1b6e83b179a1be200cebe4aba97abbd183919270fe1b829c2edb67112abd7cb55815091ff03f1caf5ec696be2bb109d1e411f845030a91f28342cf2be16fd69b6b858599c41d5f952e1aab19c4de4830b646a8cdaf43ffe18de7b7ec48b94b8a3b1c69c7bf2c0995faaafa75eb13c280b02c7f1ee5c94aea235f71c4eaf3d061df1f308afa518fb8be4465ea4e482854b6c512a8304129c23475648a4cea0bc11963ff483866dacd22baaa44a48b4b0815521b9b7db2f8792aa2b5a8eb2cc8a6abbc92b9937351df9d60f8f98a987845167cdd0b915527a06d1b8f9bc5a90bbd64970dc63242ca930a0208389b3d1fd6a33f2238e265931ad5d2df4322aba6997f6be83617a10f3042ae312e62143b6581c51a52acdacf87f01cb5cc6756cfc5f5477b889fa90f1179cfd66bd06b7329acbff1c51c9ced6e641c2c62f3b362705c2903c3be08afd1f0db73926fcbfed2b8041b7e10f789c32871bc74c9e0db10f747b75833b83933cb757c06688b1978f2c98207f13eae7e18d7d896f3fb760b337273b65895808d1829dfd226cc3713ffe4d668b3ce9b3e72d309cf05472ef67f1cd22082dab590933c5e6bda3332746b3a5308cd31745c1c17976ad0d1ca49381b30e25249cf8231e19b0ee32b7f6e866d2b9238df3977f28ee7e8e302'
         );
     }catch(error){
         console.log("error",error); 
@@ -330,6 +334,8 @@ router.post('/api/verifyVC', async (req : any, res : any) => {
     let encrypted = req.body.encrypted
     
     let result = await verifyVC(encrypted, privateKey) 
+    console.log(result);
+    
     res.json({result})
 })
 

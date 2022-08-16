@@ -2,7 +2,8 @@
 import { Block, Text, theme } from "galio-framework";
 import {
     StyleSheet, Dimensions, Image, Modal, TouchableWithoutFeedback, TouchableOpacity,FlatList,
-    RefreshControl
+    RefreshControl,
+    ScrollView
 } from "react-native";
 import { argonTheme, Images } from "../constants";
 import { Button } from "../components/";
@@ -161,7 +162,7 @@ function Credentials({navigation}) {
                                         style={{fontWeight: "bold"}}>
                                         {item.credentialSchema.id}
                                     </Text>
-                                    <Text size={14} style={{marginVertical: 5}} color={argonTheme.COLORS.WHITE}>
+                                    <Text size={13} style={{marginVertical: 5}} color={argonTheme.COLORS.WHITE}>
                                         {item.issuerInfo.name}
                                     </Text>
                                     </Block> 
@@ -219,12 +220,12 @@ const styles = StyleSheet.create({
         borderLeftColor: "#dadde1",
         borderStyle: "solid",
         borderLeftWidth: 1,
-        height: 85
+        //height: 100
     },
     image: {
         width: 50,
         height: 50,
-        borderRadius: 50,
+        //borderRadius: 50,
         margin: 16,
         overflow: 'hidden'
     },
@@ -262,7 +263,7 @@ const styles = StyleSheet.create({
     rightSideModal : {
         width: width*0.8, 
         padding: 15,
-        height: 85
+        height: 100
     },
     imageModal: {
         width: 50,

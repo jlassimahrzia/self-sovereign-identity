@@ -334,12 +334,12 @@ const styles = StyleSheet.create({
         borderLeftColor: "#dadde1",
         borderStyle: "solid",
         borderLeftWidth: 1,
-        height: 85
+        //height: 85
     },
     image: {
         width: 50,
         height: 50,
-        borderRadius: 50,
+        //borderRadius: 50,
         margin: 16,
         overflow: 'hidden'
     },

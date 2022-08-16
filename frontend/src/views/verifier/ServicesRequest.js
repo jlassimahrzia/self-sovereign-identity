@@ -15,7 +15,7 @@ import VerifierService from 'services/VerifierService';
 import swal from 'sweetalert';
 import jwt from 'jwt-decode'
 import DidService from 'services/DidService';
-
+import ReactReadMoreReadLess from "react-read-more-read-less";  
 function ServicesRequest() {
 
     const [status, setStatus] = useState(0);
@@ -109,9 +109,17 @@ function ServicesRequest() {
                                             <td>{
                                                 index + 1
                                             }</td>
-                                            <td>{
-                                                item.did_holder
-                                            }</td>
+                                            <td>
+                                            <ReactReadMoreReadLess
+                                                    charLimit={5}
+                                                    readMoreText={"Read more ▼"}
+                                                    readLessText={"Read less ▲"}
+                                                    readMoreStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                    readLessStyle={{color: "#d7363c", cursor: "pointer"}}
+                                                >
+                                                    {item.did_holder}
+                                                </ReactReadMoreReadLess> 
+                                            </td>
                                             <td>{
                                                 item.verification_request_name
                                             }</td>  
@@ -122,21 +130,21 @@ function ServicesRequest() {
                                                 item.state === 0 ? <Badge color="warning">Pending</Badge> : item.state === 1 ? <Badge color="success">Issued</Badge> : <Badge color="danger">Declined</Badge>
                                             }</td>
                                             <td>
-                                                <Button style={
+                                                <Button className='btn-sm' style={
                                                         {
                                                             background: "#d7363c",
                                                             color: "white"
                                                         }
                                                     }
                                                 onClick={() => openHolderModal(item.did_holder)}>Holder details</Button>
-                                                <Button color="success"
+                                                <Button className='btn-sm' color="success"
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                     }
                                                     onClick={
                                                         () => sendVerificationRequest(item)
                                                 }>Send Verification Request</Button>
-                                                <Button color="secondary" onClick={()=>declineService(item.id)}
+                                                <Button className='btn-sm' color="secondary" onClick={()=>declineService(item.id)}
                                                     disabled={
                                                         item.state !== 0 ? true : false
                                                 }>Decline Request</Button>
