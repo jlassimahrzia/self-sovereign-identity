@@ -97,6 +97,17 @@ class VerifierService {
         return tab;
     }
 
+    async verificationTemplatesList2(){
+        let tab
+        let did = jwt(sessionStorage.getItem("token")).res[0].did
+        await axios.post(`${environment.SERVER_API_URL}/verificationTemplates`, {did}).then(res => {
+            tab = res.data
+        }).catch(error => {
+            console.log(error)
+        });
+        return tab;
+    }
+
     async resolveVerificationTemplate(name) {
         let schema
         let did = jwt(sessionStorage.getItem("token")).res[0].did

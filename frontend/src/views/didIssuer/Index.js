@@ -88,7 +88,7 @@ const Index = (props) => {
           {
             label: "Sales",
             data: [HolderPending.length, HolderIssued.length, HolderDeclined.length],
-            maxBarThickness: 10,
+            maxBarThickness: 5,
           },
         ],
       },
@@ -145,7 +145,7 @@ const Index = (props) => {
           {
             label: "Sales",
             data: [IssuerPending.length, IssuerIssued.length, IssuerDeclined.length],
-            maxBarThickness: 10,
+            maxBarThickness: 5,
           },
         ],
       },
@@ -202,17 +202,17 @@ const Index = (props) => {
           {
             label: "Sales",
             data: [VerifierPending.length, VerifierIssued.length, VerifierDeclined.length],
-            maxBarThickness: 10,
+            maxBarThickness: 5,
           },
         ],
       },
     })
   }
 
-  useEffect(() => {
-    retrieveDidRequestsList();
-    retrieveIssuerDidRequestsList();
-    retrieveVerifierDidRequestsList();
+  useEffect( async() => {
+    await retrieveDidRequestsList();
+    await retrieveIssuerDidRequestsList();
+    await retrieveVerifierDidRequestsList();
   }, [])
  
   return (
@@ -298,7 +298,7 @@ const Index = (props) => {
     <br/>
         <Row>
         <Col xl="4">
-            {HolderChart && <Card className="shadow">
+            <Card className="shadow">
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
@@ -313,15 +313,15 @@ const Index = (props) => {
                 {/* Chart */}
                 <div className="chart">
                   <Bar
-                    data={HolderChart.data}
-                    options={HolderChart.options}
+                    data={HolderChart?.data}
+                    options={HolderChart?.options}
                   />
                 </div>
               </CardBody>
-            </Card>}
+            </Card>
           </Col>
           <Col xl="4">
-            { IssuerChart && <Card className="shadow">
+           <Card className="shadow">
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
@@ -336,16 +336,15 @@ const Index = (props) => {
                 {/* Chart */}
                 <div className="chart">
                   <Bar
-                    data={IssuerChart.data}
-                    options={IssuerChart.options}
+                    data={IssuerChart?.data}
+                    options={IssuerChart?.options}
                   />
                 </div>
               </CardBody>
-            </Card>}
+            </Card>
           </Col>
-         
           <Col xl="4">
-            {VerifierChart && <Card className="shadow">
+            <Card className="shadow">
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
@@ -360,17 +359,18 @@ const Index = (props) => {
                 {/* Chart */}
                 <div className="chart">
                   <Bar
-                    data={VerifierChart.data}
-                    options={VerifierChart.options}
+                    data={VerifierChart?.data}
+                    options={VerifierChart?.options}
                   />
                 </div>
               </CardBody>
-            </Card>}
+            </Card>
           </Col>
         </Row>    
       </Container>
     </>
   );
+
 };
 
 export default Index;

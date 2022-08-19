@@ -1,24 +1,305 @@
-// reactstrap components
+import React from 'react'
+import PageHeader from 'components/Headers/PageHeader'
+//import { useState } from "react";
+// node.js library that concatenates classes (strings)
+//import classnames from "classnames";
+// javascipt plugin for creating charts
+import Chart from "chart.js";
+// react plugin used to create charts
+import { Bar } from "react-chartjs-2";
 import {
- 
-  Container
-} from "reactstrap";
+    Card,
+    CardHeader,
+    CardBody,
+    Container,
+    CardTitle,
+    Row,
+    Col,
+  } from "reactstrap";
+  import {
+    chartOptions,
+    parseOptions,
+  } from "variables/charts.js";
+  import VCService from 'services/VCService';
+import jwt from 'jwt-decode'
+import { useState, useEffect } from 'react';
+import VcSchemaService from 'services/VcSchemaService';
+import VerifierService from 'services/VerifierService';
+
+function IndexVerifier() {
 
 
+  if (window.Chart) {
+    parseOptions(Chart, chartOptions());
+  }
+  const [serviceIssued, setServiceIssued] = useState([]);
+  const [servicePending, setServicePending] = useState([]);
+  const [serviceDeclined, setServiceDeclined] = useState([]);
 
-import PageHeader from "components/Headers/PageHeader";
+  const [responseIssued, setResponseIssued] = useState([]);
+  const [responsePending, setResponsePending] = useState([]);
+  const [responseDeclined, setResponseDeclined] = useState([]);
 
-const IndexVerifier = (props) => {
+  const [schemasList, setSchemasList] = useState([]);
+  const [responseList, setresponseList] = useState([])
+
+  const retrieveSchemasList = async () => {
+    let data = await VerifierService.verificationTemplatesList2()
+    if(data.length > 0){
+      let finalRes = [];
+      data.forEach(schemaRes => {
+          let name = schemaRes[0];
+          let path = schemaRes[1];
+          let result = {
+              name,
+              path
+          }
+          finalRes.push(result);
+      });
+      return finalRes;
+    }
+    else {
+      return []
+    }
+}
+
+  const retrieveServicesRequestsList = async () => {
+    let didVerifier = (jwt(sessionStorage.getItem("token"))).res[0].did
+    let data = await VerifierService.getServicesRequestList(didVerifier);
+    let dataIssued = data.filter(vc => vc.state === 1)
+    setServiceIssued(dataIssued)
+    let dataPending = data.filter(vc => vc.state === 0)
+    setServicePending(dataPending)
+    let dataDeclined = data.filter(vc => vc.state === 2)
+    setServiceDeclined(dataDeclined)
+  }
+  const retrieveResponseList = async () => {
+    let didIssuer = (jwt(sessionStorage.getItem("token"))).res[0].did
+    let data = await VerifierService.getVerificationResponseList();
+    setresponseList([...data])
+    let dataIssued = data.filter(vc => vc.state === 1)
+    setResponseIssued(dataIssued)
+    let dataPending = data.filter(vc => vc.state === 0)
+    setResponsePending(dataPending)
+    let dataDeclined = data.filter(vc => vc.state === 2)
+    setResponseDeclined(dataDeclined)
+  }
+
+  const [chartExample2, setchartExample2] = useState()
+  const [chartExample1, setchartExample1] = useState()
+
+  useEffect(() => {
+    retrieveServicesRequestsList()
+    retrieveResponseList()
+
+    retrieveSchemasList().then((res) => {
+      setSchemasList(res);
+    });
+    
+    setchartExample2({
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value;
+                  }
+                },
+              },
+            },
+          ],
+        },
+        tooltips: {
+          callbacks: {
+            label: function (item, data) {
+              var label = data.datasets[item.datasetIndex].label || "";
+              var yLabel = item.yLabel;
+              var content = "";
+              if (data.datasets.length > 1) {
+                content += label;
+              }
+              content += yLabel;
+              return content;
+            },
+          },
+        },
+      },
+      data: {
+        labels: ["Pending", "Issued", "Declined"],
+        datasets: [
+          {
+            label: "Sales",
+            data: [servicePending.length, serviceIssued.length, serviceDeclined.length],
+            maxBarThickness: 10,
+          },
+        ],
+      },
+    })
+
+
+    
+
+    setchartExample1({
+      options: {
+        scales: {
+          yAxes: [
+            {
+              ticks: {
+                callback: function (value) {
+                  if (!(value % 10)) {
+                    //return '$' + value + 'k'
+                    return value;
+                  }
+                },
+              },
+            },
+          ],
+        },
+        tooltips: {
+          callbacks: {
+            label: function (item, data) {
+              var label = data.datasets[item.datasetIndex].label || "";
+              var yLabel = item.yLabel;
+              var content = "";
+              if (data.datasets.length > 1) {
+                content += label;
+              }
+              content += yLabel;
+              return content;
+            },
+          },
+        },
+      },
+      data: {
+        labels: ["Pending", "Issued", "Declined"],
+        datasets: [
+          {
+            label: "Sales",
+            data: [responsePending.length, responseIssued.length, responseDeclined.length],
+            maxBarThickness: 10,
+          },
+        ],
+      },
+    })
+  }, [])
   
   return (
     <>
-      <PageHeader/>
-      {/* Page content */}
-      <Container className="mt--7" fluid>
-      
-      </Container>
-    </>
-  );
-};
+    <PageHeader/>
+    
+    <Container className="mt--7" fluid>
+    <div className="header-body">
+    {/* Card stats */}
+    <Row>
+      <Col lg="12" xl="6">
+        <Card className="card-stats mb-4 mb-xl-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle
+                  tag="h5"
+                  className="text-uppercase text-muted mb-0"
+                >
+                  Services approved
+                </CardTitle>
+                <span className="h2 font-weight-bold mb-0">
+                  {responseList.length}
+                </span>
+              </div>
+              <Col className="col-auto">
+              <div className="icon icon-shape bg-info text-white rounded-circle shadow">
+              <i className="ni ni-credit-card"></i>
+              </div>
+                
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+      </Col>
+      <Col lg="12" xl="6">
+        <Card className="card-stats mb-4 mb-xl-0">
+          <CardBody>
+            <Row>
+              <div className="col">
+                <CardTitle
+                  tag="h5"
+                  className="text-uppercase text-muted mb-0"
+                >
+                  Verification Templates
+                </CardTitle>
+                <span className="h2 font-weight-bold mb-0">{schemasList.length}</span>
+              </div>
+              <Col className="col-auto">
+                <div className="icon icon-shape bg-info text-white rounded-circle shadow">
+                  <i className="ni ni-single-copy-04" />
+                </div>
+              </Col>
+            </Row>
+          </CardBody>
+        </Card>
+      </Col>
+    
+   
+    </Row>
+    <br/>
+    <Row>
 
-export default IndexVerifier;
+    <Col xl="6">
+      <Card className="shadow">
+        <CardHeader className="bg-transparent">
+          <Row className="align-items-center">
+            <div className="col">
+              <h6 className="text-uppercase text-muted ls-1 mb-1">
+                Status
+              </h6>
+              <h2 className="mb-0">Services Requests</h2>
+            </div>
+          </Row>
+        </CardHeader>
+        <CardBody>
+          {/* Chart */}
+          <div className="chart">
+            <Bar
+              data={chartExample2?.data}
+              options={chartExample2?.options}
+            />
+          </div>
+        </CardBody>
+      </Card>
+    </Col>
+    <Col xl="6">
+      <Card className="shadow">
+        <CardHeader className="bg-transparent">
+          <Row className="align-items-center">
+            <div className="col">
+              <h6 className="text-uppercase text-muted ls-1 mb-1">
+                Status
+              </h6>
+              <h2 className="mb-0">Verification Response</h2>
+            </div>
+          </Row>
+        </CardHeader>
+        <CardBody>
+          {/* Chart */}
+          <div className="chart">
+            <Bar
+              data={chartExample1?.data}
+              options={chartExample1?.options}
+            />
+          </div>
+
+        </CardBody>
+      </Card>
+    </Col>
+  </Row>
+  </div>
+
+      </Container>
+      </>
+  )
+}
+
+export default IndexVerifier

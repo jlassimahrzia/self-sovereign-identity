@@ -12,6 +12,7 @@ const logoMunicipalite = require("../assets/imgs/municipalite.jpg")
 const logoEnsi = require("../assets/imgs/logo_ensi.jpg")
 const homeImage = require("../assets/imgs/home.png")
 const backupImage = require("../assets/imgs/backup.png")
+const avatar = require("../assets/imgs/avatar.png")
 //const logoCNSS = require("../assets/imgs/cnss.png") */
 // internet imgs
 
@@ -46,6 +47,7 @@ export default {
   logoMunicipalite,
   logoEnsi,
   homeImage,
-  backupImage
+  backupImage,
+  avatar
   //logoCNSS*/
 };

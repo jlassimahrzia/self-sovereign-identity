@@ -195,12 +195,12 @@ function IndexOrganization() {
         </CardHeader>
         <CardBody>
           {/* Chart */}
-          {/* <div className="chart">
+          <div className="chart">
             <Bar
               data={chartExample2.data}
               options={chartExample2.options}
             />
-          </div> */}
+          </div>
         </CardBody>
       </Card>
     </Col>

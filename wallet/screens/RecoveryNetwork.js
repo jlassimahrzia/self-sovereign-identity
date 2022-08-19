@@ -103,7 +103,12 @@ function RecoveryNetwork() {
             tx.executeSql(
               "drop table recoveryParameters"
             );
-        }); */
+        });
+        db.transaction((tx) => {
+            tx.executeSql(
+              "drop table trusteesFragment"
+            );
+        });  */
     }, [])
 
     const didValidation = Yup.object().shape({
@@ -188,28 +193,81 @@ function RecoveryNetwork() {
                 </Text>
                 { ((participants !== 0) && (threshold !== 0)) ? 
                 <Text>
-                    You are asked to collect the DID of your trusted contacts. Number of participants is {participants} and the 
-                    number of threshold is {threshold}.
+                    You are asked to collect the DID of your trusted contacts. Number of participants is <Text bold size={18}>{participants}</Text> and the 
+                    number of threshold is <Text bold size={18}>{threshold}</Text> .
                 </Text>   : null }
             </Block> 
             
-           { (participants === number) && (participants !== 0)? 
-            <Block>
-            <Block style={{ margin: 20  }}>
-                <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
-                    You have reached the number of participants requested click above to send the fragments of each participant.
-                </Text>
-                <Button style={styles.button} onPress={sendFragments}>
-                    <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
-                        Send fragment to all participants
+            { (participants === number) && (participants !== 0)? 
+                <Block>
+                <Block style={{ margin: 20  }}>
+                    <Text style={{paddingLeft: 10}} textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                        You have reached the number of participants requested click above to send the fragments of each participant.
                     </Text>
-                </Button>
-            </Block>
-            </Block>
-          :
-           null
+                    <Button style={styles.button} onPress={sendFragments}>
+                        <Text style={{ fontFamily: 'open-sans-bold', color: "white" }}>
+                            Send fragments to all participants
+                        </Text>
+                    </Button>
+                </Block>
+                </Block>
+            : null }
+            {
+                (number < participants) && (participants !== 0) ?
+                    <Formik
+                    validationSchema={didValidation}
+                    initialValues={{ did: ""}}
+                    onSubmit={
+                        async (values, actions) =>{
+                            let result = await DidService.getProfile(values.did)
+                            if(result.test){
+                                openModal(result.ddo)
+                                actions.resetForm({
+                                    values: { did : "" }
+                                })
+                            }
+                            else{
+                                Toast.show({
+                                    type: 'error',
+                                    text1: 'Error',
+                                    text2: result.msg
+                                });
+                            }
+                        }
+                    }
+                >
+                    {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
+                        <View>
+                        <Block>
+                            <Block style={styles.title}>
+                                <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
+                                    Enter DID :
+                                </Text>
+                            </Block>
+                            <TextInput
+                                style={styles.input}
+                                onChangeText={handleChange('did')}
+                                onBlur={handleBlur('did')}
+                                value={values.did}
+                            />
+                            <Block row style={styles.passwordCheck}>
+                                <Text size={12} color={argonTheme.COLORS.DEFAULT}>
+                                    {errors.did && touched.did ?  errors.did : null }
+                                </Text>
+                            </Block>
+                        </Block>
+                        <Block center style={{padding:10}}>
+                            <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
+                                Send request
+                            </Button>
+                        </Block> 
+                        </View>
+                )}
+                    </Formik> :
+                null
             }
-            { ((participants === 0) && (threshold === 0)) ?  <Formik
+            { ((participants === 0) && (threshold === 0)) ?  
+             <Formik
                 validationSchema={recoveryPrametersValidation}
                 initialValues={{ participants : "" , threshold : ""}}
                 onSubmit={
@@ -284,58 +342,7 @@ function RecoveryNetwork() {
                     </Block> 
                     </View>
              )}
-            </Formik> : 
-            null
-           /*  <Formik
-            validationSchema={didValidation}
-            initialValues={{ did: ""}}
-            onSubmit={
-                async (values, actions) =>{
-                    let result = await DidService.getProfile(values.did)
-                    if(result.test){
-                        openModal(result.ddo)
-                        actions.resetForm({
-                            values: { did : "" }
-                        })
-                    }
-                    else{
-                        Toast.show({
-                            type: 'error',
-                            text1: 'Error',
-                            text2: result.msg
-                        });
-                    }
-                }
-            }
-        >
-            {({ handleChange, handleBlur, handleSubmit, values , errors, touched}) => (
-                <View>
-                <Block>
-                    <Block style={styles.title}>
-                        <Text textStyle={{ color: "white", fontSize: 20, fontFamily: 'open-sans-bold' }} bold>
-                            Enter DID :
-                        </Text>
-                    </Block>
-                    <TextInput
-                        style={styles.input}
-                        onChangeText={handleChange('did')}
-                        onBlur={handleBlur('did')}
-                        value={values.did}
-                    />
-                    <Block row style={styles.passwordCheck}>
-                        <Text size={12} color={argonTheme.COLORS.DEFAULT}>
-                            {errors.did && touched.did ?  errors.did : null }
-                        </Text>
-                    </Block>
-                </Block>
-                <Block center style={{padding:10}}>
-                    <Button small color={theme.COLORS.DEFAULT} onPress={handleSubmit} textStyle={{ color: "white" }}>
-                        Send request
-                    </Button>
-                </Block> 
-                </View>
-         )}
-            </Formik>  */
+            </Formik> : null
             }
             <Block style={{padding:15}} center >
                 <Text bold  color="#e7413b" textStyle={{ fontSize: 20, fontFamily: 'open-sans-bold' }}>
@@ -426,7 +433,7 @@ function RecoveryNetwork() {
                     <Block style={styles.card}>
                         <Block middle style={styles.avatarContainer}>
                             <Image
-                                source={Images.ProfilePicture}
+                                source={Images.avatar}
                                 style={styles.avatar}
                             />
                         </Block>

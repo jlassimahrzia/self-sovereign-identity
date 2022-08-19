@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     image: {
         width: 50,
         height: 50,
-        borderRadius: 50,
+        //borderRadius: 50,
         overflow: 'hidden',
         margin : 30
     },
